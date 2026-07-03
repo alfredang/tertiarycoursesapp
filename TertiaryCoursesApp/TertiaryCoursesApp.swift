@@ -10,10 +10,10 @@ struct TertiaryCoursesApp: App {
     }
 }
 
-// White theme in the style of www.tertiarycourses.com.sg — white surfaces, red brand accent.
+// White theme with the Tertiary Infotech deep-blue brand accent (sampled from the T logo).
 enum Theme {
-    static let accent = Color(red: 0.78, green: 0.11, blue: 0.16)      // Tertiary Courses red
-    static let accentSoft = Color(red: 0.78, green: 0.11, blue: 0.16).opacity(0.10)
+    static let accent = Color(red: 11 / 255, green: 61 / 255, blue: 142 / 255)   // deep blue #0B3D8E
+    static let accentSoft = Color(red: 11 / 255, green: 61 / 255, blue: 142 / 255).opacity(0.10)
     static let page = Color.white
     static let card = Color.white
     static let cardBorder = Color(red: 0.88, green: 0.88, blue: 0.90)

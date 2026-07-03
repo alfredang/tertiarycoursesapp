@@ -106,13 +106,25 @@ struct GrantCalculatorView: View {
                     InfoCard {
                         VStack(alignment: .leading, spacing: 10) {
                             SectionLabel("Course")
-                            Picker("Course", selection: $selectedCourseID) {
+                            Menu {
                                 ForEach(catalog.courses) { course in
-                                    Text(course.title).tag(course.id)
+                                    Button(course.title) { selectedCourseID = course.id }
                                 }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Text(selectedCourse.title)
+                                        .font(.subheadline.weight(.semibold))
+                                        .multilineTextAlignment(.leading)
+                                        .lineLimit(2)
+                                    Spacer()
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .font(.caption.weight(.semibold))
+                                }
+                                .foregroundStyle(Theme.accent)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                             }
-                            .pickerStyle(.menu)
-                            .tint(Theme.accent)
                             LabeledContent("Course fee (before GST)", value: currency(selectedCourse.fee))
                             LabeledContent("Course fee with GST", value: currency(selectedCourse.feeWithGST))
                         }
@@ -171,13 +183,27 @@ struct GrantCalculatorForm: View {
                         LabeledContent("Age", value: "\(age)")
                     }
 
-                    Picker("Sponsorship", selection: $sponsorship) {
-                        ForEach(Sponsorship.allCases) { item in
-                            Text(item.rawValue).tag(item)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Sponsorship")
+                        Menu {
+                            ForEach(Sponsorship.allCases) { item in
+                                Button(item.rawValue) { sponsorship = item }
+                            }
+                        } label: {
+                            HStack(spacing: 10) {
+                                Text(sponsorship.rawValue)
+                                    .font(.subheadline.weight(.semibold))
+                                    .lineLimit(1)
+                                Spacer()
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption.weight(.semibold))
+                            }
+                            .foregroundStyle(Theme.accent)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                     }
-                    .pickerStyle(.menu)
-                    .tint(Theme.accent)
                 }
             }
 

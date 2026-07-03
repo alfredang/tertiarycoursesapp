@@ -188,6 +188,13 @@ struct CourseDetailView: View {
                     }
                 }
 
+                Link(destination: course.registerURL) {
+                    Label("Register on tertiarycourses.com.sg", systemImage: "checkmark.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+
                 Button {
                     showGrantCalculator = true
                 } label: {

@@ -1,10 +1,43 @@
 import SwiftUI
 import UIKit
 
+enum FeedbackCategory: String, CaseIterable, Identifiable {
+    case feature = "Feature Idea"
+    case bug = "Bug Report"
+    case comment = "Comment"
+
+    var id: String { rawValue }
+
+    var symbol: String {
+        switch self {
+        case .feature: "lightbulb.fill"
+        case .bug: "ant.fill"
+        case .comment: "text.bubble.fill"
+        }
+    }
+
+    var prompt: String {
+        switch self {
+        case .feature:
+            "What feature would make this app more useful? e.g. course schedules, favourites, reminders…"
+        case .bug:
+            "What went wrong? Tell us what you did, what you expected, and what happened instead."
+        case .comment:
+            "Any comments about the app or our courses — we read everything."
+        }
+    }
+}
+
 struct FeedbackView: View {
+    @State private var category: FeedbackCategory = .feature
     @State private var title = ""
     @State private var message = ""
+    @FocusState private var focusedField: Field?
     private let whatsAppNumber = "6588666375"
+
+    private enum Field {
+        case title, message
+    }
 
     private var canSend: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -15,19 +48,61 @@ struct FeedbackView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    TextField("Title", text: $title)
+                    InfoCard {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("We'd love to hear from you", systemImage: "heart.fill")
+                                .font(.headline)
+                                .foregroundStyle(Theme.accent)
+                            Text("Suggest features you'd like, report bugs you found, or just leave a comment. Your feedback goes straight to our team on WhatsApp.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    SectionLabel("What kind of feedback?")
+                    HStack(spacing: 10) {
+                        ForEach(FeedbackCategory.allCases) { item in
+                            Button {
+                                category = item
+                            } label: {
+                                VStack(spacing: 6) {
+                                    Image(systemName: item.symbol)
+                                        .font(.title3)
+                                    Text(item.rawValue)
+                                        .font(.caption.weight(.semibold))
+                                        .multilineTextAlignment(.center)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .foregroundStyle(category == item ? .white : Theme.accent)
+                                .background(
+                                    category == item ? Theme.accent : Theme.accentSoft,
+                                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    SectionLabel("Your feedback")
+                    TextField("Short title", text: $title)
                         .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .title)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .message }
 
                     ZStack(alignment: .topLeading) {
                         if message.isEmpty {
-                            Text("Your message")
+                            Text(category.prompt)
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 8)
                         }
                         TextEditor(text: $message)
                             .scrollContentBackground(.hidden)
-                            .frame(minHeight: 180)
+                            .frame(minHeight: 160)
+                            .focused($focusedField, equals: .message)
                     }
                     .padding(8)
                     .background(Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -40,16 +115,28 @@ struct FeedbackView: View {
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .disabled(!canSend)
+
+                    Text("Sent to Tertiary Courses Singapore (+65 8866 6375) via WhatsApp.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 .padding(20)
             }
             .background(Theme.page)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Feedback")
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                }
+            }
         }
     }
 
     private func send() {
-        var body = ""
+        var body = "\(category.rawValue) — Tertiary Courses SG app\n"
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmedTitle.isEmpty {
