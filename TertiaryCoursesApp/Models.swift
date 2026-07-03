@@ -35,6 +35,9 @@ struct Course: Identifiable, Hashable {
     let outcomes: [String]
     let isRemote: Bool
     let websiteURLString: String?
+    let sfecEligible: Bool
+    let pseaEligible: Bool
+    let utapEligible: Bool
 
     init(
         id: String = UUID().uuidString,
@@ -49,7 +52,10 @@ struct Course: Identifiable, Hashable {
         summary: String,
         outcomes: [String],
         isRemote: Bool = false,
-        websiteURLString: String? = nil
+        websiteURLString: String? = nil,
+        sfecEligible: Bool = true,
+        pseaEligible: Bool = true,
+        utapEligible: Bool = true
     ) {
         self.id = id
         self.title = title
@@ -64,10 +70,35 @@ struct Course: Identifiable, Hashable {
         self.outcomes = outcomes
         self.isRemote = isRemote
         self.websiteURLString = websiteURLString
+        self.sfecEligible = sfecEligible
+        self.pseaEligible = pseaEligible
+        self.utapEligible = utapEligible
     }
 
     var feeWithGST: Decimal {
         GrantEstimate.roundedCurrency(fee * (1 + GrantEstimate.gstRate))
+    }
+
+    /// Short funding-scheme badges shown on course cards.
+    var fundingBadges: [String] {
+        var badges: [String] = []
+        if isWSQCourse { badges.append("WSQ") }
+        if skillsFutureClaimable { badges.append("SFC") }
+        if sfecEligible { badges.append("SFEC") }
+        if pseaEligible { badges.append("PSEA") }
+        if utapEligible { badges.append("UTAP") }
+        return badges
+    }
+
+    /// Funding schemes with full names and eligibility, for the course detail page.
+    var fundingSchemes: [(abbreviation: String, name: String, eligible: Bool)] {
+        [
+            ("WSQ", "Workforce Skills Qualifications (SSG-funded)", isWSQCourse),
+            ("SFC", "SkillsFuture Credit", skillsFutureClaimable),
+            ("SFEC", "SkillsFuture Enterprise Credit", sfecEligible),
+            ("PSEA", "Post-Secondary Education Account", pseaEligible),
+            ("UTAP", "NTUC Union Training Assistance Programme", utapEligible)
+        ]
     }
 
     /// Course page on www.tertiarycourses.com.sg for registration. Falls back to a
@@ -160,7 +191,8 @@ enum CourseData {
             courseCode: "TGS-2020503626",
             summary: "Understand cyber threats, common attack patterns, and practical protection steps.",
             outcomes: ["Identify phishing risks", "Harden accounts and devices", "Respond to common incidents"],
-            websiteURLString: "https://www.tertiarycourses.com.sg/wsq-cyber-security-awareness-course-for-personal-and-businesses.html"
+            websiteURLString: "https://www.tertiarycourses.com.sg/wsq-cyber-security-awareness-course-for-personal-and-businesses.html",
+            pseaEligible: false
         ),
         Course(
             title: "WSQ - Robotics Process Automation (RPA) for Beginners",
@@ -199,7 +231,8 @@ enum CourseData {
             courseCode: "TGS-2020505790",
             summary: "Learn SQL queries for retrieving, filtering, joining, and summarising relational data.",
             outcomes: ["Write SELECT queries", "Filter and join tables", "Aggregate business data"],
-            websiteURLString: "https://www.tertiarycourses.com.sg/wsq-sql-fundamental-for-beginners.html"
+            websiteURLString: "https://www.tertiarycourses.com.sg/wsq-sql-fundamental-for-beginners.html",
+            pseaEligible: false
         )
     ]
 }

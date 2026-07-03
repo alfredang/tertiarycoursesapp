@@ -120,10 +120,9 @@ struct CourseCard: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
-            HStack {
-                CourseBadge(text: course.fundingTier.rawValue, symbol: "checkmark.seal.fill")
-                if course.skillsFutureClaimable {
-                    CourseBadge(text: "SkillsFuture Claimable", symbol: "person.crop.circle.badge.checkmark")
+            HStack(spacing: 5) {
+                ForEach(course.fundingBadges, id: \.self) { badge in
+                    SchemeBadge(text: badge)
                 }
             }
         }
@@ -146,15 +145,15 @@ struct CourseCard: View {
     }
 }
 
-struct CourseBadge: View {
+// Small funding-scheme chip (WSQ / SFC / SFEC / PSEA / UTAP) sized to fit five in a row.
+struct SchemeBadge: View {
     let text: String
-    let symbol: String
 
     var body: some View {
-        Label(text, systemImage: symbol)
-            .font(.caption2.weight(.semibold))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+        Text(text)
+            .font(.system(size: 11, weight: .bold))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
             .foregroundStyle(Theme.accent)
             .background(Theme.accentSoft, in: Capsule())
     }
@@ -213,10 +212,21 @@ struct CourseDetailView: View {
                 .controlSize(.large)
 
                 InfoCard {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
                         SectionLabel("Funding")
-                        LabeledContent("SSG funding", value: course.fundingTier.rawValue)
-                        LabeledContent("SkillsFuture Credit", value: course.skillsFutureClaimable ? "Claimable" : "Not marked claimable")
+                        ForEach(course.fundingSchemes, id: \.abbreviation) { scheme in
+                            HStack(spacing: 10) {
+                                Image(systemName: scheme.eligible ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundStyle(scheme.eligible ? Theme.accent : Color.secondary)
+                                Text(scheme.abbreviation)
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(width: 48, alignment: .leading)
+                                Text(scheme.name)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                Spacer(minLength: 0)
+                            }
+                        }
                         Text(course.fundingTier.shortDescription)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
