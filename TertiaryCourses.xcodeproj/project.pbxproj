@@ -7,20 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1EA83F1FF208F115611A1F04 /* GrantCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 369A8AB65F3E23246A174751 /* GrantCalculator.swift */; };
+		1F93E8993DE9413CF3E068EC /* SupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A60B8CE9FC92C5A9928C110 /* SupportViews.swift */; };
+		27FA8E5DEEB0D2212E31A7BD /* CatalogViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */; };
+		2DDCBBBF82EACAEEC064179D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F4BA980C833D1E1A903B7B /* Models.swift */; };
+		C316CCAD47BC4E23570FD3BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB0AEC1F624DA71BC8ABF2EF /* Assets.xcassets */; };
 		D1F5BF620867124FEA2D6605 /* TertiaryCoursesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		28F4BA980C833D1E1A903B7B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		369A8AB65F3E23246A174751 /* GrantCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantCalculator.swift; sourceTree = "<group>"; };
 		392F6EDC7DF6073F52091784 /* TertiaryCourses.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TertiaryCourses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		462823A25BA4DB21AA6DE6F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5A60B8CE9FC92C5A9928C110 /* SupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportViews.swift; sourceTree = "<group>"; };
+		6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogViews.swift; sourceTree = "<group>"; };
 		A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TertiaryCoursesApp.swift; sourceTree = "<group>"; };
+		CB0AEC1F624DA71BC8ABF2EF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		506596459C20DD865B141C12 /* TertiaryCoursesApp */ = {
 			isa = PBXGroup;
 			children = (
+				CB0AEC1F624DA71BC8ABF2EF /* Assets.xcassets */,
+				6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */,
+				369A8AB65F3E23246A174751 /* GrantCalculator.swift */,
 				462823A25BA4DB21AA6DE6F4 /* Info.plist */,
+				28F4BA980C833D1E1A903B7B /* Models.swift */,
+				5A60B8CE9FC92C5A9928C110 /* SupportViews.swift */,
 				A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */,
 			);
 			path = TertiaryCoursesApp;
@@ -50,6 +65,7 @@
 			buildConfigurationList = 0F957A39902BBE2B1F3CC248 /* Build configuration list for PBXNativeTarget "TertiaryCourses" */;
 			buildPhases = (
 				36C77F60934B6A40E76DC500 /* Sources */,
+				6F67EAA767DBA446E568A570 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -95,11 +111,26 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		6F67EAA767DBA446E568A570 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C316CCAD47BC4E23570FD3BF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		36C77F60934B6A40E76DC500 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27FA8E5DEEB0D2212E31A7BD /* CatalogViews.swift in Sources */,
+				1EA83F1FF208F115611A1F04 /* GrantCalculator.swift in Sources */,
+				2DDCBBBF82EACAEEC064179D /* Models.swift in Sources */,
+				1F93E8993DE9413CF3E068EC /* SupportViews.swift in Sources */,
 				D1F5BF620867124FEA2D6605 /* TertiaryCoursesApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
