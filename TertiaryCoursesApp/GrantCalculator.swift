@@ -161,7 +161,13 @@ struct GrantCalculatorForm: View {
     @State private var nationality: Nationality = .singaporeCitizen
     @State private var age = 35
     @State private var sponsorship: Sponsorship = .selfSponsored
-    @State private var skillsFutureCredit = 500.0
+    @State private var skillsFutureCreditText = ""
+    @FocusState private var creditFieldFocused: Bool
+
+    // Parse whatever the user typed ("350", "$1,200.50", …) into a Decimal; empty = 0.
+    private var creditBalance: Decimal {
+        Decimal(string: skillsFutureCreditText.filter { "0123456789.".contains($0) }) ?? 0
+    }
 
     private var estimate: GrantEstimate {
         GrantEstimate(
@@ -170,7 +176,7 @@ struct GrantCalculatorForm: View {
             nationality: nationality,
             age: age,
             sponsorship: sponsorship,
-            creditBalance: Decimal(skillsFutureCredit)
+            creditBalance: creditBalance
         )
     }
 
@@ -219,16 +225,24 @@ struct GrantCalculatorForm: View {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionLabel("SkillsFuture Credit")
                     HStack {
-                        Text("Available credit")
+                        Text("Credit to claim")
                         Spacer()
-                        TextField("Credit", value: $skillsFutureCredit, format: .currency(code: "SGD"))
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(maxWidth: 150)
-                            .disabled(!estimate.canUseSkillsFutureCredit)
-                            .foregroundStyle(estimate.canUseSkillsFutureCredit ? .primary : .secondary)
+                        HStack(spacing: 2) {
+                            Text("S$")
+                                .foregroundStyle(.secondary)
+                            TextField("0", text: $skillsFutureCreditText)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(maxWidth: 110)
+                                .focused($creditFieldFocused)
+                                .disabled(!estimate.canUseSkillsFutureCredit)
+                                .foregroundStyle(estimate.canUseSkillsFutureCredit ? .primary : .secondary)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 8)
+                        .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
-                    Text("SkillsFuture Credit applies only to self-sponsored Singapore Citizens on claimable courses.")
+                    Text("Enter the SkillsFuture Credit you want to claim — it is deducted from the net fee. Applies only to self-sponsored Singapore Citizens on claimable courses.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -266,6 +280,12 @@ struct GrantCalculatorForm: View {
                     Link("TP Gateway — Grant Calculator and Funding Eligibility", destination: URL(string: "https://www.tpgateway.gov.sg/faq/grant-calculator-and-funding-eligibility")!)
                         .font(.footnote)
                 }
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { creditFieldFocused = false }
             }
         }
     }
