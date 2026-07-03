@@ -32,6 +32,7 @@ targets:
         CFBundleDisplayName: Tertiary Courses SG
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
         TERTIARY_COURSES_API_KEY: ""
         TERTIARY_COURSES_API_BASE_URL: https://lms-tms.tertiaryinfotech.com
         TERTIARY_COURSES_LIST_RUNS_PATH: /api/external/list-course-runs

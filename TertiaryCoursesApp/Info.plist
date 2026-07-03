@@ -32,5 +32,7 @@
 	<string>/api/external/get-course-run</string>
 	<key>TERTIARY_COURSES_LIST_RUNS_PATH</key>
 	<string>/api/external/list-course-runs</string>
+	<key>UILaunchScreen</key>
+	<dict/>
 </dict>
 </plist>
