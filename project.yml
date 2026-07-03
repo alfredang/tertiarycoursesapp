@@ -29,7 +29,7 @@ targets:
     info:
       path: TertiaryCoursesApp/Info.plist
       properties:
-        CFBundleDisplayName: Tertiary Courses SG
+        CFBundleDisplayName: Tertiary Courses
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
