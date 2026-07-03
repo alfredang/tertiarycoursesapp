@@ -21,20 +21,26 @@ enum Theme {
 
 struct MainTabView: View {
     @StateObject private var catalog = CourseCatalogStore()
+    // START_TAB env var selects the initial tab (used by screenshot automation)
+    @State private var selection = ProcessInfo.processInfo.environment["START_TAB"].flatMap(Int.init) ?? 0
 
     var body: some View {
-        TabView {
+        TabView(selection: $selection) {
             CatalogView(catalog: catalog)
                 .tabItem { Label("Catalog", systemImage: "books.vertical.fill") }
+                .tag(0)
 
             GrantCalculatorView(catalog: catalog)
                 .tabItem { Label("Grant Calculator", systemImage: "dollarsign.circle.fill") }
+                .tag(1)
 
             FeedbackView()
                 .tabItem { Label("Feedback", systemImage: "bubble.left.and.bubble.right.fill") }
+                .tag(2)
 
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle.fill") }
+                .tag(3)
         }
         .tint(Theme.accent)
         .task {
