@@ -179,7 +179,6 @@ struct CourseDetailView: View {
                         Divider()
                         LabeledContent("Course code", value: course.courseCode)
                         LabeledContent("Duration", value: course.duration)
-                        LabeledContent("Delivery", value: course.delivery)
                         LabeledContent("Fee (before GST)", value: currency(course.fee))
                         LabeledContent("Fee with GST (9%)", value: currency(course.feeWithGST))
                         if course.isRemote {
