@@ -92,7 +92,7 @@ enum CourseData {
             fee: 800,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-001",
+            courseCode: "TGS-2022015539",
             summary: "Build app and workflow integrations using Microsoft Power Apps and Power Automate.",
             outcomes: ["Create low-code business apps", "Automate approval workflows", "Connect app data sources"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-applications-integration-with-power-apps-and-power-automate.html"
@@ -105,7 +105,7 @@ enum CourseData {
             fee: 750,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-002",
+            courseCode: "TGS-2019503161",
             summary: "Learn beginner-friendly Python syntax, data structures, and practical scripting.",
             outcomes: ["Write Python scripts", "Use functions and collections", "Solve beginner programming tasks"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-python-fundamental-course-for-beginners.html"
@@ -118,7 +118,7 @@ enum CourseData {
             fee: 750,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-003",
+            courseCode: "TGS-2019504058",
             summary: "Use R for introductory statistics, analysis workflows, and data exploration.",
             outcomes: ["Run R scripts", "Summarise datasets", "Apply basic statistical analysis"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-r-fundamental-and-statistical-analysis-for-beginners.html"
@@ -131,7 +131,7 @@ enum CourseData {
             fee: 750,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-004",
+            courseCode: "TGS-2019504591",
             summary: "Create Python applications faster with AI-assisted coding workflows.",
             outcomes: ["Plan app features", "Use AI coding tools", "Deploy a Python application"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-build-and-deploy-python-applications-with-vibe-coding.html"
@@ -144,7 +144,7 @@ enum CourseData {
             fee: 750,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-005",
+            courseCode: "TGS-2020503177",
             summary: "Build Tableau dashboards and visual analytics for business reporting.",
             outcomes: ["Connect data in Tableau", "Design visual dashboards", "Publish interactive views"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-data-visualisation-with-tableau.html"
@@ -157,7 +157,7 @@ enum CourseData {
             fee: 350,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-006",
+            courseCode: "TGS-2020503626",
             summary: "Understand cyber threats, common attack patterns, and practical protection steps.",
             outcomes: ["Identify phishing risks", "Harden accounts and devices", "Respond to common incidents"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-cyber-security-awareness-course-for-personal-and-businesses.html"
@@ -170,7 +170,7 @@ enum CourseData {
             fee: 750,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-007",
+            courseCode: "TGS-2020504808",
             summary: "Use RPA concepts and tools to automate repeatable office processes.",
             outcomes: ["Map automation workflows", "Build simple bots", "Test automated processes"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-robotics-process-automation-rpa-for-beginners.html"
@@ -183,7 +183,7 @@ enum CourseData {
             fee: 800,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-008",
+            courseCode: "TGS-2020505444",
             summary: "Create decision-ready Power BI reports with data shaping, models, and visual dashboards.",
             outcomes: ["Transform data with Power Query", "Create report visuals", "Publish Power BI dashboards"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-data-analytics-and-visualization-with-power-bi.html"
@@ -196,7 +196,7 @@ enum CourseData {
             fee: 350,
             fundingTier: .tier2,
             skillsFutureClaimable: true,
-            courseCode: "TGS-PLACEHOLDER-009",
+            courseCode: "TGS-2020505790",
             summary: "Learn SQL queries for retrieving, filtering, joining, and summarising relational data.",
             outcomes: ["Write SELECT queries", "Filter and join tables", "Aggregate business data"],
             websiteURLString: "https://www.tertiarycourses.com.sg/wsq-sql-fundamental-for-beginners.html"
