@@ -6,6 +6,14 @@ enum Nationality: String, CaseIterable, Identifiable {
     case others = "Others"
 
     var id: String { rawValue }
+
+    var shortLabel: String {
+        switch self {
+        case .singaporeCitizen: "Citizen"
+        case .permanentResident: "PR"
+        case .others: "Others"
+        }
+    }
 }
 
 enum Sponsorship: String, CaseIterable, Identifiable {
@@ -174,7 +182,7 @@ struct GrantCalculatorForm: View {
 
                     Picker("Nationality", selection: $nationality) {
                         ForEach(Nationality.allCases) { item in
-                            Text(item.rawValue).tag(item)
+                            Text(item.shortLabel).tag(item)
                         }
                     }
                     .pickerStyle(.segmented)

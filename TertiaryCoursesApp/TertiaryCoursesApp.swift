@@ -2,6 +2,15 @@ import SwiftUI
 
 @main
 struct TertiaryCoursesApp: App {
+    init() {
+        // Selected segment in segmented pickers: deep blue, semibold — more visible than default black.
+        let accent = UIColor(red: 11 / 255, green: 61 / 255, blue: 142 / 255, alpha: 1)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: accent, .font: UIFont.systemFont(ofSize: 14, weight: .semibold)],
+            for: .selected
+        )
+    }
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
