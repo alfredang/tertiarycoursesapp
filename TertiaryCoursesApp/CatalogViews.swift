@@ -188,7 +188,7 @@ struct CourseDetailView: View {
                 }
 
                 Link(destination: course.registerURL) {
-                    Label("Register on tertiarycourses.com.sg", systemImage: "checkmark.circle.fill")
+                    Label("Check Schedule", systemImage: "calendar")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
