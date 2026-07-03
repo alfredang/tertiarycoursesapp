@@ -20,3 +20,4 @@ id_ed25519
 .netrc
 .npmrc
 .claude/skills/ios-auto-release/org-credentials.env
+.playwright-mcp/
