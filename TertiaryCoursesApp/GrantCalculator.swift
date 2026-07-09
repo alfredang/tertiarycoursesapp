@@ -144,6 +144,7 @@ struct GrantCalculatorView: View {
             }
             .background(Theme.page)
             .navigationTitle("Grant Calculator")
+            .brandToolbar()
             .onChange(of: catalog.courses) { _, courses in
                 if !courses.contains(where: { $0.id == selectedCourseID }) {
                     selectedCourseID = courses.first?.id ?? CourseData.courses[0].id

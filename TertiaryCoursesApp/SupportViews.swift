@@ -126,6 +126,7 @@ struct FeedbackView: View {
             .background(Theme.page)
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Feedback")
+            .brandToolbar()
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -239,6 +240,7 @@ struct AboutView: View {
             }
             .background(Theme.page)
             .navigationTitle("About")
+            .brandToolbar()
         }
     }
 }

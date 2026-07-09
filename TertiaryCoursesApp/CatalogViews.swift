@@ -83,6 +83,7 @@ struct CatalogView: View {
             .navigationDestination(for: Course.self) { course in
                 CourseDetailView(course: course)
             }
+            .brandToolbar()
         }
     }
 }
