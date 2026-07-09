@@ -2,9 +2,12 @@
 
 Native iPhone app for [tertiarycourses.com.sg](https://www.tertiarycourses.com.sg/) that lists WSQ courses, searches TGS-coded course runs, estimates course grants, and sends course enquiries.
 
+[![Download on the App Store](https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83)](https://apps.apple.com/app/tertiary-courses/id6787036413)
+
 ![iOS](https://img.shields.io/badge/iOS-17%2B-black)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-native-blue)
 ![XcodeGen](https://img.shields.io/badge/XcodeGen-project-green)
+![App Store](https://img.shields.io/badge/App_Store-live-0D96F6?logo=apple&logoColor=white)
 
 ## About
 
