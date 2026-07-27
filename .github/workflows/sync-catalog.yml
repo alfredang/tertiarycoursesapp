@@ -1,0 +1,84 @@
+name: Sync course catalog
+
+# Rebuilds Courses.json from tertiarycourses.com.sg and publishes it to GitHub Pages,
+# so the app picks up new courses and price changes WITHOUT an App Store release.
+on:
+  schedule:
+    - cron: "0 18 * * 0"   # Mondays 02:00 Singapore (UTC+8)
+  workflow_dispatch:        # allow a manual run from the Actions tab
+
+permissions:
+  contents: write   # commit the refreshed snapshot
+  pages: write      # publish the feed
+  id-token: write
+
+concurrency:
+  group: sync-catalog
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild catalog from the website
+        run: python3 scripts/sync_catalog.py --out TertiaryCoursesApp/Courses.json
+
+      - name: Show what changed
+        run: |
+          if git diff --quiet -- TertiaryCoursesApp/Courses.json; then
+            echo "catalog unchanged"
+          else
+            git diff --stat -- TertiaryCoursesApp/Courses.json
+          fi
+
+      - name: Commit the refreshed snapshot
+        run: |
+          if git diff --quiet -- TertiaryCoursesApp/Courses.json; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add TertiaryCoursesApp/Courses.json
+          COUNT=$(python3 -c "import json;print(len(json.load(open('TertiaryCoursesApp/Courses.json'))))")
+          git commit -m "chore: sync course catalog ($COUNT courses)"
+          git push
+
+      # The feed the app fetches at launch. Served from Pages, so it needs no server.
+      - name: Assemble the feed
+        run: |
+          mkdir -p _site
+          cp TertiaryCoursesApp/Courses.json _site/courses.json
+          python3 -c "
+          import json, hashlib, pathlib
+          raw = pathlib.Path('_site/courses.json').read_bytes()
+          courses = json.loads(raw)
+          meta = {
+              'count': len(courses),
+              'wsq': sum(1 for c in courses if c['isWSQ']),
+              'sha256': hashlib.sha256(raw).hexdigest(),
+          }
+          pathlib.Path('_site/version.json').write_text(json.dumps(meta, indent=1) + '\n')
+          print(meta)
+          "
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: sync
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -159,8 +159,8 @@ struct Course: Identifiable, Hashable, Decodable {
 }
 
 enum CourseData {
-    /// Full catalog snapshot of tertiarycourses.com.sg (WSQ + non-WSQ), bundled as Courses.json.
-    static let courses: [Course] = {
+    /// Catalog snapshot shipped inside the app — the offline floor, always available.
+    static let bundledCourses: [Course] = {
         guard let url = Bundle.main.url(forResource: "Courses", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let decoded = try? JSONDecoder().decode([Course].self, from: data)
@@ -171,15 +171,44 @@ enum CourseData {
         return decoded
     }()
 
+    /// Best catalog available at startup: the cached feed if it is newer than the
+    /// bundled snapshot, otherwise the bundled one.
+    static var courses: [Course] {
+        CatalogCache.load() ?? bundledCourses
+    }
+
     /// Category names in catalog order, each with its SF Symbol.
-    static let categories: [(name: String, icon: String)] = {
+    static func categories(for courses: [Course]) -> [(name: String, icon: String)] {
         var seen = Set<String>()
         return courses.compactMap { course in
             guard !seen.contains(course.category) else { return nil }
             seen.insert(course.category)
             return (course.category, course.iconName)
         }
-    }()
+    }
+}
+
+/// On-device cache of the published catalog feed.
+enum CatalogCache {
+    private static var fileURL: URL? {
+        try? FileManager.default
+            .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent("courses-feed.json")
+    }
+
+    static func load() -> [Course]? {
+        guard let fileURL,
+              let data = try? Data(contentsOf: fileURL),
+              let decoded = try? JSONDecoder().decode([Course].self, from: data),
+              !decoded.isEmpty
+        else { return nil }
+        return decoded
+    }
+
+    static func save(_ data: Data) {
+        guard let fileURL else { return }
+        try? data.write(to: fileURL, options: .atomic)
+    }
 }
 
 extension Course {
@@ -194,6 +223,29 @@ extension Course {
 
 @MainActor
 final class CourseCatalogStore: ObservableObject {
-    /// The bundled catalog snapshot of tertiarycourses.com.sg — all WSQ and non-WSQ courses.
+    /// Newest catalog available: cached feed if present, else the bundled snapshot.
     @Published private(set) var courses = CourseData.courses
+
+    /// Category sections for the catalog currently being shown.
+    var categories: [(name: String, icon: String)] { CourseData.categories(for: courses) }
+
+    /// Published catalog feed, refreshed weekly by the sync-catalog GitHub Action.
+    private static let feedURL = URL(string: "https://alfredang.github.io/tertiarycoursesapp/courses.json")!
+
+    /// Pull the latest catalog. Any failure silently keeps the current list —
+    /// the catalog must never go empty or block the UI.
+    func refresh() async {
+        var request = URLRequest(url: Self.feedURL)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 15
+
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode,
+              let decoded = try? JSONDecoder().decode([Course].self, from: data),
+              !decoded.isEmpty
+        else { return }
+
+        CatalogCache.save(data)
+        courses = decoded
+    }
 }

@@ -26,7 +26,7 @@ struct CatalogView: View {
     @State private var collapsed: Set<String> = []
 
     private var categories: [String] {
-        ["All"] + CourseData.categories.map(\.name)
+        ["All"] + catalog.categories.map(\.name)
     }
 
     private var filteredCourses: [Course] {
@@ -40,7 +40,7 @@ struct CatalogView: View {
     /// Filtered courses grouped into catalog-ordered category sections.
     private var sections: [(name: String, icon: String, courses: [Course])] {
         let grouped = Dictionary(grouping: filteredCourses, by: \.category)
-        return CourseData.categories.compactMap { category in
+        return catalog.categories.compactMap { category in
             guard let courses = grouped[category.name], !courses.isEmpty else { return nil }
             return (category.name, category.icon, courses)
         }
@@ -122,6 +122,13 @@ struct CatalogView: View {
                 CourseDetailView(course: course)
             }
             .brandToolbar()
+            // A refreshed feed can retire a category the user had selected; without this
+            // the list would silently show nothing.
+            .onChange(of: catalog.courses) { _, _ in
+                if selectedCategory != "All" && !categories.contains(selectedCategory) {
+                    selectedCategory = "All"
+                }
+            }
         }
     }
 }
