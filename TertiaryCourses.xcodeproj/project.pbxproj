@@ -13,10 +13,12 @@
 		2DDCBBBF82EACAEEC064179D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F4BA980C833D1E1A903B7B /* Models.swift */; };
 		C316CCAD47BC4E23570FD3BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB0AEC1F624DA71BC8ABF2EF /* Assets.xcassets */; };
 		D1F5BF620867124FEA2D6605 /* TertiaryCoursesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */; };
+		D847AD0F32BEFD2109C9F054 /* Courses.json in Resources */ = {isa = PBXBuildFile; fileRef = 298330C7614186995B74E6E0 /* Courses.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		28F4BA980C833D1E1A903B7B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		298330C7614186995B74E6E0 /* Courses.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Courses.json; sourceTree = "<group>"; };
 		369A8AB65F3E23246A174751 /* GrantCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrantCalculator.swift; sourceTree = "<group>"; };
 		392F6EDC7DF6073F52091784 /* TertiaryCourses.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TertiaryCourses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		462823A25BA4DB21AA6DE6F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -32,6 +34,7 @@
 			children = (
 				CB0AEC1F624DA71BC8ABF2EF /* Assets.xcassets */,
 				6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */,
+				298330C7614186995B74E6E0 /* Courses.json */,
 				369A8AB65F3E23246A174751 /* GrantCalculator.swift */,
 				462823A25BA4DB21AA6DE6F4 /* Info.plist */,
 				28F4BA980C833D1E1A903B7B /* Models.swift */,
@@ -117,6 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C316CCAD47BC4E23570FD3BF /* Assets.xcassets in Resources */,
+				D847AD0F32BEFD2109C9F054 /* Courses.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,7 +176,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -186,7 +190,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -277,7 +281,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = GU9WTSTX9M;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -297,7 +301,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

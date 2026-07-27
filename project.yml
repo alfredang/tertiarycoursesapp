@@ -6,8 +6,8 @@ options:
 settings:
   base:
     DEVELOPMENT_TEAM: GU9WTSTX9M
-    MARKETING_VERSION: "1.1"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "1.2"
+    CURRENT_PROJECT_VERSION: "3"
     SWIFT_VERSION: "5.0"
 targets:
   TertiaryCourses:
@@ -15,6 +15,8 @@ targets:
     platform: iOS
     sources:
       - TertiaryCoursesApp
+      - path: TertiaryCoursesApp/Courses.json
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tertiaryinfotech.tertiarycoursesapp

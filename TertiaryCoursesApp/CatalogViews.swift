@@ -1,19 +1,48 @@
 import SwiftUI
 
+/// WSQ / non-WSQ funding filter across the whole catalog.
+enum FundingFilter: String, CaseIterable, Identifiable {
+    case all = "All"
+    case wsq = "WSQ"
+    case nonWSQ = "Non-WSQ"
+
+    var id: String { rawValue }
+
+    func matches(_ course: Course) -> Bool {
+        switch self {
+        case .all: true
+        case .wsq: course.isWSQCourse
+        case .nonWSQ: !course.isWSQCourse
+        }
+    }
+}
+
 struct CatalogView: View {
     @ObservedObject var catalog: CourseCatalogStore
     @State private var selectedCategory = "All"
+    @State private var fundingFilter: FundingFilter = .all
     @State private var searchText = ""
+    /// Categories the user has collapsed. Sections start expanded.
+    @State private var collapsed: Set<String> = []
 
     private var categories: [String] {
-        ["All"] + Array(Set(catalog.courses.map(\.category))).sorted()
+        ["All"] + CourseData.categories.map(\.name)
     }
 
     private var filteredCourses: [Course] {
         catalog.courses.filter { course in
             let categoryMatches = selectedCategory == "All" || course.category == selectedCategory
             let queryMatches = normalizedSearchText.isEmpty || course.searchIndex.localizedCaseInsensitiveContains(normalizedSearchText)
-            return categoryMatches && queryMatches
+            return categoryMatches && queryMatches && fundingFilter.matches(course)
+        }
+    }
+
+    /// Filtered courses grouped into catalog-ordered category sections.
+    private var sections: [(name: String, icon: String, courses: [Course])] {
+        let grouped = Dictionary(grouping: filteredCourses, by: \.category)
+        return CourseData.categories.compactMap { category in
+            guard let courses = grouped[category.name], !courses.isEmpty else { return nil }
+            return (category.name, category.icon, courses)
         }
     }
 
@@ -21,22 +50,21 @@ struct CatalogView: View {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// While searching, sections auto-expand so matches are never hidden behind a collapsed header.
+    private func isExpanded(_ name: String) -> Bool {
+        !normalizedSearchText.isEmpty || !collapsed.contains(name)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    if catalog.isLoading {
-                        ProgressView("Loading course runs")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    } else if catalog.loadedFromAPI {
-                        Label("Live TGS-coded WSQ course runs from LMS/TMS", systemImage: "checkmark.icloud.fill")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else if let errorMessage = catalog.errorMessage {
-                        Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    Picker("Funding", selection: $fundingFilter) {
+                        ForEach(FundingFilter.allCases) { filter in
+                            Text(filter.rawValue).tag(filter)
+                        }
                     }
+                    .pickerStyle(.segmented)
 
                     HStack {
                         Picker("Category", selection: $selectedCategory) {
@@ -58,20 +86,30 @@ struct CatalogView: View {
                         ContentUnavailableView {
                             Label("No courses found", systemImage: "magnifyingglass")
                         } description: {
-                            Text("Try a different keyword or category.")
+                            Text("Try a different keyword, category, or funding filter.")
                         } actions: {
-                            Button("Clear Search") {
+                            Button("Clear Filters") {
                                 searchText = ""
                                 selectedCategory = "All"
+                                fundingFilter = .all
                             }
                         }
                         .padding(.top, 40)
                     } else {
-                        ForEach(filteredCourses) { course in
-                            NavigationLink(value: course) {
-                                CourseCard(course: course)
-                            }
-                            .buttonStyle(.plain)
+                        ForEach(sections, id: \.name) { section in
+                            CategorySection(
+                                name: section.name,
+                                icon: section.icon,
+                                courses: section.courses,
+                                isExpanded: isExpanded(section.name),
+                                toggle: {
+                                    if collapsed.contains(section.name) {
+                                        collapsed.remove(section.name)
+                                    } else {
+                                        collapsed.insert(section.name)
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -88,13 +126,61 @@ struct CatalogView: View {
     }
 }
 
+/// A collapsible category header plus its course cards.
+struct CategorySection: View {
+    let name: String
+    let icon: String
+    let courses: [Course]
+    let isExpanded: Bool
+    let toggle: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button(action: toggle) {
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.accent)
+                    Text(name)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text("\(courses.count)")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .foregroundStyle(Theme.accent)
+                        .background(Theme.accentSoft, in: Capsule())
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(name), \(courses.count) courses")
+            .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
+
+            if isExpanded {
+                ForEach(courses) { course in
+                    NavigationLink(value: course) {
+                        CourseCard(course: course)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
 struct CourseCard: View {
     let course: Course
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: iconName)
+                Image(systemName: course.iconName)
                     .font(.title2)
                     .foregroundStyle(Theme.accent)
                     .frame(width: 34, height: 34)
@@ -132,18 +218,6 @@ struct CourseCard: View {
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
     }
 
-    private var iconName: String {
-        switch course.category {
-        case "Cybersecurity": "lock.shield.fill"
-        case "Automation": "gearshape.2.fill"
-        case "Microsoft Power Platform": "square.grid.2x2.fill"
-        case "Programming", "AI and Programming": "chevron.left.forwardslash.chevron.right"
-        case "Data Analytics": "chart.xyaxis.line"
-        case "Data Visualisation", "Business Intelligence": "chart.bar.xaxis"
-        case "Databases": "cylinder.split.1x2.fill"
-        default: "books.vertical.fill"
-        }
-    }
 }
 
 // Small funding-scheme chip (WSQ / SFC / SFEC / PSEA / UTAP) sized to fit five in a row.
@@ -234,11 +308,13 @@ struct CourseDetailView: View {
                     }
                 }
 
-                InfoCard {
-                    VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel("Outcomes")
-                        ForEach(course.outcomes, id: \.self) { outcome in
-                            Label(outcome, systemImage: "checkmark.circle.fill")
+                if !course.outcomes.isEmpty {
+                    InfoCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            SectionLabel("Outcomes")
+                            ForEach(course.outcomes, id: \.self) { outcome in
+                                Label(outcome, systemImage: "checkmark.circle.fill")
+                            }
                         }
                     }
                 }

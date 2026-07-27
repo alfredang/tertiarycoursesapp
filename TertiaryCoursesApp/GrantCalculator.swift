@@ -35,6 +35,8 @@ struct GrantEstimate {
     static let gstRate: Decimal = 0.09
 
     let courseFee: Decimal          // original fee, before GST
+    /// Non-WSQ / unfunded courses receive no SSG subsidy regardless of the learner profile.
+    let ssgFunded: Bool
     let skillsFutureClaimable: Bool
     let nationality: Nationality
     let age: Int
@@ -42,6 +44,7 @@ struct GrantEstimate {
     let creditBalance: Decimal
 
     var fundingRate: Decimal {
+        guard ssgFunded else { return 0 }
         switch nationality {
         case .singaporeCitizen:
             if sponsorship == .employerSME { return 0.70 }
@@ -54,6 +57,7 @@ struct GrantEstimate {
     }
 
     var grantName: String {
+        guard ssgFunded else { return "Not SSG-funded — full fee payable" }
         switch nationality {
         case .singaporeCitizen:
             if sponsorship == .employerSME { return "SME Enhanced Training Support (70%)" }
@@ -101,56 +105,115 @@ struct GrantEstimate {
 
 struct GrantCalculatorView: View {
     @ObservedObject var catalog: CourseCatalogStore
-    @State private var selectedCourseID = CourseData.courses[0].id
+    @State private var selectedCourseID = CourseData.courses.first?.id ?? ""
+    @State private var showCoursePicker = false
 
-    private var selectedCourse: Course {
-        catalog.courses.first { $0.id == selectedCourseID } ?? catalog.courses.first ?? CourseData.courses[0]
+    private var selectedCourse: Course? {
+        catalog.courses.first { $0.id == selectedCourseID } ?? catalog.courses.first
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    InfoCard {
-                        VStack(alignment: .leading, spacing: 10) {
-                            SectionLabel("Course")
-                            Menu {
-                                ForEach(catalog.courses) { course in
-                                    Button(course.title) { selectedCourseID = course.id }
+                    if let course = selectedCourse {
+                        InfoCard {
+                            VStack(alignment: .leading, spacing: 10) {
+                                SectionLabel("Course")
+                                Button {
+                                    showCoursePicker = true
+                                } label: {
+                                    HStack(spacing: 10) {
+                                        Text(course.title)
+                                            .font(.subheadline.weight(.semibold))
+                                            .multilineTextAlignment(.leading)
+                                            .lineLimit(2)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.caption.weight(.semibold))
+                                    }
+                                    .foregroundStyle(Theme.accent)
+                                    .padding(12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 }
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Text(selectedCourse.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .multilineTextAlignment(.leading)
-                                        .lineLimit(2)
-                                    Spacer()
-                                    Image(systemName: "chevron.up.chevron.down")
-                                        .font(.caption.weight(.semibold))
-                                }
-                                .foregroundStyle(Theme.accent)
-                                .padding(12)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .buttonStyle(.plain)
+                                LabeledContent("Course fee (before GST)", value: currency(course.fee))
+                                LabeledContent("Course fee with GST", value: currency(course.feeWithGST))
                             }
-                            LabeledContent("Course fee (before GST)", value: currency(selectedCourse.fee))
-                            LabeledContent("Course fee with GST", value: currency(selectedCourse.feeWithGST))
                         }
-                    }
 
-                    GrantCalculatorForm(course: selectedCourse)
+                        GrantCalculatorForm(course: course)
+                    } else {
+                        ContentUnavailableView(
+                            "Catalog unavailable",
+                            systemImage: "exclamationmark.triangle",
+                            description: Text("The bundled course catalog could not be loaded.")
+                        )
+                    }
                 }
                 .padding(20)
             }
             .background(Theme.page)
             .navigationTitle("Grant Calculator")
             .brandToolbar()
-            .onChange(of: catalog.courses) { _, courses in
-                if !courses.contains(where: { $0.id == selectedCourseID }) {
-                    selectedCourseID = courses.first?.id ?? CourseData.courses[0].id
+            .sheet(isPresented: $showCoursePicker) {
+                CoursePickerSheet(courses: catalog.courses, selectedCourseID: $selectedCourseID)
+            }
+        }
+    }
+}
+
+/// Searchable course chooser — the catalog is far too large for a flat menu.
+struct CoursePickerSheet: View {
+    let courses: [Course]
+    @Binding var selectedCourseID: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    private var results: [Course] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return courses }
+        return courses.filter { $0.searchIndex.localizedCaseInsensitiveContains(query) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List(results) { course in
+                Button {
+                    selectedCourseID = course.id
+                    dismiss()
+                } label: {
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(course.title)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("\(course.courseCode) · \(currency(course.feeWithGST)) w/GST")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 8)
+                        if course.id == selectedCourseID {
+                            Image(systemName: "checkmark")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                }
+            }
+            .listStyle(.plain)
+            .searchable(text: $searchText, prompt: "Search courses")
+            .navigationTitle("Select Course")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
                 }
             }
         }
+        .preferredColorScheme(.light)
+        .tint(Theme.accent)
     }
 }
 
@@ -173,6 +236,7 @@ struct GrantCalculatorForm: View {
     private var estimate: GrantEstimate {
         GrantEstimate(
             courseFee: course.fee,
+            ssgFunded: course.isWSQCourse,
             skillsFutureClaimable: course.skillsFutureClaimable,
             nationality: nationality,
             age: age,
@@ -253,16 +317,19 @@ struct GrantCalculatorForm: View {
                 VStack(alignment: .leading, spacing: 10) {
                     SectionLabel("Estimate")
 
-                    Label(estimate.grantName, systemImage: "checkmark.seal.fill")
+                    Label(estimate.grantName,
+                          systemImage: estimate.fundingRate > 0 ? "checkmark.seal.fill" : "info.circle.fill")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.accent)
+                        .foregroundStyle(estimate.fundingRate > 0 ? Theme.accent : Color.secondary)
 
                     Divider()
 
                     EstimateRow(title: "Course fee (before GST)", value: estimate.courseFee)
                     EstimateRow(title: "GST 9% (on original fee)", value: estimate.gst)
                     EstimateRow(title: "Course fee with GST", value: estimate.feeWithGST)
-                    EstimateRow(title: "SSG grant (\(estimate.rateText))", value: -estimate.grant)
+                    if estimate.fundingRate > 0 {
+                        EstimateRow(title: "SSG grant (\(estimate.rateText))", value: -estimate.grant)
+                    }
                     if estimate.canUseSkillsFutureCredit {
                         EstimateRow(title: "SkillsFuture Credit", value: -estimate.skillsFutureCreditApplied)
                     }
@@ -312,7 +379,7 @@ struct EstimateRow: View {
 #Preview {
     NavigationStack {
         ScrollView {
-            GrantCalculatorForm(course: CourseData.courses[0])
+            GrantCalculatorForm(course: CourseData.courses[0])  // preview only
                 .padding(20)
         }
         .background(Theme.page)

@@ -86,9 +86,6 @@ struct MainTabView: View {
                 .tag(3)
         }
         .tint(Theme.accent)
-        .task {
-            await catalog.loadCourseRuns()
-        }
     }
 }
 
