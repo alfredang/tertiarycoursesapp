@@ -558,24 +558,6 @@
   "url": "https://www.tertiarycourses.com.sg/hands-on-rest-api-development-with-fastapi.html"
  },
  {
-  "id": "C1143",
-  "title": "AI Vibe Coding for React Development",
-  "courseCode": "C1143",
-  "category": "Artificial Intelligence",
-  "icon": "sparkles",
-  "summary": "Build modern React apps with AI vibe coding. Master JSX, components, hooks and routing using AI assistants like Cursor, GitHub Copilot and Claude in this hands-on 2-day React course at Tertiary Courses Singapore.",
-  "duration": "2 days",
-  "delivery": "Blended",
-  "fee": 700.0,
-  "isWSQ": false,
-  "sfc": false,
-  "sfec": false,
-  "psea": false,
-  "utap": false,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/ai-vibe-coding-for-react-development.html"
- },
- {
   "id": "C1154",
   "title": "AI Vibe Coding for SQL",
   "courseCode": "C1154",
@@ -628,24 +610,6 @@
   "utap": false,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/ai-vibe-coding-for-unity-game-development.html"
- },
- {
-  "id": "C603",
-  "title": "AI Vibe Coding for Web Development",
-  "courseCode": "C603",
-  "category": "Artificial Intelligence",
-  "icon": "sparkles",
-  "summary": "Build modern websites and web apps with AI vibe coding. Master responsive pages, interactivity, APIs and deployment using AI assistants like Cursor, GitHub Copilot and Claude in this hands-on 1-day course at Tertiary Courses Singapore.",
-  "duration": "1 day",
-  "delivery": "Blended",
-  "fee": 350.0,
-  "isWSQ": false,
-  "sfc": false,
-  "sfec": false,
-  "psea": false,
-  "utap": false,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/ai-vibe-coding-for-web-development.html"
  },
  {
   "id": "C141",
@@ -1206,6 +1170,24 @@
   "url": "https://www.tertiarycourses.com.sg/casl-build-a-conversational-ai-agent-with-google-gemini.html"
  },
  {
+  "id": "TGS-2026064716",
+  "title": "CASL - Business Innovation with Artificial Intelligence",
+  "courseCode": "TGS-2026064716",
+  "category": "Artificial Intelligence",
+  "icon": "sparkles",
+  "summary": "Elevate your business operations and strategy through the transformative power of artificial intelligence with this WSQ-endorsed course. Our curriculum covers how AI can be applied to various facets of your business, from automating mundane tasks to leveraging data analytics for strategic decisions. You'll get hands-on experience through practical exercises and learn from real-world case studies, ensuring that your newfound knowledge is readily applicable. By completing this course, you'll be well-equipped to integrate artificial intelligence into your business model. You'll understand the types of AI technology that are most relevant to your industry and learn how to implement them to solve complex problems, increase efficiency, and drive innovation. Whether you're a corporate executive, business owner, or a professional looking to upskill, this course provides you with the tools and insights to innovate effectively with AI.",
+  "duration": "1 day",
+  "delivery": "Blended",
+  "fee": 350.0,
+  "isWSQ": true,
+  "sfc": true,
+  "sfec": true,
+  "psea": true,
+  "utap": true,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/casl-business-innovation-with-artificial-intelligence.html"
+ },
+ {
   "id": "TGS-2026065050",
   "title": "CASL - Generative AI for Finance and Fintech",
   "courseCode": "TGS-2026065050",
@@ -1219,7 +1201,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-generative-ai-for-finance-and-fintech.html"
  },
@@ -1456,24 +1438,6 @@
   "utap": false,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/copilot-studio-and-power-automate.html"
- },
- {
-  "id": "C803",
-  "title": "Copilot for Power Apps",
-  "courseCode": "C803",
-  "category": "Artificial Intelligence",
-  "icon": "sparkles",
-  "summary": "Build business apps faster with AI. Learn Copilot for Power Apps - create canvas apps from prompts, generate Power Fx formulas, and automate flows in this hands-on 1-day course at Tertiary Courses Singapore.",
-  "duration": "1 day",
-  "delivery": "Blended",
-  "fee": 350.0,
-  "isWSQ": false,
-  "sfc": false,
-  "sfec": false,
-  "psea": false,
-  "utap": false,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/copilot-for-power-apps.html"
  },
  {
   "id": "C814",
@@ -1775,9 +1739,9 @@
   "fee": 1600.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-data-analytics-and-deep-learning-for-financial-services.html"
  },
@@ -1793,9 +1757,9 @@
   "fee": 900.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-financial-data-mining-and-modeling-with-r.html"
  },
@@ -1811,9 +1775,9 @@
   "fee": 900.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-machine-learning-101-for-financial-trading.html"
  },
@@ -1993,7 +1957,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-agent-with-hermes-agent.html"
  },
@@ -2011,7 +1975,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-agents-for-business.html"
  },
@@ -2029,7 +1993,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-game-development.html"
  },
@@ -2047,7 +2011,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-machine-learning.html"
  },
@@ -2065,7 +2029,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-multi-agents-system.html"
  },
@@ -2083,7 +2047,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-c-sharp.html"
  },
@@ -2101,7 +2065,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-react.html"
  },
@@ -2111,7 +2075,7 @@
   "courseCode": "TGS-2025052468",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
-  "summary": "In today’s rapidly advancing AI landscape, the ability to build agentic AI applications is becoming a critical capability for developing intelligent, autonomous, and context-aware systems. This course, Building Agentic AI Applications with Claude Code, equips learners with the technical skills to design, develop, and deploy AI-powered applications using modern large language models and agent-based architectures. Learners will be introduced to Claude Code as a development approach for creating AI-driven solutions through structured prompting, code generation, and iterative workflows. The course covers the fundamentals of agentic AI, including how to design systems where AI agents can reason, plan, and execute tasks across multi-step workflows. Participants will gain hands-on experience in building AI pipelines using frameworks such as LangChain, and implementing Retrieval-Augmented Generation (RAG) to enable applications to access and utilize external knowledge sources effectively. The course also explores how to develop AI agents and multi-agent systems that can interact with tools, APIs, and knowledge bases to deliver dynamic and context-aware responses. In addition to development, the course emphasizes practical considerations such as debugging, optimization, and reliability of RAG and agent-based systems, enabling learners to identify and resolve common challenges in real-world implementations. By the end of the course, learners will be able to design and build scalable, intelligent, and autonomous AI applications, leveraging Claude Code methodologies and agentic AI patterns to create impactful solutions across various domains. This course is suitable for developers, AI practitioners, and technology professionals seeking to develop hands-on expertise in agentic AI, RAG systems, and modern AI application development. Course Brochure Download WSQ - Agentic AI Applications with Claude Code Brochure Skills Framework This course follows the guideline of Artificial Intelligence Application EGS-TEM-3026-1.1 under Engineering Services Skills Framework Certification Certificate of Completion from Tertiary Infotech - Upon meeting at least 75% attendance and passing the assessment(s), participants will receive a Certificate of Completion from Tertiary Infotech. OpenCerts from SkillsFuture Singapore - After passing the assessment(s) and achieving at least 75% attendance, participants will receive a OpenCert (aka Statement of Achievement) from SkillsFuture Singapore, certifying that they have achieved the Competency Standard(s) in the above Skills Framework. External Certification - The participant will be able to attempt the AWS Certified Machine Learning Engineer Associate exam after attending this course. Upon passing the exam, you will receive the AWS Certified Machine Learning Engineer Associate accreditation. WSQ Funding WSQ funding is only applicable to Singaporeans and PR. Subject to eligibility, the funding support is subjected to funding caps. Effective for courses starting from 1 Jan 2024 Full Fee GST Nett Fee after Funding (Incl. GST) Baseline MCES / SME $500.00 $45.00 $295.00 $195.00 Baseline: Singaporean/PR age 21 and aboveMCES(Mid-Career Enhanced Subsidy): S'porean age 40 & above Upon registration, we will advise further on how to tap on the WSQ Training Subsidy. You can pay the nett fee (after the WSQ training subsidy) by the following : SkillsFuture Enterprise Credit (SFEC) Eligible Singapore-registered companies can tap on $10000 SFEC to cover out-of-pocket expenses.Click here to submit SkillsFuture Enterprise Credit SkillsFuture Credit (SFC) Eligible Singapore Citizens can use their SFC to offset course fee payable after funding but the $4,000 Additional SFC (Mid-Career Support) cannot be used. Click here for SkillsFuture Credit submission UTAP Eligible NTUC members can apply for 50% of the unfunded fee from UTAP, capped up to $250/year and for members aged 40 and above, capped up to $500/year. Click here to submit UTAP PSEA Eligible Singapore Citizens can use their PSEA funds to offset course fee payable after funding. To check for Post-Secondary Education Account (PSEA) eligibility for this course, Visit SkillsFuture (course code: TGS-2025052468) Scroll down to “Keyword Tags” to verify for PSEA eligibility. If there is “PSEA” under keyword tags, the course is eligible for PSEA. Once you are eligible for PSEA, please download and fill up the PSEA Withdrawal Form and email to us.",
+  "summary": "In today’s rapidly advancing AI landscape, the ability to build agentic AI applications is becoming a critical capability for developing intelligent, autonomous, and context-aware systems. This course, Building Agentic AI Applications with Claude Code, equips learners with the technical skills to design, develop, and deploy AI-powered applications using modern large language models and agent-based architectures. Learners will be introduced to Claude Code as a development approach for creating AI-driven solutions through structured prompting, code generation, and iterative workflows. The course covers the fundamentals of agentic AI, including how to design systems where AI agents can reason, plan, and execute tasks across multi-step workflows. Participants will gain hands-on experience in building AI pipelines using frameworks such as LangChain, and implementing Retrieval-Augmented Generation (RAG) to enable applications to access and utilize external knowledge sources effectively. The course also explores how to develop AI agents and multi-agent systems that can interact with tools, APIs, and knowledge bases to deliver dynamic and context-aware responses. In addition to development, the course emphasizes practical considerations such as debugging, optimization, and reliability of RAG and agent-based systems, enabling learners to identify and resolve common challenges in real-world implementations. By the end of the course, learners will be able to design and build scalable, intelligent, and autonomous AI applications, leveraging Claude Code methodologies and agentic AI patterns to create impactful solutions across various domains. This course is suitable for developers, AI practitioners, and technology professionals seeking to develop hands-on expertise in agentic AI, RAG systems, and modern AI application development.",
   "duration": "1 day",
   "delivery": "Blended",
   "fee": 500.0,
@@ -2119,7 +2083,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-applications-with-claude-code.html"
  },
@@ -2173,7 +2137,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-hr.html"
  },
@@ -2191,7 +2155,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-automate-video-and-voice-ai-agents-with-n8n.html"
  },
@@ -2209,7 +2173,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-basic-machine-learning-with-scikitlearn-course.html"
  },
@@ -2227,7 +2191,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-asp-net-web-apps-with-vibe-coding.html"
  },
@@ -2245,7 +2209,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-modern-restful-api-applications-with-ai-assisted-programming.html"
  },
@@ -2263,7 +2227,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-professional-web-apps-quickly-with-ai-assisted-vibe-coding.html"
  },
@@ -2281,7 +2245,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-a-generative-ai-llm-powered-chatbot-to-enhance-customer-service.html"
  },
@@ -2335,27 +2299,9 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-building-advanced-machine-learning-and-ai-solutions-with-pytorch.html"
- },
- {
-  "id": "TGS-2020504518",
-  "title": "WSQ - Business Innovation with Artificial Intelligence",
-  "courseCode": "TGS-2020504518",
-  "category": "Artificial Intelligence",
-  "icon": "sparkles",
-  "summary": "Elevate your business operations and strategy through the transformative power of artificial intelligence with this WSQ-endorsed course. Our curriculum covers how AI can be applied to various facets of your business, from automating mundane tasks to leveraging data analytics for strategic decisions. You'll get hands-on experience through practical exercises and learn from real-world case studies, ensuring that your newfound knowledge is readily applicable. By completing this course, you'll be well-equipped to integrate artificial intelligence into your business model. You'll understand the types of AI technology that are most relevant to your industry and learn how to implement them to solve complex problems, increase efficiency, and drive innovation. Whether you're a corporate executive, business owner, or a professional looking to upskill, this course provides you with the tools and insights to innovate effectively with AI. Course Brochure Download WSQ - Business Innovation with Artificial Intelligence Brochure Skills Framework This course follows the guideline of Business Innovation ICT-SNA-4003-1.1 TSC under ICT Skills Framework Certification Certificate of Completion from Tertiary Infotech - Upon meeting at least 75% attendance and passing the assessment(s), participants will receive a Certificate of Completion from Tertiary Infotech. OpenCerts from SkillsFuture Singapore - After passing the assessment(s) and achieving at least 75% attendance, participants will receive a OpenCert (aka Statement of Achievement) from SkillsFuture Singapore, certifying that they have achieved the Competency Standard(s) in the above Skills Framework. WSQ Funding WSQ funding is only applicable to Singaporeans and PR. Subject to eligibility, the funding support is subjected to funding caps. Effective for courses starting from 1 Jan 2024 Full Fee GST Nett Fee after Funding (Incl. GST) Baseline MCES / SME $350 $31.50 $206.50 $136.50 Baseline: Singaporean/PR age 21 and aboveMCES(Mid-Career Enhanced Subsidy): S'porean age 40 & above Upon registration, we will advise further on how to tap on the WSQ Training Subsidy. You can pay the nett fee (after the WSQ training subsidy) by the following : SkillsFuture Enterprise Credit (SFEC) Eligible Singapore-registered companies can tap on $10000 SFEC to cover of out-of-pocket expenses.Click here to submit SkillsFuture Enterprise Credit SkillsFuture Credit (SFC) Eligible Singapore Citizens can use their SFC to offset course fee payable after funding but the $4,000 Additional SFC (Mid-Career Support) cannot be used. Click here for SkillsFuture Credit submission UTAP Eligible NTUC members can apply for 50% of the unfunded fee from UTAP, capped up to $250/year and for members aged 40 and above, capped up to $500/year. Click here to submit UTAP",
-  "duration": "1 day",
-  "delivery": "Blended",
-  "fee": 350.0,
-  "isWSQ": true,
-  "sfc": true,
-  "sfec": true,
-  "psea": true,
-  "utap": false,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/wsq-business-innovation-with-artificial-intelligence.html"
  },
  {
   "id": "TGS-2020503395",
@@ -2371,7 +2317,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-innovation-with-openclaw-and-blockchain.html"
  },
@@ -2389,7 +2335,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-process-automation-with-power-automate-and-copilot-studio-agents.html"
  },
@@ -2407,7 +2353,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-transformation-with-openclaw-and-nft.html"
  },
@@ -2443,7 +2389,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-computer-vision-for-beginners.html"
  },
@@ -2479,7 +2425,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-create-intelligent-power-apps-and-power-automate-workflows-with-copilot.html"
  },
@@ -2497,7 +2443,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-creating-engaging-videos-with-generative-ai-genai.html"
  },
@@ -2515,7 +2461,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-analytics-and-ai-for-healthcare.html"
  },
@@ -2533,7 +2479,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-mining-and-machine-learning-fundamentals-for-beginners.html"
  },
@@ -2551,7 +2497,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-ai-agents-with-openai-agent-development-kit.html"
  },
@@ -2569,7 +2515,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-blockchain-and-web3-app-with-vibe-coding.html"
  },
@@ -2587,7 +2533,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-full-stack-web-applications-with-vue-using-vibe-coding.html"
  },
@@ -2605,7 +2551,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-generative-ai-apps-in-azure-ai-foundry-ai-3016.html"
  },
@@ -2623,7 +2569,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-multi-ai-agent-applications-with-gemini-agent-adk.html"
  },
@@ -2641,7 +2587,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-multi-agent-ai-applications-with-autogen.html"
  },
@@ -2677,7 +2623,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-digital-transformation-and-business-innovation-with-generative-ai-genai.html"
  },
@@ -2695,7 +2641,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-driving-digital-transformation-with-microsoft-365-copilot-for-organizations.html"
  },
@@ -2749,7 +2695,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-enhance-work-productivity-with-microsoft-365-copilot.html"
  },
@@ -2767,7 +2713,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fast-track-innovations-with-agile-design-thinking-and-generative-ai-genai.html"
  },
@@ -2785,7 +2731,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-ai-ethics-and-responsible-ai.html"
  },
@@ -2839,7 +2785,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-generative-ai-for-content-creation.html"
  },
@@ -2857,7 +2803,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-google-professional-machine-learning-engineer-training.html"
  },
@@ -2875,7 +2821,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-image-and-video-processing-with-opencv.html"
  },
@@ -2893,7 +2839,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-improve-hiring-decisions-with-genai-assisted-interview-questioning.html"
  },
@@ -2911,7 +2857,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-innovative-problem-solving-with-generative-ai-genai.html"
  },
@@ -2929,7 +2875,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-manage-ai-agents-with-paperclip.html"
  },
@@ -2947,7 +2893,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-prompt-engineering-for-generative-ai-content-creation.html"
  },
@@ -2983,7 +2929,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-neo4j-graph-data-science-and-large-language-model-llm.html"
  },
@@ -3001,7 +2947,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-no-code-and-low-code-agentic-ai-applications.html"
  },
@@ -3019,7 +2965,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-pearson-vue-certified-it-specialist-artificial-intelligence.html"
  },
@@ -3037,7 +2983,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-practical-reinforcement-learning-for-beginners.html"
  },
@@ -3055,7 +3001,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-project-management-with-generative-ai-genai.html"
  },
@@ -3073,7 +3019,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-responsible-generative-ai-basics.html"
  },
@@ -3091,7 +3037,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-storytelling-and-storyboarding-with-generative-ai.html"
  },
@@ -3109,7 +3055,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-text-analytics-with-r.html"
  },
@@ -3127,7 +3073,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-vibe-coding-a-full-stack-nosql-web-apps.html"
  },
@@ -3145,7 +3091,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-vibe-coding-for-agentic-ai-workflows-and-responsive-web-ui.html"
  },
@@ -3163,7 +3109,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-vibe-coding-for-basic-web-design.html"
  },
@@ -3307,7 +3253,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-design-thinking-course-for-businesses.html"
  },
@@ -3485,9 +3431,9 @@
   "fee": 800.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-blockchain-smart-contract-programming-for-financial-services.html"
  },
@@ -3503,9 +3449,9 @@
   "fee": 800.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-financial-analysis-for-non-finance-managers.html"
  },
@@ -3685,7 +3631,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-accounting-for-non-finance-managers.html"
  },
@@ -3703,7 +3649,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-advanced-transactional-accounting-with-quickbooks-online.html"
  },
@@ -3721,7 +3667,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-advanced-transactional-accounting-with-xero.html"
  },
@@ -3739,7 +3685,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agile-project-management-for-business.html"
  },
@@ -3757,7 +3703,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-budgeting-for-small-and-medium-enterprises.html"
  },
@@ -3775,7 +3721,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-innovation-with-metaverse-and-immersive-technologies.html"
  },
@@ -3793,7 +3739,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-closing-sales-with-empathy-driven-people-focused-selling.html"
  },
@@ -3811,7 +3757,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-communicate-with-confidence-harness-your-strengths-for-influence-impact.html"
  },
@@ -3829,7 +3775,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-corporate-law-compliance-for-business-owners.html"
  },
@@ -3865,7 +3811,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-decision-making-and-resource-optimization-with-linear-programming.html"
  },
@@ -3883,7 +3829,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-effective-project-management-for-small-projects.html"
  },
@@ -3901,7 +3847,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-empowering-employee-health-and-wellness-at-the-workplace.html"
  },
@@ -3919,7 +3865,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-financial-analysis-for-small-and-medium-enterprises.html"
  },
@@ -3937,7 +3883,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-microsoft-project-management.html"
  },
@@ -3955,7 +3901,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-google-workspace-for-smes-boosting-efficiency-and-collaboration.html"
  },
@@ -3973,7 +3919,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-itil-4-foundation-training.html"
  },
@@ -3991,7 +3937,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-impactful-leadership-framework.html"
  },
@@ -4009,7 +3955,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-implementing-digital-facilities-management-system.html"
  },
@@ -4063,7 +4009,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-agile-project-management-for-it-projects.html"
  },
@@ -4081,7 +4027,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-financial-ratio-analysis-unlocking-organizational-health.html"
  },
@@ -4099,7 +4045,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-notion-for-content-project-and-database-management.html"
  },
@@ -4117,7 +4063,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-the-art-of-conflict-resolution-to-foster-team-collaboration-and-success.html"
  },
@@ -4135,7 +4081,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-the-art-and-science-of-working-with-people-and-teams-using-disc-asiaplus.html"
  },
@@ -4153,7 +4099,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-the-art-of-communication-to-enhance-team-collaboration-and-customer-satisfaction.html"
  },
@@ -4171,7 +4117,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-project-management-professional.html"
  },
@@ -4189,7 +4135,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-quickbooks-accounting-system-for-small-and-medium-enterprises.html"
  },
@@ -4207,7 +4153,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-scrum-master-fundamentals-for-high-performing-teams.html"
  },
@@ -4225,7 +4171,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-service-branding-strategies-to-elevate-your-business.html"
  },
@@ -4261,7 +4207,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-tax-computations-for-individuals-and-organizations.html"
  },
@@ -4279,7 +4225,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-unlocking-business-potential-with-strategic-negotiation-tactics.html"
  },
@@ -4297,7 +4243,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-xero-essentials-for-smes-streamlining-accounting-and-tax-operations.html"
  },
@@ -4999,7 +4945,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-ai-practitioner-training.html"
  },
@@ -5017,7 +4963,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-cloud-practitioner-training.html"
  },
@@ -5035,7 +4981,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-data-engineer-associate-training.html"
  },
@@ -5053,7 +4999,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-devops-engineer-training.html"
  },
@@ -5071,7 +5017,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-developer-associate-training.html"
  },
@@ -5089,7 +5035,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-machine-learning-engineer-associate-training.html"
  },
@@ -5107,7 +5053,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-solutions-architect-associate-training.html"
  },
@@ -5125,7 +5071,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-solutions-architect-professional-training.html"
  },
@@ -5143,7 +5089,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-aws-certified-sysops-administrator-associate-training.html"
  },
@@ -5161,7 +5107,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-administering-microsoft-azure-sql-solutions-dp-300.html"
  },
@@ -5179,7 +5125,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-application-integration-with-docker-and-kubernetes.html"
  },
@@ -5197,7 +5143,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-kubernetes-administrator-cka-training.html"
  },
@@ -5215,7 +5161,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-kubernetes-application-developer-ckad-training.html"
  },
@@ -5233,7 +5179,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-cisco-certified-network-associate-ccna.html"
  },
@@ -5251,7 +5197,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-cisco-certified-network-professional-ccnp-for-encor-training.html"
  },
@@ -5269,7 +5215,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-cloud-training.html"
  },
@@ -5287,7 +5233,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-designing-and-implementing-microsoft-devops-solutions-az-400.html"
  },
@@ -5323,7 +5269,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-devops-foundation-training.html"
  },
@@ -5341,7 +5287,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-github-foundations-certification-training.html"
  },
@@ -5359,7 +5305,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-google-associate-cloud-engineer-training.html"
  },
@@ -5377,7 +5323,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-kubernetes-and-cloud-native-associate-kcna-training-753.html"
  },
@@ -5395,7 +5341,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-kubernetes-and-cloud-native-associate-kcna-training.html"
  },
@@ -5413,7 +5359,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-linux-configuration-and-shell-scripting.html"
  },
@@ -5431,7 +5377,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-ai-fundamentals-ai-900.html"
  },
@@ -5449,7 +5395,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-data-fundamentals-dp-900.html"
  },
@@ -5467,7 +5413,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-data-scientist-associate-dp-100.html"
  },
@@ -5485,7 +5431,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-fundamentals-az-900.html"
  },
@@ -5503,7 +5449,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-security-engineer-associate-az-500.html"
  },
@@ -5521,7 +5467,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-certified-azure-ai-engineer-associate-ai-102-training.html"
  },
@@ -5539,7 +5485,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-certified-azure-administrator-associate-az-104.html"
  },
@@ -5557,7 +5503,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-certified-fabric-data-engineer-associate-dp-700-training.html"
  },
@@ -5575,7 +5521,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-network-securities-for-beginners.html"
  },
@@ -5611,7 +5557,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-pearson-vue-certified-it-specialist-networking.html"
  },
@@ -5647,7 +5593,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-comptia-pentest-training.html"
  },
@@ -5657,7 +5603,7 @@
   "courseCode": "TGS-2026064533",
   "category": "Cybersecurity",
   "icon": "lock.shield.fill",
-  "summary": "Discover how to fortify your digital world against cyber threats with the CASL Cyber Security Awareness Course, designed for both individuals and businesses. Learn the ins and outs of online safety, data protection, and cybersecurity fundamentals, including password management, phishing prevention, and secure browsing techniques. Equip yourself with vital knowledge to protect your personal data, as well as safeguard your business's confidential information. This course offers practical insights into the latest cyber threats and vulnerabilities, along with hands-on training on implementing effective cybersecurity measures. Whether you are looking to enhance your personal online safety or secure your business infrastructure, this course provides comprehensive strategies and actionable steps to help you become more cyber-resilient. By the end of the course, you'll be empowered with the skills and understanding to mitigate cybersecurity risks effectively. Course Brochure Download CASL - Cyber Security Awareness Course for Personal and Businesses Brochure Skills Framework This course follows the guideline of Cyber Security ACC-ICT-3002-1.1 TSC under Accounting Skills Framework Certification Certificate of Completion from Tertiary Infotech - Upon meeting at least 75% attendance and passing the assessment(s), participants will receive a Certificate of Completion from Tertiary Infotech. WSQ Funding WSQ funding is only applicable to Singaporeans and PR. Subject to eligibility, the funding support is subjected to funding caps. Effective for courses starting from 1 Jan 2024 Full Fee GST Nett Fee after Funding (Incl. GST) Baseline MCES / SME $350 $31.50 $206.50 $136.50 Baseline: Singaporean/PR age 21 and aboveMCES(Mid-Career Enhanced Subsidy): S'porean age 40 & above Upon registration, we will advise further on how to tap on the WSQ Training Subsidy. You can pay the nett fee (after the WSQ training subsidy) by the following : SkillsFuture Enterprise Credit (SFEC) Eligible Singapore-registered companies can tap on $10000 SFEC to cover out-of-pocket expenses.Click here to submit SkillsFuture Enterprise Credit SkillsFuture Credit (SFC) Eligible Singapore Citizens can use their SFC to offset course fee payable after funding but the $4,000 Additional SFC (Mid-Career Support) cannot be used. Click here for SkillsFuture Credit submission UTAP Eligible NTUC members can apply for 50% of the unfunded fee from UTAP, capped up to $250/year and for members aged 40 and above, capped up to $500/year. Click here to submit UTAP",
+  "summary": "Discover how to fortify your digital world against cyber threats with the CASL Cyber Security Awareness Course, designed for both individuals and businesses. Learn the ins and outs of online safety, data protection, and cybersecurity fundamentals, including password management, phishing prevention, and secure browsing techniques. Equip yourself with vital knowledge to protect your personal data, as well as safeguard your business's confidential information. This course offers practical insights into the latest cyber threats and vulnerabilities, along with hands-on training on implementing effective cybersecurity measures. Whether you are looking to enhance your personal online safety or secure your business infrastructure, this course provides comprehensive strategies and actionable steps to help you become more cyber-resilient. By the end of the course, you'll be empowered with the skills and understanding to mitigate cybersecurity risks effectively.",
   "duration": "1 day",
   "delivery": "Blended",
   "fee": 350.0,
@@ -5665,7 +5611,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-cyber-security-awareness-course-for-personal-and-businesses.html"
  },
@@ -5683,7 +5629,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-robotics-process-automation-rpa-for-beginners.html"
  },
@@ -5863,7 +5809,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-administering-information-protection-and-compliance-in-microsoft-365-sc-400.html"
  },
@@ -5881,7 +5827,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-a-training-core-1-and-core-2.html"
  },
@@ -5899,7 +5845,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-linux-training.html"
  },
@@ -5917,7 +5863,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-network-training.html"
  },
@@ -5935,7 +5881,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-network-training-synchronous-e-learning.html"
  },
@@ -5953,7 +5899,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-security-training.html"
  },
@@ -5971,7 +5917,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-securityx-training.html"
  },
@@ -5989,7 +5935,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-server-training.html"
  },
@@ -6007,7 +5953,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-cybersecurity-analyst-cysa-training.html"
  },
@@ -6025,7 +5971,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-isc2-information-systems-security-professional-cissp-training.html"
  },
@@ -6043,7 +5989,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-it-automation-with-google-apps-script.html"
  },
@@ -6061,7 +6007,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-cybersecurity-architect-sc-100-training.html"
  },
@@ -6079,7 +6025,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-identity-and-access-administrator-sc-300.html"
  },
@@ -6097,7 +6043,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-security-operations-analyst-sc-200.html"
  },
@@ -6115,7 +6061,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-navigating-digital-threats-proactive-measures-against-cyber-frauds-and-scams.html"
  },
@@ -6133,7 +6079,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-pearson-vue-certified-it-specialist-cybersecurity.html"
  },
@@ -6151,7 +6097,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-pearson-vue-certified-it-specialist-network-security-training.html"
  },
@@ -6187,7 +6133,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-quantum-computing-for-beginners.html"
  },
@@ -6205,7 +6151,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-securing-the-future-with-quantum-computing-and-cryptography.html"
  },
@@ -6259,7 +6205,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-data-analytics-and-visualization-with-r.html"
  },
@@ -6347,9 +6293,9 @@
   "fee": 800.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-data-storytelling-and-visualisation-for-finance-services.html"
  },
@@ -6439,7 +6385,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-certified-data-training.html"
  },
@@ -6457,7 +6403,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-create-interactive-dashboard-using-excel.html"
  },
@@ -6475,7 +6421,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-analytics-and-visualization-with-power-bi.html"
  },
@@ -6493,7 +6439,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-quality-management-framework.html"
  },
@@ -6511,7 +6457,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-storytelling-with-tableau.html"
  },
@@ -6529,7 +6475,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-visualisation-with-tableau.html"
  },
@@ -6547,7 +6493,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-enhance-data-insights-with-google-sheets-and-looker-studio.html"
  },
@@ -6565,7 +6511,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-elasticsearch-and-kibana-for-real-time-data-analysis.html"
  },
@@ -6583,7 +6529,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-neo4j-professional-graph-database-course.html"
  },
@@ -6601,7 +6547,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-r-fundamental-and-statistical-analysis-for-beginners.html"
  },
@@ -6619,7 +6565,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-sql-fundamental-for-beginners.html"
  },
@@ -6637,7 +6583,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-statistical-data-analysis-with-excel-for-beginners.html"
  },
@@ -6655,7 +6601,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-statistics-fundamental-training-for-beginners.html"
  },
@@ -6673,7 +6619,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-tableau-certified-data-analyst-training.html"
  },
@@ -6691,7 +6637,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-tableau-certified-desktop-specialist-training.html"
  },
@@ -6709,7 +6655,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-unlocking-the-power-of-google-analytics-ga4-for-advanced-web-analytics.html"
  },
@@ -7051,7 +6997,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-3d-modelling-with-blender-for-beginners.html"
  },
@@ -7069,7 +7015,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-application-of-bim-using-revit.html"
  },
@@ -7087,7 +7033,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-architectural-visualization-with-3ds-max.html"
  },
@@ -7105,7 +7051,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-architecture-drawing-with-revit.html"
  },
@@ -7123,7 +7069,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autocad-civil-3d-for-infrastructure-design.html"
  },
@@ -7141,7 +7087,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-fusion-360-design-for-manufacturing.html"
  },
@@ -7159,7 +7105,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-autocad-design-and-drafting.html"
  },
@@ -7177,7 +7123,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-for-civil-3d-infrastructure-design.html"
  },
@@ -7195,7 +7141,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-for-inventor-mechanical-design.html"
  },
@@ -7213,7 +7159,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-for-revit-architectural-design.html"
  },
@@ -7231,7 +7177,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-for-revit-mechanical-design.html"
  },
@@ -7249,7 +7195,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-autodesk-certified-professional-acp-for-revit-structural-design.html"
  },
@@ -7267,7 +7213,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-basic-technical-drawing-with-sketchup-for-beginners.html"
  },
@@ -7285,7 +7231,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-compositing-and-visual-effects-with-after-effects.html"
  },
@@ -7303,7 +7249,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-creating-professional-graphics-with-adobe-illustrator.html"
  },
@@ -7321,7 +7267,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-creating-stunning-print-and-digital-publications-with-indesign.html"
  },
@@ -7339,7 +7285,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-creative-digital-art-and-design.html"
  },
@@ -7357,7 +7303,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-augmented-reality-ar-applications.html"
  },
@@ -7375,7 +7321,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-exploring-the-art-of-visual-communication-with-canva.html"
  },
@@ -7393,7 +7339,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-figma-fundamentals-for-aspiring-ui-ux-designers.html"
  },
@@ -7411,7 +7357,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-generative-ai-genai-visuals-in-photoshop-and-firefly.html"
  },
@@ -7429,7 +7375,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-innovating-product-development-with-3d-printing-and-additive-manufacturing.html"
  },
@@ -7447,7 +7393,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-master-mobile-photography-capturing-professional-photos-with-your-smartphone.html"
  },
@@ -7465,7 +7411,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-adobe-lightroom-for-photo-editing.html"
  },
@@ -7483,7 +7429,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-articulate-storyline-360-for-e-learning-content-creation.html"
  },
@@ -7501,7 +7447,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-ui-design-techniques-for-web-and-mobile.html"
  },
@@ -7519,7 +7465,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-product-design-with-autodesk-inventor.html"
  },
@@ -7537,7 +7483,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-product-design-with-fusion-360.html"
  },
@@ -7555,7 +7501,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-professional-digital-image-editing-with-photoshop.html"
  },
@@ -7573,7 +7519,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-steam-sustainability-professional-lesson-plan-development.html"
  },
@@ -7583,7 +7529,7 @@
   "courseCode": "TGS-2021005538",
   "category": "Design & Media",
   "icon": "paintbrush.fill",
-  "summary": "Dive into the world of technical drawing with our WSQ-accredited AutoCAD course. Our comprehensive curriculum covers everything from basic drafting techniques to advanced architectural and engineering plans. Designed to fit the needs of professionals and beginners alike, this course offers hands-on training in 2D and 3D modeling, ensuring you grasp the full range of AutoCAD's capabilities. By the end of this course, you will be able to create precise and informative technical drawings for various industries. This includes mastering dimensions, layers, blocks, and attributes, as well as understanding how to incorporate text and annotations for maximum clarity. Practical exercises and real-world projects will further sharpen your skills, making you a proficient AutoCAD user capable of handling complex technical drawing tasks. Course Brochure Download WSQ - Technical Drawing with AutoCAD Brochure Skills Framework This course follows the guideline of Technical Drawing DSN-TDR-3005-1.11 TSC under Design Skills Framework Certification Certificate of Completion from Tertiary Infotech - Upon meeting at least 75% attendance and passing the assessment(s), participants will receive a Certificate of Completion from Tertiary Infotech. OpenCerts from SkillsFuture Singapore - After passing the assessment(s) and achieving at least 75% attendance, participants will receive a OpenCert (aka Statement of Achievement) from SkillsFuture Singapore, certifying that they have achieved the Competency Standard(s) in the above Skills Framework. Autodesk ATC We are Autodesk Authorized Training Center. To get the official certification, please register on Pearson Vue Test CenterTo get the official certification, please register on Pearson Vue Test Center WSQ Funding WSQ funding is only applicable to Singaporeans and PR. Subject to eligibility, the funding support is subjected to funding caps. Effective for courses starting from 1 Jan 2024 Full Fee GST Nett Fee after Funding (Incl. GST) Baseline MCES / SME $680.00 $61.20 $401.20 $265.20 Baseline: Singaporean/PR age 21 and aboveMCES(Mid-Career Enhanced Subsidy): S'porean age 40 & above Upon registration, we will advise further on how to tap on the WSQ Training Subsidy. You can pay the nett fee (after the WSQ training subsidy) by the following : SkillsFuture Enterprise Credit (SFEC) Eligible Singapore-registered companies can tap on $10000 SFEC to cover out-of-pocket expenses.Click here to submit SkillsFuture Enterprise Credit SkillsFuture Credit (SFC) Eligible Singapore Citizens can use their SFC to offset course fee payable after funding but the $4,000 Additional SFC (Mid-Career Support) cannot be used. Click here for SkillsFuture Credit submission UTAP Eligible NTUC members can apply for 50% of the unfunded fee from UTAP, capped up to $250/year and for members aged 40 and above, capped up to $500/year. Click here to submit UTAP PSEA Eligible Singapore Citizens can use their PSEA funds to offset course fee payable after funding. To check for Post-Secondary Education Account (PSEA) eligibility for this course, Visit SkillsFuture (course code: TGS-2021005538) Scroll down to “Keyword Tags” to verify for PSEA eligibility. If there is “PSEA” under keyword tags, the course is eligible for PSEA. Once you are eligible for PSEA, please download and fill up the PSEA Withdrawal Form and email to us.",
+  "summary": "Dive into the world of technical drawing with our WSQ-accredited AutoCAD course. Our comprehensive curriculum covers everything from basic drafting techniques to advanced architectural and engineering plans. Designed to fit the needs of professionals and beginners alike, this course offers hands-on training in 2D and 3D modeling, ensuring you grasp the full range of AutoCAD's capabilities. By the end of this course, you will be able to create precise and informative technical drawings for various industries. This includes mastering dimensions, layers, blocks, and attributes, as well as understanding how to incorporate text and annotations for maximum clarity. Practical exercises and real-world projects will further sharpen your skills, making you a proficient AutoCAD user capable of handling complex technical drawing tasks. Autodesk ATC We are Autodesk Authorized Training Center. To get the official certification, please register on Pearson Vue Test CenterTo get the official certification, please register on Pearson Vue Test Center",
   "duration": "2 days",
   "delivery": "Blended",
   "fee": 680.0,
@@ -7591,7 +7537,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-technical-drawing-with-autocad.html"
  },
@@ -7609,7 +7555,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-technical-drawing-with-autocad-electrical.html"
  },
@@ -7627,7 +7573,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-technical-drawing-with-autocad-mechanical.html"
  },
@@ -7645,7 +7591,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ui-design-with-ai.html"
  },
@@ -7663,7 +7609,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-unity-certified-user-programmer-training.html"
  },
@@ -7681,7 +7627,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-video-editing-with-premiere-pro.html"
  },
@@ -7699,7 +7645,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-building-a-successful-ecommerce-store-with-woocommerce.html"
  },
@@ -7717,7 +7663,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-create-social-media-campaigns-with-agentic-ai.html"
  },
@@ -7735,7 +7681,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-running-a-successful-ecommerce-store-with-shopify.html"
  },
@@ -7789,7 +7735,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-affiliate-marketing.html"
  },
@@ -7807,7 +7753,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-digital-marketing.html"
  },
@@ -7825,7 +7771,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-social-media-marketing.html"
  },
@@ -7843,7 +7789,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-tiktok-marketing.html"
  },
@@ -7861,7 +7807,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-your-online-presence-and-website-with-wix-for-beginners.html"
  },
@@ -7879,7 +7825,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-building-professional-websites-with-wordpress.html"
  },
@@ -7897,7 +7843,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-creating-high-converting-email-campaigns-with-mailchimp.html"
  },
@@ -7915,7 +7861,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-driving-brand-engagement-with-proven-instagram-social-media-marketing-strategies.html"
  },
@@ -7933,7 +7879,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-enhancing-online-presence-with-ai-powered-search-engine-optimization-seo.html"
  },
@@ -7951,7 +7897,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-generative-ai-for-search-engine-optimization-seo.html"
  },
@@ -7987,7 +7933,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-google-tag-manager-for-optimized-website-tracking-and-analytics.html"
  },
@@ -8005,7 +7951,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-dynamics-365-fundamentals-crm-mb-910.html"
  },
@@ -8023,7 +7969,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-teams-administrator-associate-ms-700.html"
  },
@@ -8041,7 +7987,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-pay-per-click-ppc-campaign-optimization-driving-roi-with-google-ads.html"
  },
@@ -8077,7 +8023,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-business-innovation-with-internet-of-things-iot.html"
  },
@@ -8185,7 +8131,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-assisted-c-programming-for-arduino.html"
  },
@@ -8203,7 +8149,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-electrostatic-discharge-esd-control-for-lab-and-factory-engineers-and-managers.html"
  },
@@ -8221,7 +8167,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-robot-operating-system-ros-for-beginners.html"
  },
@@ -8239,7 +8185,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-semiconductor-device-physics-and-process-integration.html"
  },
@@ -8257,7 +8203,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-hands-on-guide-to-iot-development-with-microcontrollers.html"
  },
@@ -8275,7 +8221,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-internet-of-things-iot-fundamental-for-beginners.html"
  },
@@ -8293,7 +8239,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-raspberry-pi-hands-on-practical-applications-for-beginners.html"
  },
@@ -8311,7 +8257,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-robot-operating-system-ros-essentials-developing-intelligent-robots.html"
  },
@@ -8329,7 +8275,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-semiconductor-key-modules-for-enhanced-cmos-process-integration-and-device-performance.html"
  },
@@ -8347,9 +8293,27 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-practical-electronics-design-with-arduino-microcontroller.html"
+ },
+ {
+  "id": "C803",
+  "title": "Copilot for Power Apps",
+  "courseCode": "C803",
+  "category": "Microsoft Office",
+  "icon": "square.grid.2x2.fill",
+  "summary": "Build business apps faster with AI. Learn Copilot for Power Apps - create canvas apps from prompts, generate Power Fx formulas, and automate flows in this hands-on 1-day course at Tertiary Courses Singapore.",
+  "duration": "1 day",
+  "delivery": "Blended",
+  "fee": 350.0,
+  "isWSQ": false,
+  "sfc": false,
+  "sfec": false,
+  "psea": false,
+  "utap": false,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/copilot-for-power-apps.html"
  },
  {
   "id": "C734",
@@ -8581,7 +8545,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-applications-integration-with-power-apps-and-power-automate.html"
  },
@@ -8599,7 +8563,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-analytics-with-excel.html"
  },
@@ -8617,7 +8581,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-excel-power-query-and-power-pivot.html"
  },
@@ -8635,7 +8599,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-hands-on-power-automate-desktop-rpa-for-work-process-automation.html"
  },
@@ -8653,7 +8617,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-infographics-and-data-visualization-with-powerpoint.html"
  },
@@ -8671,7 +8635,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-power-bi-data-analyst-associate-pl-300.html"
  },
@@ -8689,7 +8653,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-power-platform-developer-pl-400.html"
  },
@@ -8707,7 +8671,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-power-platform-functional-consultant-pl-200.html"
  },
@@ -8725,7 +8689,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-power-platform-fundamentals-pl-900.html"
  },
@@ -8743,7 +8707,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-sharepoint-online-for-end-users.html"
  },
@@ -8910,6 +8874,42 @@
   "url": "https://www.tertiarycourses.com.sg/python-data-analysis-training.html"
  },
  {
+  "id": "C1143",
+  "title": "AI Vibe Coding for React Development",
+  "courseCode": "C1143",
+  "category": "Programming",
+  "icon": "chevron.left.forwardslash.chevron.right",
+  "summary": "Build modern React apps with AI vibe coding. Master JSX, components, hooks and routing using AI assistants like Cursor, GitHub Copilot and Claude in this hands-on 2-day React course at Tertiary Courses Singapore.",
+  "duration": "2 days",
+  "delivery": "Blended",
+  "fee": 700.0,
+  "isWSQ": false,
+  "sfc": false,
+  "sfec": false,
+  "psea": false,
+  "utap": false,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/ai-vibe-coding-for-react-development.html"
+ },
+ {
+  "id": "C603",
+  "title": "AI Vibe Coding for Web Development",
+  "courseCode": "C603",
+  "category": "Programming",
+  "icon": "chevron.left.forwardslash.chevron.right",
+  "summary": "Build modern websites and web apps with AI vibe coding. Master responsive pages, interactivity, APIs and deployment using AI assistants like Cursor, GitHub Copilot and Claude in this hands-on 1-day course at Tertiary Courses Singapore.",
+  "duration": "1 day",
+  "delivery": "Blended",
+  "fee": 350.0,
+  "isWSQ": false,
+  "sfc": false,
+  "sfec": false,
+  "psea": false,
+  "utap": false,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/ai-vibe-coding-for-web-development.html"
+ },
+ {
   "id": "C138",
   "title": "AI Vibe Coding with Python Fundamentals",
   "courseCode": "C138",
@@ -8941,7 +8941,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-hands-on-web-app-development-with-javascript.html"
  },
@@ -8957,9 +8957,9 @@
   "fee": 2000.0,
   "isWSQ": true,
   "sfc": true,
-  "sfec": true,
+  "sfec": false,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": true,
   "url": "https://www.tertiarycourses.com.sg/ibf-ai-assisted-python-programming-for-finance.html"
  },
@@ -8977,7 +8977,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-data-mining.html"
  },
@@ -8995,7 +8995,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-pytorch.html"
  },
@@ -9013,7 +9013,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-python.html"
  },
@@ -9031,7 +9031,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-bioinformatics-data-analysis-with-r-bioconductor.html"
  },
@@ -9049,7 +9049,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-building-your-first-machine-learning-model-with-python-and-tensorflow.html"
  },
@@ -9067,7 +9067,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-create-restful-apis-and-web-apps-with-python-flask.html"
  },
@@ -9085,7 +9085,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-data-analytics-and-visualization-with-python.html"
  },
@@ -9103,7 +9103,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-mastering-game-development-with-unity-and-c-programming-basics.html"
  },
@@ -9121,7 +9121,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-certified-endpoint-administrator-associate-md-102.html"
  },
@@ -9157,7 +9157,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-python-fundamental-course-for-beginners.html"
  },
@@ -9175,7 +9175,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-python-programming-for-finance.html"
  },
@@ -9193,7 +9193,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-software-automation-with-excel-vba-programming.html"
  },
@@ -9229,7 +9229,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-statistical-process-control-spc-in-manufacturing.html"
  },
@@ -9463,7 +9463,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-basic-urban-farming-with-hydroponics.html"
  },
@@ -9481,7 +9481,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-carbon-footprint-management-for-sustainability.html"
  },
@@ -9499,7 +9499,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-lean-six-sigma-black-belt-clssbb-training.html"
  },
@@ -9517,7 +9517,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-lean-six-sigma-green-belt-clssgb-training.html"
  },
@@ -9535,7 +9535,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-lean-six-sigma-white-belt-clsswb-training.html"
  },
@@ -9553,7 +9553,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-certified-lean-six-sigma-yellow-belt-clssyb-training.html"
  },
@@ -9571,7 +9571,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-continuous-process-improvement-with-fmea.html"
  },
@@ -9589,7 +9589,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-iso-14001-environmental-management-system-ems.html"
  },
@@ -9607,7 +9607,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-fundamentals-of-iso-9001-quality-management-system.html"
  },
@@ -9625,7 +9625,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-holistic-plant-health-and-care-for-urban-agriculture.html"
  },
@@ -9643,7 +9643,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-iso-14001-2015-internal-auditor-training.html"
  },
@@ -9715,7 +9715,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-iso-9001-quality-management-system-qms-internal-auditor-training.html"
  },
@@ -9769,7 +9769,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-practical-design-of-experiment-doe-for-engineers-and-researchers.html"
  },
@@ -9787,7 +9787,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-process-and-design-fmea.html"
  },
@@ -9805,7 +9805,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-reducing-waste-and-improving-workplace-efficiency-with-lean-six-sigma.html"
  },
@@ -9823,7 +9823,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-sustainability-reporting-and-engineering-strategies-for-senior-leaders.html"
  },
@@ -9841,7 +9841,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-sustainability-reporting-and-gri-standards.html"
  }
