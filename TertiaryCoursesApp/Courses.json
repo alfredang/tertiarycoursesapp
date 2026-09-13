@@ -1495,11 +1495,11 @@
  },
  {
   "id": "TGS-2026064715",
-  "title": "CASL - Python Text Mining and Analytics: Transforming Text",
+  "title": "CASL - Python Text Mining and Analytics: Transforming Text into Insights",
   "courseCode": "TGS-2026064715",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
-  "summary": "Unveil valuable insights from text data with our WSQ-endorsed Text Analytics with Python course. Master techniques like sentiment analysis and text mining. Enjoy up to 70% WSQ funding subsidy.",
+  "summary": "Turn raw text into business insights with Python. Hands-on text mining, tokenization, sentiment analysis, topic modelling and text classification using NLTK, spaCy and scikit-learn. CASL funded with SkillsFuture Credit, PSEA and SFEC support.",
   "duration": "2 days",
   "delivery": "Blended",
   "fee": 720.0,
@@ -1509,7 +1509,7 @@
   "psea": true,
   "utap": false,
   "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/casl-ai-vibe-coding-for-data-mining.html"
+  "url": "https://www.tertiarycourses.com.sg/casl-python-text-mining-and-analytics-transforming-text-into-insights.html"
  },
  {
   "id": "TGS-2026064174",
@@ -4554,6 +4554,24 @@
   "url": "https://www.tertiarycourses.com.sg/wsq-effective-project-management-for-small-projects.html"
  },
  {
+  "id": "TGS-2024045222",
+  "title": "WSQ - Empowering Employee Health and Wellness at the Workplace",
+  "courseCode": "TGS-2024045222",
+  "category": "Business & Soft Skills",
+  "icon": "briefcase.fill",
+  "summary": "Discover how to foster a healthier workplace with our WSQ course on Empowering Employee Health and Wellness. Learn about the latest trends, implement effective programs, and enhance employee well-being. Enjoy up to 70% WSQ funding subsidy.",
+  "duration": "2 days",
+  "delivery": "Blended",
+  "fee": 800.0,
+  "isWSQ": true,
+  "sfc": true,
+  "sfec": true,
+  "psea": true,
+  "utap": true,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/wsq-empowering-employee-health-and-wellness-at-the-workplace.html"
+ },
+ {
   "id": "TGS-2024042307",
   "title": "WSQ - Fundamentals of Microsoft Project Management",
   "courseCode": "TGS-2024042307",
@@ -6300,24 +6318,6 @@
   "url": "https://www.tertiarycourses.com.sg/wsq-comptia-cybersecurity-analyst-cysa-training.html"
  },
  {
-  "id": "TGS-2024045222",
-  "title": "WSQ - Empowering Employee Health and Wellness at the Workplace",
-  "courseCode": "TGS-2024045222",
-  "category": "Cybersecurity",
-  "icon": "lock.shield.fill",
-  "summary": "Discover how to foster a healthier workplace with our WSQ course on Empowering Employee Health and Wellness. Learn about the latest trends, implement effective programs, and enhance employee well-being. Enjoy up to 70% WSQ funding subsidy.",
-  "duration": "2 days",
-  "delivery": "Blended",
-  "fee": 800.0,
-  "isWSQ": true,
-  "sfc": true,
-  "sfec": true,
-  "psea": true,
-  "utap": true,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/wsq-empowering-employee-health-and-wellness-at-the-workplace.html"
- },
- {
   "id": "TGS-2024043392",
   "title": "WSQ - ISC2 Information Systems Security Professional (CISSP) Training",
   "courseCode": "TGS-2024043392",
@@ -8028,6 +8028,24 @@
   "url": "https://www.tertiarycourses.com.sg/wsq-enhancing-online-presence-with-ai-powered-search-engine-optimization-seo.html"
  },
  {
+  "id": "TGS-2021009337",
+  "title": "WSQ - Generative AI for Paid Search Marketing",
+  "courseCode": "TGS-2021009337",
+  "category": "Digital Marketing",
+  "icon": "megaphone.fill",
+  "summary": "Use generative AI to plan, build and optimise paid search campaigns on Google Ads. Hands-on keyword research, ad copywriting, conversion tracking, bid management and ROI reporting. Up to 70% WSQ funding subsidy.",
+  "duration": "2 days",
+  "delivery": "Blended",
+  "fee": 720.0,
+  "isWSQ": true,
+  "sfc": true,
+  "sfec": true,
+  "psea": true,
+  "utap": true,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/wsq-generative-ai-for-paid-search-marketing.html"
+ },
+ {
   "id": "TGS-2020503501",
   "title": "WSQ - Generative AI for Search Engine Optimization (SEO)",
   "courseCode": "TGS-2020503501",
@@ -8080,24 +8098,6 @@
   "utap": false,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-managing-e-commerce-operations-to-grow-sales.html"
- },
- {
-  "id": "TGS-2021009337",
-  "title": "WSQ - Pay Per Click (PPC) Campaign Optimization: Driving ROI with Google Ads",
-  "courseCode": "TGS-2021009337",
-  "category": "Digital Marketing",
-  "icon": "megaphone.fill",
-  "summary": "WSQ-endorsed course on PPC Marketing with Google Ads. Master the art of crafting high-performing ad campaigns to drive targeted traffic and boost sales. Enjoy up to 70% WSQ funding subsidy.",
-  "duration": "2 days",
-  "delivery": "Blended",
-  "fee": 720.0,
-  "isWSQ": true,
-  "sfc": true,
-  "sfec": true,
-  "psea": true,
-  "utap": true,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/wsq-pay-per-click-ppc-campaign-optimization-driving-roi-with-google-ads.html"
  },
  {
   "id": "TGS-2026064711",
