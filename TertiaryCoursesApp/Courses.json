@@ -145,7 +145,7 @@
  },
  {
   "id": "C690",
-  "title": "AI Agents for SMEs",
+  "title": "AI Agents Fundamentals for Beginners",
   "courseCode": "C690",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
@@ -159,7 +159,7 @@
   "psea": false,
   "utap": false,
   "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/ai-agents-for-smes.html"
+  "url": "https://www.tertiarycourses.com.sg/ai-agents-fundamentals-for-beginners.html"
  },
  {
   "id": "C177",
@@ -473,7 +473,7 @@
   "courseCode": "C1143",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
-  "summary": "Build modern React apps with AI vibe coding. Master JSX, components, hooks and routing using AI assistants like Cursor, GitHub Copilot and Claude in this hands-on 2-day React course at Tertiary Courses Singapore.",
+  "summary": "Build full stack React web apps with AI vibe coding. Master JSX, components, hooks, a serverless API over Neon Postgres, React Router and cloud deployment at Tertiary Courses Singapore.",
   "duration": "2 days",
   "delivery": "Blended",
   "fee": 700.0,
@@ -1222,6 +1222,24 @@
   "utap": false,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-ai-for-ecommerce.html"
+ },
+ {
+  "id": "TGS-2026064535",
+  "title": "CASL - Agentic AI Solutions with ChatGPT Work and Codex",
+  "courseCode": "TGS-2026064535",
+  "category": "Artificial Intelligence",
+  "icon": "sparkles",
+  "summary": "Learn Agentic AI Solutions with ChatGPT Work and Codex in Singapore. Design, build and test AI agents that automate business workflows, support software development and solve business problems. CASL course at Tertiary Courses.",
+  "duration": "3 days",
+  "delivery": "Blended",
+  "fee": 1500.0,
+  "isWSQ": true,
+  "sfc": false,
+  "sfec": true,
+  "psea": true,
+  "utap": true,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/casl-agentic-ai-solutions-with-chatgpt-work-and-codex.html"
  },
  {
   "id": "TGS-2026064473",
@@ -2179,11 +2197,11 @@
  },
  {
   "id": "C1034",
-  "title": "Multi Agents System with Autogen",
+  "title": "Multi AI Agents for Content Creation",
   "courseCode": "C1034",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
-  "summary": "Learn to build a multi agents system with AutoGen. Master AgentChat, RAG, and multi-agent workflows to automate tasks and build scalable AI solutions.",
+  "summary": "Learn to design and manage multi AI agent workflows for end-to-end content creation. Coordinate research, strategy, writing, design and publishing agents to produce marketing content at scale.",
   "duration": "2 days",
   "delivery": "Blended",
   "fee": 700.0,
@@ -2193,7 +2211,7 @@
   "psea": false,
   "utap": false,
   "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/multi-agents-system-with-autogen.html"
+  "url": "https://www.tertiarycourses.com.sg/multi-ai-agents-for-content-creation.html"
  },
  {
   "id": "C526",
@@ -2353,7 +2371,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-code-of-image-generation.html"
  },
@@ -2443,7 +2461,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-full-stack-web-applications.html"
  },
@@ -2497,7 +2515,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-multi-agents-system.html"
  },
@@ -2515,7 +2533,7 @@
   "sfc": true,
   "sfec": true,
   "psea": false,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-sql.html"
  },
@@ -2551,7 +2569,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-for-ios-mobile-apps-development.html"
  },
@@ -2569,7 +2587,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-c-sharp.html"
  },
@@ -2587,7 +2605,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-vibe-coding-with-python.html"
  },
@@ -2821,7 +2839,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-video-inbound-marketing.html"
  },
@@ -2911,7 +2929,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-social-media-marketing.html"
  },
@@ -2929,7 +2947,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-agentic-ai-for-video-creation.html"
  },
@@ -2983,7 +3001,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-asp-net-web-apps-with-vibe-coding.html"
  },
@@ -3037,7 +3055,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-build-a-human-ai-workforce-with-autonomous-ai-agents.html"
  },
@@ -3091,7 +3109,7 @@
   "sfc": true,
   "sfec": true,
   "psea": false,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-innovation-with-ai-agents.html"
  },
@@ -3127,7 +3145,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-business-process-automation-with-power-automate-and-copilot-studio-agents.html"
  },
@@ -3307,7 +3325,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-blockchain-and-web3-app-with-vibe-coding.html"
  },
@@ -3325,7 +3343,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-develop-multi-ai-agent-applications-with-gemini-agent-adk.html"
  },
@@ -3595,17 +3613,17 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-manage-ai-agents-with-paperclip.html"
  },
  {
   "id": "TGS-2023021100",
-  "title": "WSQ - Microsoft Azure AI Fundamentals (AI-900)",
+  "title": "WSQ - Microsoft Azure AI Fundamentals (AI-901)",
   "courseCode": "TGS-2023021100",
   "category": "Artificial Intelligence",
   "icon": "sparkles",
-  "summary": "Ace your WSQ AI-900 Azure AI Fundamentals exam with our preparation course. Learn AI and machine learning concepts on Azure. Enjoy up to 70% WSQ funding subsidy.",
+  "summary": "Learn AI fundamentals on Microsoft Azure: machine learning, computer vision, NLP, generative AI with Azure AI Foundry and responsible AI. Prepares you for the Microsoft AI-901 Azure AI Fundamentals exam. Up to 70% WSQ funding.",
   "duration": "2 days",
   "delivery": "Blended",
   "fee": 800.0,
@@ -3615,7 +3633,7 @@
   "psea": true,
   "utap": true,
   "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-ai-fundamentals-ai-900.html"
+  "url": "https://www.tertiarycourses.com.sg/wsq-microsoft-azure-ai-fundamentals-ai-901.html"
  },
  {
   "id": "TGS-2023036642",
@@ -3940,6 +3958,24 @@
   "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/casl-financial-analysis-for-small-and-medium-enterprises.html"
+ },
+ {
+  "id": "TGS-2026066579",
+  "title": "CASL - Managing Human Resource Management System (HRMS)",
+  "courseCode": "TGS-2026066579",
+  "category": "Business & Soft Skills",
+  "icon": "briefcase.fill",
+  "summary": "Learn to operate a Human Resource Management System (HRMS): employee records, leave and MC, expense claims, payroll inputs and HR data protection. CASL course with SkillsFuture funding.",
+  "duration": "1 day",
+  "delivery": "Blended",
+  "fee": 500.0,
+  "isWSQ": true,
+  "sfc": true,
+  "sfec": false,
+  "psea": false,
+  "utap": false,
+  "ibf": false,
+  "url": "https://www.tertiarycourses.com.sg/casl-managing-human-resource-management-system-hrms.html"
  },
  {
   "id": "TGS-2026065049",
@@ -4876,24 +4912,6 @@
   "utap": false,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/microsoft-azure-fundamental-az-900-exam-prep-crash-course.html"
- },
- {
-  "id": "TGS-2026064535",
-  "title": "CASL - AWS Certified Solutions Architect Associate Training",
-  "courseCode": "TGS-2026064535",
-  "category": "Cloud & DevOps",
-  "icon": "cloud.fill",
-  "summary": "Master AWS cloud solutions with our WSQ AWS Certified Solutions Architect Associate Training. Learn architecture fundamentals, security, VPC, EC2, and more. Enjoy up to 70% WSQ funding subsidy.",
-  "duration": "3 days",
-  "delivery": "Blended",
-  "fee": 1500.0,
-  "isWSQ": true,
-  "sfc": false,
-  "sfec": true,
-  "psea": true,
-  "utap": true,
-  "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/casl-aws-certified-solutions-architect-associate-training.html"
  },
  {
   "id": "C1394",
@@ -6571,11 +6589,11 @@
  },
  {
   "id": "TGS-2025053206",
-  "title": "WSQ - Tableau Certified Data Analyst Training",
+  "title": "WSQ - Tableau Data Preparation and Analysis",
   "courseCode": "TGS-2025053206",
   "category": "Data & Analytics",
   "icon": "chart.xyaxis.line",
-  "summary": "Master advanced Tableau skills to transform data, create predictive dashboards, and deliver actionable insights with Tableau Certified Data Analyst Training. Enjoy up to 70% WSQ funding subsidy.",
+  "summary": "Learn Tableau data preparation and analysis in Singapore. Clean, transform and model data, discover patterns, build predictive dashboards and communicate insights to stakeholders. Up to 70% WSQ funding.",
   "duration": "3 days",
   "delivery": "Blended",
   "fee": 1500.0,
@@ -6585,7 +6603,7 @@
   "psea": true,
   "utap": true,
   "ibf": false,
-  "url": "https://www.tertiarycourses.com.sg/wsq-tableau-certified-data-analyst-training.html"
+  "url": "https://www.tertiarycourses.com.sg/wsq-tableau-data-preparation-and-analysis.html"
  },
  {
   "id": "C204",
@@ -7051,7 +7069,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-for-game-development.html"
  },
@@ -7069,7 +7087,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-ai-for-unity-2d-and-3d-game-development.html"
  },
@@ -8401,7 +8419,7 @@
   "sfc": true,
   "sfec": true,
   "psea": true,
-  "utap": false,
+  "utap": true,
   "ibf": false,
   "url": "https://www.tertiarycourses.com.sg/wsq-hands-on-power-automate-desktop-rpa-for-work-process-automation.html"
  },
