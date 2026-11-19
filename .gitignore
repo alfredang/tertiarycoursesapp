@@ -21,3 +21,10 @@ id_ed25519
 .npmrc
 .claude/skills/ios-auto-release/org-credentials.env
 .playwright-mcp/
+
+# Distribution archives (rebuildable — never pushed to GitHub)
+*.zip
+
+# Source material the project was derived from — not ours to republish.
+**/reference/
+__pycache__/

@@ -1,70 +1,63 @@
-# Tertiary Courses SG
+# TC LMS SG — Tertiary Courses Singapore learner app (iOS)
 
-Native iPhone app for [tertiarycourses.com.sg](https://www.tertiarycourses.com.sg/) that lists WSQ courses, searches TGS-coded course runs, estimates course grants, and sends course enquiries.
+[![Download on the App Store](https://img.shields.io/badge/Download_on_the-App_Store-0D96F6?logo=apple&logoColor=white)](https://apps.apple.com/app/tertiary-courses/id6787036413)
 
-[![Download on the App Store](https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83)](https://apps.apple.com/app/tertiary-courses/id6787036413)
+Native SwiftUI app for **learners and trainers** of
+[Tertiary Courses Singapore](https://www.tertiarycourses.com.sg/). It is the
+phone version of the LMS on www.tertiarycourses.com.sg.
 
-![iOS](https://img.shields.io/badge/iOS-17%2B-black)
-![SwiftUI](https://img.shields.io/badge/SwiftUI-native-blue)
-![XcodeGen](https://img.shields.io/badge/XcodeGen-project-green)
-![App Store](https://img.shields.io/badge/App_Store-live-0D96F6?logo=apple&logoColor=white)
+- **Sign in** with an emailed one-time code or the website password (learner or trainer login).
+- **My Classes** — current, upcoming and past classes; venue / online link. A trainer sees the
+  classes they teach (WSQ and non-WSQ) beside the classes they attend, tagged Teaching / Attending.
+- **Trainer class view** — take attendance per session, show the check-in QR, trainer and learner
+  materials, feedback response count.
+- **Digital attendance** — learners check in to the current session.
+- **Class reminders** — local notifications 3 days before, the evening before each class day and an
+  hour before class (no push service; scheduled on the device from the class list).
+- **Class materials** — slides, learner guide, lesson plan, labs and certificates open in an in-app viewer.
+- **In-house feedback survey** — the site's own course survey, once per class.
+- **Calendar** — class days by month; add them to the iPhone calendar.
+- **Certificates** and **Billing** — certificate PDFs; registrations and payment status.
+- **Profile** — edit name and phone; Light / Dark / System appearance saved to the account.
+- **Courses** — the public non-WSQ catalog; **account deletion** in Account.
 
-## About
+## Sister apps
 
-Tertiary Courses SG is a SwiftUI iPhone app for browsing WSQ course runs from the Tertiary Infotech LMS/TMS API. The app only shows WSQ courses whose course code starts with `TGS`.
+The same code ships as three apps; only `TertiaryCoursesApp/Site.swift`,
+`project.yml`, the icon and the bundled catalog differ.
 
-## Features
+| App | Site | Repo |
+|---|---|---|
+| TC LMS SG | www.tertiarycourses.com.sg | this repo (shared source lives here) |
+| TC LMS MY | www.tertiarycourses.com.my | `tertiarycoursesmyapp` |
+| TC LMS GH | www.tertiarycourses.com.gh | `tertiarycoursesghapp` |
 
-- WSQ course catalog backed by the LMS/TMS API
-- Course search across code, title, category, delivery, funding tier, summary, and outcomes
-- Grant calculator with nationality and date-of-birth inputs
-- SkillsFuture claimable and WSQ funding estimates
-- Course enquiry form via WhatsApp
-- Feedback and About bottom tabs in the Tertiary Infotech house style
+After changing shared code here, run `scripts/sync_variant.sh ../tertiarycoursesmyapp`
+(and `…ghapp`) to copy it across.
 
-## Tech Stack
+## Backend
 
-- SwiftUI
-- iOS 17+
-- XcodeGen
-- URLSession
+Each app talks only to its own site's `/mobileapi/*` JSON API (module
+`MMD_MobileApi` in the `ai-mms` storefront, documented in its
+`docs/mobile-learner-api.md`). No keys are shipped in the app; learners
+authenticate with their own account and get a bearer token kept in the Keychain.
 
-## API Configuration
+## Build
 
-The API settings are generated into `Info.plist` from `project.yml`:
+Requires Xcode 26 and XcodeGen. Minimum iOS 17.
 
-- `TERTIARY_COURSES_API_BASE_URL`
-- `TERTIARY_COURSES_LIST_RUNS_PATH`
-- `TERTIARY_COURSES_GET_RUN_PATH`
-- `TERTIARY_COURSES_API_KEY`
-
-The API key is intentionally blank in source control. Configure it locally or in CI before release.
-
-## Project Structure
-
-```text
-.
-├── TertiaryCoursesApp/
-│   ├── Info.plist
-│   └── TertiaryCoursesApp.swift
-├── project.yml
-├── .claude/skills/
-└── README.md
-```
-
-## Getting Started
-
-```bash
+```sh
 xcodegen generate
-xcodebuild -scheme TertiaryCourses -destination 'generic/platform=iOS Simulator' build
+xcodebuild -project TertiaryCourses.xcodeproj -scheme TertiaryCourses \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' build
 ```
 
-Open `TertiaryCourses.xcodeproj` in Xcode to run the app on an iPhone simulator or device.
+- `scripts/make_icon.swift SG <out.png>` — renders the TC LMS icon.
+- `scripts/snapshot_catalog.sh` — refreshes the bundled offline catalog from the site.
+- `scripts/screenshots.sh <dir> <simulator-udid>` — App Store screenshots using the App Review sample account.
 
-## Deployment
+## Preview
 
-This repository is configured as a native iOS app. GitHub Pages deployment is not applicable.
-
-## Credits
-
-Course data is provided by the Tertiary Infotech LMS/TMS API and official SkillsFuture/SSG funding references.
+| My Classes | Teaching a class | Feedback | Calendar |
+|---|---|---|---|
+| ![](ci/screenshots/APP_IPHONE_67/01-classes.png) | ![](ci/screenshots/APP_IPHONE_67/02-trainer-class.png) | ![](ci/screenshots/APP_IPHONE_67/05-feedback.png) | ![](ci/screenshots/APP_IPHONE_67/06-calendar.png) |

@@ -1,134 +1,113 @@
 import SwiftUI
 
-/// WSQ / non-WSQ funding filter across the whole catalog.
-enum FundingFilter: String, CaseIterable, Identifiable {
-    case all = "All"
-    case wsq = "WSQ"
-    case nonWSQ = "Non-WSQ"
-
-    var id: String { rawValue }
-
-    func matches(_ course: Course) -> Bool {
-        switch self {
-        case .all: true
-        case .wsq: course.isWSQCourse
-        case .nonWSQ: !course.isWSQCourse
-        }
-    }
-}
-
+/// Public non-WSQ course catalog of this site, grouped into collapsible categories.
 struct CatalogView: View {
-    @ObservedObject var catalog: CourseCatalogStore
+    /// True when pushed inside another NavigationStack (Account → Browse Courses).
+    var embedded = false
+
+    @EnvironmentObject private var catalog: CatalogStore
     @State private var selectedCategory = "All"
-    @State private var fundingFilter: FundingFilter = .all
     @State private var searchText = ""
     /// Categories the user has collapsed. Sections start expanded.
     @State private var collapsed: Set<String> = []
 
-    private var categories: [String] {
-        ["All"] + catalog.categories.map(\.name)
-    }
+    private var query: String { searchText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
-    private var filteredCourses: [Course] {
-        catalog.courses.filter { course in
-            let categoryMatches = selectedCategory == "All" || course.category == selectedCategory
-            let queryMatches = normalizedSearchText.isEmpty || course.searchIndex.localizedCaseInsensitiveContains(normalizedSearchText)
-            return categoryMatches && queryMatches && fundingFilter.matches(course)
+    private var filtered: [Course] {
+        catalog.courses.filter { c in
+            (selectedCategory == "All" || c.category == selectedCategory)
+                && (query.isEmpty || c.searchIndex.localizedCaseInsensitiveContains(query))
         }
     }
 
-    /// Filtered courses grouped into catalog-ordered category sections.
-    private var sections: [(name: String, icon: String, courses: [Course])] {
-        let grouped = Dictionary(grouping: filteredCourses, by: \.category)
-        return catalog.categories.compactMap { category in
-            guard let courses = grouped[category.name], !courses.isEmpty else { return nil }
-            return (category.name, category.icon, courses)
+    private var sections: [(name: String, courses: [Course])] {
+        let grouped = Dictionary(grouping: filtered, by: \.category)
+        return catalog.categories.compactMap { name in
+            guard let list = grouped[name], !list.isEmpty else { return nil }
+            return (name, list)
         }
-    }
-
-    private var normalizedSearchText: String {
-        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    /// While searching, sections auto-expand so matches are never hidden behind a collapsed header.
-    private func isExpanded(_ name: String) -> Bool {
-        !normalizedSearchText.isEmpty || !collapsed.contains(name)
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    Picker("Funding", selection: $fundingFilter) {
-                        ForEach(FundingFilter.allCases) { filter in
-                            Text(filter.rawValue).tag(filter)
+        if embedded {
+            content
+        } else {
+            NavigationStack { content }
+        }
+    }
+
+    private var content: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Picker("Category", selection: $selectedCategory) {
+                        Text("All categories").tag("All")
+                        ForEach(catalog.categories, id: \.self) { Text($0).tag($0) }
+                    }
+                    .pickerStyle(.menu)
+                    Spacer()
+                    Text("\(filtered.count) course\(filtered.count == 1 ? "" : "s")")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if catalog.courses.isEmpty {
+                    ProgressView("Loading courses…").frame(maxWidth: .infinity).padding(.top, 40)
+                } else if filtered.isEmpty {
+                    ContentUnavailableView {
+                        Label("No courses found", systemImage: "magnifyingglass")
+                    } description: {
+                        Text("Try a different keyword or category.")
+                    } actions: {
+                        Button("Clear Filters") {
+                            searchText = ""
+                            selectedCategory = "All"
                         }
                     }
-                    .pickerStyle(.segmented)
-
-                    HStack {
-                        Picker("Category", selection: $selectedCategory) {
-                            ForEach(categories, id: \.self) { category in
-                                Text(category).tag(category)
+                    .padding(.top, 40)
+                } else {
+                    ForEach(sections, id: \.name) { section in
+                        CategorySection(
+                            name: section.name,
+                            courses: section.courses,
+                            isExpanded: !query.isEmpty || !collapsed.contains(section.name),
+                            toggle: {
+                                if collapsed.contains(section.name) { collapsed.remove(section.name) } else { collapsed.insert(section.name) }
                             }
-                        }
-                        .pickerStyle(.menu)
-                        .tint(Theme.accent)
-
-                        Spacer()
-
-                        Text("\(filteredCourses.count) course\(filteredCourses.count == 1 ? "" : "s")")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if filteredCourses.isEmpty {
-                        ContentUnavailableView {
-                            Label("No courses found", systemImage: "magnifyingglass")
-                        } description: {
-                            Text("Try a different keyword, category, or funding filter.")
-                        } actions: {
-                            Button("Clear Filters") {
-                                searchText = ""
-                                selectedCategory = "All"
-                                fundingFilter = .all
-                            }
-                        }
-                        .padding(.top, 40)
-                    } else {
-                        ForEach(sections, id: \.name) { section in
-                            CategorySection(
-                                name: section.name,
-                                icon: section.icon,
-                                courses: section.courses,
-                                isExpanded: isExpanded(section.name),
-                                toggle: {
-                                    if collapsed.contains(section.name) {
-                                        collapsed.remove(section.name)
-                                    } else {
-                                        collapsed.insert(section.name)
-                                    }
-                                }
-                            )
-                        }
+                        )
                     }
                 }
-                .padding(20)
             }
-            .background(Theme.page)
-            .navigationTitle("Catalog")
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search courses")
-            .navigationDestination(for: Course.self) { course in
-                CourseDetailView(course: course)
-            }
-            .brandToolbar()
-            // A refreshed feed can retire a category the user had selected; without this
-            // the list would silently show nothing.
-            .onChange(of: catalog.courses) { _, _ in
-                if selectedCategory != "All" && !categories.contains(selectedCategory) {
-                    selectedCategory = "All"
-                }
-            }
+            .padding(20)
+        }
+        .background(Theme.page)
+        .refreshable { await catalog.refresh() }
+        .navigationTitle("Courses")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search courses")
+        .navigationDestination(for: Course.self) { CourseDetailView(course: $0) }
+        .brandToolbar()
+        .onChange(of: catalog.courses) { _, _ in
+            if selectedCategory != "All" && !catalog.categories.contains(selectedCategory) { selectedCategory = "All" }
+        }
+    }
+}
+
+enum CategoryIcon {
+    static func name(_ category: String) -> String {
+        switch category {
+        case "Artificial Intelligence": "sparkles"
+        case "Data & Analytics": "chart.xyaxis.line"
+        case "Programming": "chevron.left.forwardslash.chevron.right"
+        case "Cloud & DevOps": "cloud.fill"
+        case "Cybersecurity": "lock.shield.fill"
+        case "Digital Marketing": "megaphone.fill"
+        case "Design & Media": "paintbrush.fill"
+        case "Microsoft Office": "square.grid.2x2.fill"
+        case "Business & Soft Skills": "briefcase.fill"
+        case "Engineering & IoT": "cpu.fill"
+        case "Quality & Compliance": "checkmark.seal.fill"
+        default: "books.vertical.fill"
         }
     }
 }
@@ -136,7 +115,6 @@ struct CatalogView: View {
 /// A collapsible category header plus its course cards.
 struct CategorySection: View {
     let name: String
-    let icon: String
     let courses: [Course]
     let isExpanded: Bool
     let toggle: () -> Void
@@ -145,12 +123,10 @@ struct CategorySection: View {
         VStack(alignment: .leading, spacing: 12) {
             Button(action: toggle) {
                 HStack(spacing: 10) {
-                    Image(systemName: icon)
+                    Image(systemName: CategoryIcon.name(name))
                         .font(.subheadline)
                         .foregroundStyle(Theme.accent)
-                    Text(name)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+                    Text(name).font(.headline).foregroundStyle(.primary)
                     Text("\(courses.count)")
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 7)
@@ -171,10 +147,8 @@ struct CategorySection: View {
 
             if isExpanded {
                 ForEach(courses) { course in
-                    NavigationLink(value: course) {
-                        CourseCard(course: course)
-                    }
-                    .buttonStyle(.plain)
+                    NavigationLink(value: course) { CourseCard(course: course) }
+                        .buttonStyle(.plain)
                 }
             }
         }
@@ -185,201 +159,95 @@ struct CourseCard: View {
     let course: Course
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
-                Image(systemName: course.iconName)
-                    .font(.title2)
-                    .foregroundStyle(Theme.accent)
-                    .frame(width: 34, height: 34)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(course.courseCode)
+                CourseThumb(url: course.image)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(course.sku)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                     Text(course.title)
                         .font(.headline)
                         .foregroundStyle(.primary)
-                    Text(course.summary)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
                 }
             }
-
+            Text(course.summary)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
             HStack {
-                Label(course.duration, systemImage: "clock")
+                if !course.duration.isEmpty { Label(course.duration, systemImage: "clock") }
                 Spacer(minLength: 10)
-                Label("\(currency(course.feeWithGST)) w/GST", systemImage: "tag")
+                if course.price > 0 { Label(Fmt.money(course.price, course.currency), systemImage: "tag") }
             }
             .font(.caption)
             .foregroundStyle(.secondary)
-
-            HStack(spacing: 5) {
-                ForEach(course.fundingBadges, id: \.self) { badge in
-                    SchemeBadge(text: badge)
-                }
-            }
         }
         .padding(16)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
     }
-
-}
-
-// Small funding-scheme chip (WSQ / SFC / SFEC / PSEA / UTAP) sized to fit five in a row.
-struct SchemeBadge: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 11, weight: .bold))
-            .padding(.horizontal, 7)
-            .padding(.vertical, 4)
-            .foregroundStyle(Theme.accent)
-            .background(Theme.accentSoft, in: Capsule())
-    }
 }
 
 struct CourseDetailView: View {
     let course: Course
-    @State private var showGrantCalculator = false
-
-    private let whatsAppNumber = "6588666375"
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                if let image = course.image {
+                    AsyncImage(url: image) { phase in
+                        if let img = phase.image {
+                            img.resizable().scaledToFit()
+                        } else {
+                            Color.clear.frame(height: 1)
+                        }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
                 InfoCard {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(course.category)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Theme.accent)
+                        Text(course.title).font(.title3.bold())
                         Text(course.summary)
-                            .font(.body)
                         Divider()
-                        LabeledContent("Course code", value: course.courseCode)
-                        LabeledContent("Duration", value: course.duration)
-                        LabeledContent("Fee (before GST)", value: currency(course.fee))
-                        LabeledContent("Fee with GST (9%)", value: currency(course.feeWithGST))
-                        if course.isRemote {
-                            LabeledContent("Course run ID", value: course.id)
+                        LabeledContent("Course code", value: course.sku)
+                        if !course.duration.isEmpty {
+                            LabeledContent("Duration", value: course.duration)
+                        }
+                        if course.price > 0 {
+                            LabeledContent("Course fee", value: Fmt.money(course.price, course.currency)
+                                + (Site.priceNote.isEmpty ? "" : " (\(Site.priceNote))"))
                         }
                     }
                 }
 
-                Link(destination: course.registerURL) {
-                    Label("Check Schedule", systemImage: "calendar")
-                        .frame(maxWidth: .infinity)
+                if let url = course.pageURL {
+                    Link(destination: url) {
+                        Label("View Schedule & Register", systemImage: "calendar")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.brand)
+                    .controlSize(.large)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
 
                 Button {
-                    showGrantCalculator = true
-                } label: {
-                    Label("Calculate My Grant & Net Fee", systemImage: "dollarsign.circle.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-
-                Button {
-                    enquire()
+                    openWhatsApp(number: Site.whatsApp, body: "\(Site.siteName) course enquiry\n\nCourse: \(course.title)\nCourse code: \(course.sku)")
                 } label: {
                     Label("Enquire via WhatsApp", systemImage: "paperplane.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
-
-                InfoCard {
-                    VStack(alignment: .leading, spacing: 10) {
-                        SectionLabel("Funding")
-                        ForEach(course.fundingSchemes, id: \.abbreviation) { scheme in
-                            HStack(spacing: 10) {
-                                Image(systemName: scheme.eligible ? "checkmark.circle.fill" : "xmark.circle")
-                                    .foregroundStyle(scheme.eligible ? Theme.accent : Color.secondary)
-                                Text(scheme.abbreviation)
-                                    .font(.subheadline.weight(.semibold))
-                                    .frame(width: 48, alignment: .leading)
-                                Text(scheme.name)
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                                Spacer(minLength: 0)
-                            }
-                        }
-                        Text(course.fundingTier.shortDescription)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                if !course.outcomes.isEmpty {
-                    InfoCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            SectionLabel("Outcomes")
-                            ForEach(course.outcomes, id: \.self) { outcome in
-                                Label(outcome, systemImage: "checkmark.circle.fill")
-                            }
-                        }
-                    }
-                }
             }
             .padding(20)
         }
         .background(Theme.page)
         .navigationTitle(course.title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showGrantCalculator) {
-            CourseGrantSheet(course: course)
-        }
-    }
-
-    private func enquire() {
-        let body = """
-        Tertiary Courses Singapore course enquiry
-
-        Course: \(course.title)
-        Course code: \(course.courseCode)
-        """
-        openWhatsApp(number: whatsAppNumber, body: body)
-    }
-}
-
-// Grant calculator sheet launched from a course — the course fee (with GST) is autopopulated;
-// the user enters nationality, age, sponsorship, and SkillsFuture Credit.
-struct CourseGrantSheet: View {
-    let course: Course
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    InfoCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(course.title)
-                                .font(.headline)
-                            LabeledContent("Course fee (before GST)", value: currency(course.fee))
-                            LabeledContent("Course fee with GST", value: currency(course.feeWithGST))
-                        }
-                    }
-
-                    GrantCalculatorForm(course: course)
-                }
-                .padding(20)
-            }
-            .background(Theme.page)
-            .navigationTitle("Grant Calculator")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-        .preferredColorScheme(.light)
-        .tint(Theme.accent)
     }
 }

@@ -1,97 +1,198 @@
 import SwiftUI
+import UserNotifications
 
 @main
 struct TertiaryCoursesApp: App {
+    @StateObject private var store = LearnerStore()
+    @StateObject private var catalog = CatalogStore()
+
     init() {
-        // Selected segment in segmented pickers: deep blue, semibold — more visible than default black.
-        let accent = UIColor(red: 11 / 255, green: 61 / 255, blue: 142 / 255, alpha: 1)
+        // Selected segment in segmented pickers: brand blue, semibold — more visible than the default.
         UISegmentedControl.appearance().setTitleTextAttributes(
-            [.foregroundColor: accent, .font: UIFont.systemFont(ofSize: 14, weight: .semibold)],
+            [.foregroundColor: Theme.accentUI, .font: UIFont.systemFont(ofSize: 14, weight: .semibold)],
             for: .selected
         )
+        UNUserNotificationCenter.current().delegate = ReminderDelegate.shared
     }
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .preferredColorScheme(.light)   // white theme, matching tertiarycourses.com.sg
+            RootView()
+                .environmentObject(store)
+                .environmentObject(catalog)
         }
     }
 }
 
-// White theme with the Tertiary Infotech deep-blue brand accent (sampled from the T logo).
+/// Tertiary Courses palette: white + deep blue in light, and a dark counterpart.
+/// Every colour adapts, so screens only ever use these and the semantic styles.
 enum Theme {
-    static let accent = Color(red: 11 / 255, green: 61 / 255, blue: 142 / 255)   // deep blue #0B3D8E
-    static let accentSoft = Color(red: 11 / 255, green: 61 / 255, blue: 142 / 255).opacity(0.10)
+    private static func dynamic(light: UIColor, dark: UIColor) -> UIColor {
+        UIColor { $0.userInterfaceStyle == .dark ? dark : light }
+    }
+    private static func rgb(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) -> UIColor {
+        UIColor(red: r / 255, green: g / 255, blue: b / 255, alpha: 1)
+    }
+
+    /// Brand blue for text, icons and tinted controls: deep blue #0B3D8E on light,
+    /// a lighter tint on dark so it stays readable.
+    static let accentUI = dynamic(light: rgb(11, 61, 142), dark: rgb(92, 153, 250))
+    static let accent = Color(uiColor: accentUI)
+    static let accentSoft = Color(uiColor: dynamic(light: rgb(11, 61, 142).withAlphaComponent(0.10),
+                                                   dark: rgb(92, 153, 250).withAlphaComponent(0.18)))
+    /// Solid brand fills that carry white text (badge, selected day, primary buttons).
+    static let brand = Color(uiColor: dynamic(light: rgb(11, 61, 142), dark: rgb(31, 94, 199)))
     static let accentDark = Color(red: 10 / 255, green: 45 / 255, blue: 111 / 255)  // gradient bottom #0A2D6F
-    static let page = Color.white
-    static let card = Color.white
-    static let cardBorder = Color(red: 0.88, green: 0.88, blue: 0.90)
+    static let brandTop = Color(red: 11 / 255, green: 61 / 255, blue: 142 / 255)    // #0B3D8E, both themes
+    static let success = Color(uiColor: dynamic(light: UIColor(red: 0.11, green: 0.55, blue: 0.29, alpha: 1),
+                                                dark: UIColor(red: 0.30, green: 0.80, blue: 0.47, alpha: 1)))
+    static let warning = Color(uiColor: dynamic(light: UIColor(red: 0.80, green: 0.45, blue: 0.0, alpha: 1),
+                                                dark: UIColor(red: 1.0, green: 0.70, blue: 0.25, alpha: 1)))
+    static let page = Color(uiColor: dynamic(light: UIColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 1),
+                                             dark: .systemGroupedBackground))
+    static let card = Color(uiColor: dynamic(light: .white, dark: .secondarySystemGroupedBackground))
+    static let cardBorder = Color(uiColor: dynamic(light: UIColor(red: 0.88, green: 0.88, blue: 0.90, alpha: 1),
+                                                   dark: UIColor(white: 1, alpha: 0.14)))
 }
 
-// Brand mark shown at the top of every tab: the TIA monogram badge + the academy name,
-// matching the tertiaryinfotech.com header (Tertiary Infotech Academy Pte. Ltd.).
+/// The appearance the app is showing. Signed in, it follows the account's saved
+/// theme; signed out, the device setting. The last value is cached so launch
+/// does not flash.
+enum Appearance {
+    private static let key = "appearance.theme"
+
+    static var cached: ThemeChoice {
+        ThemeChoice(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .system
+    }
+
+    static func apply(_ choice: ThemeChoice, remember: Bool = true) {
+        if remember { UserDefaults.standard.set(choice.rawValue, forKey: key) }
+        let style: UIUserInterfaceStyle = switch choice {
+        case .system: .unspecified
+        case .light: .light
+        case .dark: .dark
+        }
+        for scene in UIApplication.shared.connectedScenes {
+            for window in (scene as? UIWindowScene)?.windows ?? [] {
+                window.overrideUserInterfaceStyle = style
+            }
+        }
+    }
+
+    static func reset() {
+        UserDefaults.standard.removeObject(forKey: key)
+        apply(.system, remember: false)
+    }
+}
+
+/// Brand mark at the top of every tab: the TC LMS badge + the site name.
 struct BrandHeader: View {
     var body: some View {
         HStack(spacing: 8) {
-            Text("TIA")
-                .font(.system(size: 14, weight: .heavy))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(
-                    LinearGradient(colors: [Theme.accent, Theme.accentDark],
-                                   startPoint: .top, endPoint: .bottom),
-                    in: RoundedRectangle(cornerRadius: 7, style: .continuous)
-                )
-            Text("Tertiary Infotech Academy")
+            VStack(spacing: -2) {
+                Text("TC")
+                    .font(.system(size: 11, weight: .heavy))
+                Text(Site.code)
+                    .font(.system(size: 7, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .frame(width: 30, height: 30)
+            .background(
+                LinearGradient(colors: [Theme.brandTop, Theme.accentDark], startPoint: .top, endPoint: .bottom),
+                in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+            )
+            Text(Site.siteName)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Theme.accent)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Tertiary Infotech Academy")
+        .accessibilityLabel(Site.siteName)
     }
 }
 
 extension View {
-    /// Places the Tertiary Infotech Academy brand mark in the top navigation bar,
-    /// above the page's own title. Apply inside each tab's NavigationStack.
+    /// Places the brand mark in the top navigation bar. Apply inside each tab's NavigationStack.
     func brandToolbar() -> some View {
         toolbar { ToolbarItem(placement: .principal) { BrandHeader() } }
     }
 }
 
-struct MainTabView: View {
-    @StateObject private var catalog = CourseCatalogStore()
-    // START_TAB env var selects the initial tab (used by screenshot automation)
-    @State private var selection = ProcessInfo.processInfo.environment["START_TAB"].flatMap(Int.init) ?? 0
+/// Signed out: browse courses + sign in. Signed in: the learner's LMS.
+struct RootView: View {
+    @EnvironmentObject private var store: LearnerStore
+    @EnvironmentObject private var catalog: CatalogStore
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        TabView(selection: $selection) {
-            CatalogView(catalog: catalog)
-                .tabItem { Label("Catalog", systemImage: "books.vertical.fill") }
-                .tag(0)
-
-            GrantCalculatorView(catalog: catalog)
-                .tabItem { Label("Grant Calculator", systemImage: "dollarsign.circle.fill") }
-                .tag(1)
-
-            FeedbackView()
-                .tabItem { Label("Feedback", systemImage: "bubble.left.and.bubble.right.fill") }
-                .tag(2)
-
-            AboutView()
-                .tabItem { Label("About", systemImage: "info.circle.fill") }
-                .tag(3)
+        Group {
+            if store.restoring {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(Theme.accent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Theme.page)
+            } else if store.isSignedIn {
+                LearnerTabs()
+            } else {
+                GuestTabs()
+            }
         }
         .tint(Theme.accent)
+        .onAppear { Appearance.apply(Appearance.cached, remember: false) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await store.refreshIfStale() } }
+        }
         .task {
-            await catalog.refresh()
+            async let r: Void = store.restore()
+            async let c: Void = catalog.refresh()
+            _ = await (r, c)
         }
     }
 }
 
-#Preview {
-    MainTabView()
+/// `START_TAB` selects the first tab (used by screenshot automation).
+private let startTab = ProcessInfo.processInfo.environment["START_TAB"].flatMap(Int.init) ?? 0
+
+struct GuestTabs: View {
+    @State private var selection = startTab
+
+    var body: some View {
+        TabView(selection: $selection) {
+            SignInView()
+                .tabItem { Label("Sign In", systemImage: "person.crop.circle") }
+                .tag(0)
+            CatalogView()
+                .tabItem { Label("Courses", systemImage: "books.vertical.fill") }
+                .tag(1)
+            AboutView()
+                .tabItem { Label("About", systemImage: "info.circle.fill") }
+                .tag(2)
+        }
+    }
+}
+
+struct LearnerTabs: View {
+    @State private var selection = startTab
+
+    var body: some View {
+        TabView(selection: $selection) {
+            ClassesView()
+                .tabItem { Label("My Classes", systemImage: "graduationcap.fill") }
+                .tag(0)
+            CalendarView()
+                .tabItem { Label("Calendar", systemImage: "calendar") }
+                .tag(1)
+            CertificatesView()
+                .tabItem { Label("Certificates", systemImage: "rosette") }
+                .tag(2)
+            BillingView()
+                .tabItem { Label("Billing", systemImage: "creditcard.fill") }
+                .tag(3)
+            AccountView()
+                .tabItem { Label("Account", systemImage: "person.crop.circle.fill") }
+                .tag(4)
+        }
+    }
 }

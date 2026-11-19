@@ -1,251 +1,383 @@
 import Foundation
 
-enum FundingTier: String, CaseIterable, Identifiable {
-    case tier1 = "Tier 1 SSG"
-    case tier2 = "Tier 2 WSQ"
-    case unfunded = "No SSG funding"
+// Shapes of the site's learner API (MMD_MobileApi). JSON keys are snake_case;
+// the decoder converts them, so `image_url` arrives as `imageUrl`.
 
+struct Learner: Decodable, Hashable {
+    let email: String
+    let firstName: String
+    let lastName: String
+    let fullName: String
+    // Added in 1.4; absent on an older site.
+    let phone: String?
+    let theme: String?
+    let roles: [String]?
+
+    var isTrainer: Bool { roles?.contains("trainer") ?? false }
+    var themeChoice: ThemeChoice { ThemeChoice(rawValue: theme ?? "") ?? .system }
+}
+
+/// The account's saved appearance; the app follows it.
+enum ThemeChoice: String, CaseIterable, Identifiable {
+    case system, light, dark
     var id: String { rawValue }
-
-    var shortDescription: String {
+    var label: String {
         switch self {
-        case .tier1:
-            "Emerging skills, employability, SCTP, SkillsFuture Series, WPLN, or stackable IHL modules."
-        case .tier2:
-            "WSQ or other approved skills courses supporting general upskilling and reskilling."
-        case .unfunded:
-            "Not listed as SSG-funded. SkillsFuture Credit may still depend on official approval."
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
         }
     }
 }
 
-/// `fee` is the ORIGINAL course fee before GST. GST is always computed on this
-/// original fee, per SSG rules — see https://www.tpgateway.gov.sg/faq/grant-calculator-and-funding-eligibility
-struct Course: Identifiable, Hashable, Decodable {
-    let id: String
+struct ProfileReply: Decodable {
+    let learner: Learner
+    let message: String?
+}
+
+struct SiteInfo: Decodable, Hashable {
+    let country: String
+    let name: String
+    let websiteUrl: String
+    let currency: String
+    let phone: String
+    let email: String
+    let academy: String
+    let priceNote: String
+}
+
+struct AuthReply: Decodable {
+    let token: String
+    let learner: Learner
+    let site: SiteInfo?
+}
+
+struct MeReply: Decodable {
+    let learner: Learner
+    let site: SiteInfo?
+}
+
+struct MessageReply: Decodable {
+    let message: String?
+}
+
+// MARK: Catalog
+
+/// A public non-WSQ course from `/mobileapi/catalog`.
+struct Course: Identifiable, Hashable, Codable {
+    let id: Int
+    let sku: String
     let title: String
+    let summary: String
     let category: String
     let duration: String
-    let delivery: String
-    let fee: Decimal
-    let fundingTier: FundingTier
-    let skillsFutureClaimable: Bool
-    let courseCode: String
-    let summary: String
-    let outcomes: [String]
-    let isRemote: Bool
-    let websiteURLString: String?
-    let sfecEligible: Bool
-    let pseaEligible: Bool
-    let utapEligible: Bool
-    let ibfEligible: Bool
-    /// SF Symbol for the course's category, chosen when the catalog snapshot is built.
-    let iconName: String
+    let price: Double
+    let currency: String
+    let url: String
+    let imageUrl: String
 
-    init(
-        id: String = UUID().uuidString,
-        title: String,
-        category: String,
-        duration: String,
-        delivery: String,
-        fee: Decimal,
-        fundingTier: FundingTier,
-        skillsFutureClaimable: Bool,
-        courseCode: String,
-        summary: String,
-        outcomes: [String],
-        isRemote: Bool = false,
-        websiteURLString: String? = nil,
-        sfecEligible: Bool = true,
-        pseaEligible: Bool = true,
-        utapEligible: Bool = true,
-        ibfEligible: Bool = false,
-        iconName: String = "books.vertical.fill"
-    ) {
-        self.id = id
-        self.title = title
-        self.category = category
-        self.duration = duration
-        self.delivery = delivery
-        self.fee = fee
-        self.fundingTier = fundingTier
-        self.skillsFutureClaimable = skillsFutureClaimable
-        self.courseCode = courseCode
-        self.summary = summary
-        self.outcomes = outcomes
-        self.isRemote = isRemote
-        self.websiteURLString = websiteURLString
-        self.sfecEligible = sfecEligible
-        self.pseaEligible = pseaEligible
-        self.utapEligible = utapEligible
-        self.ibfEligible = ibfEligible
-        self.iconName = iconName
-    }
+    var pageURL: URL? { URL(string: url) }
+    var image: URL? { imageUrl.isEmpty ? nil : URL(string: imageUrl) }
 
-    // Decodes the bundled Courses.json snapshot scraped from tertiarycourses.com.sg.
-    private enum CodingKeys: String, CodingKey {
-        case id, title, courseCode, category, icon, summary, duration, delivery, fee
-        case isWSQ, sfc, sfec, psea, utap, ibf, url
-    }
+    var searchIndex: String { [sku, title, category, summary].joined(separator: " ") }
+}
 
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(String.self, forKey: .id)
-        title = try c.decode(String.self, forKey: .title)
-        courseCode = try c.decode(String.self, forKey: .courseCode)
-        category = try c.decode(String.self, forKey: .category)
-        iconName = try c.decodeIfPresent(String.self, forKey: .icon) ?? "books.vertical.fill"
-        summary = try c.decode(String.self, forKey: .summary)
-        duration = try c.decode(String.self, forKey: .duration)
-        delivery = try c.decode(String.self, forKey: .delivery)
-        fee = Decimal(try c.decode(Double.self, forKey: .fee))
-        websiteURLString = try c.decodeIfPresent(String.self, forKey: .url)
+struct CatalogReply: Codable {
+    let courses: [Course]
+}
 
-        let isWSQ = try c.decode(Bool.self, forKey: .isWSQ)
-        skillsFutureClaimable = try c.decodeIfPresent(Bool.self, forKey: .sfc) ?? false
-        sfecEligible = try c.decodeIfPresent(Bool.self, forKey: .sfec) ?? false
-        pseaEligible = try c.decodeIfPresent(Bool.self, forKey: .psea) ?? false
-        utapEligible = try c.decodeIfPresent(Bool.self, forKey: .utap) ?? false
-        ibfEligible = try c.decodeIfPresent(Bool.self, forKey: .ibf) ?? false
+// MARK: Classes
 
-        fundingTier = isWSQ ? .tier2 : .unfunded
-        outcomes = []
-        isRemote = false
-    }
+struct CertificateInfo: Decodable, Hashable, Identifiable {
+    let runId: Int
+    let classId: String
+    let sku: String
+    let title: String
+    let startDate: String
+    let endDate: String
+    let certNo: String
+    let issuedOn: String
+    let name: String
+    let url: String
 
-    var feeWithGST: Decimal {
-        GrantEstimate.roundedCurrency(fee * (1 + GrantEstimate.gstRate))
-    }
+    var id: String { certNo.isEmpty ? "\(runId)" : certNo }
+}
 
-    /// Short funding-scheme badges shown on course cards.
-    var fundingBadges: [String] {
-        var badges: [String] = []
-        if isWSQCourse { badges.append("WSQ") }
-        if ibfEligible { badges.append("IBF") }
-        if skillsFutureClaimable { badges.append("SFC") }
-        if sfecEligible { badges.append("SFEC") }
-        if pseaEligible { badges.append("PSEA") }
-        if utapEligible { badges.append("UTAP") }
-        return badges
-    }
+/// A class in My Classes. `runId` is 0 for a registration still awaiting payment.
+struct ClassItem: Decodable, Hashable, Identifiable {
+    let runId: Int
+    let classId: String
+    let productId: Int
+    let sku: String
+    let title: String
+    let startDate: String
+    let endDate: String
+    let startTime: String
+    let endTime: String
+    let mode: String
+    let venue: String
+    let room: String
+    let virtualLink: String
+    let trainer: String
+    let status: String
+    let orderNo: String?
+    let bucket: String
+    let days: [String]?
+    let imageUrl: String?
+    let certificate: CertificateInfo?
+    let surveySubmitted: Bool?
+    /// "learner" or "trainer"; absent on an older site (= learner).
+    let role: String?
+    let learnerCount: Int?
 
-    /// Funding schemes with full names and eligibility, for the course detail page.
-    var fundingSchemes: [(abbreviation: String, name: String, eligible: Bool)] {
-        var schemes: [(String, String, Bool)] = [
-            ("WSQ", "Workforce Skills Qualifications (SSG-funded)", isWSQCourse)
-        ]
-        if ibfEligible {
-            schemes.append(("IBF", "Institute of Banking and Finance funding", true))
+    var isTeaching: Bool { role == "trainer" }
+    var id: String { runId > 0 ? "run-\(runId)-\(role ?? "learner")" : "order-\(orderNo ?? "")-\(sku)-\(startDate)" }
+    var isPendingPayment: Bool { status == "pending_payment" }
+    var image: URL? { (imageUrl ?? "").isEmpty ? nil : URL(string: imageUrl ?? "") }
+    /// Actual class dates; falls back to the start…end span when the site doesn't list them.
+    var classDays: [String] {
+        if let days, !days.isEmpty { return days }
+        guard let s = Fmt.date(startDate) else { return [] }
+        let e = Fmt.date(endDate) ?? s
+        var out: [String] = []
+        var d = s
+        while d <= e && out.count < 14 {
+            out.append(Fmt.ymd(d))
+            d = Calendar(identifier: .gregorian).date(byAdding: .day, value: 1, to: d)!
         }
-        schemes += [
-            ("SFC", "SkillsFuture Credit", skillsFutureClaimable),
-            ("SFEC", "SkillsFuture Enterprise Credit", sfecEligible),
-            ("PSEA", "Post-Secondary Education Account", pseaEligible),
-            ("UTAP", "NTUC Union Training Assistance Programme", utapEligible)
-        ]
-        return schemes.map { (abbreviation: $0.0, name: $0.1, eligible: $0.2) }
-    }
-
-    /// Course page on www.tertiarycourses.com.sg for registration. Falls back to a
-    /// catalog search by title when no explicit page URL is known.
-    var registerURL: URL {
-        if let websiteURLString, let url = URL(string: websiteURLString) {
-            return url
-        }
-        var components = URLComponents(string: "https://www.tertiarycourses.com.sg/catalogsearch/result/")!
-        components.queryItems = [URLQueryItem(name: "q", value: title.replacingOccurrences(of: "WSQ - ", with: ""))]
-        return components.url!
+        return out
     }
 }
 
-enum CourseData {
-    /// Catalog snapshot shipped inside the app — the offline floor, always available.
-    static let bundledCourses: [Course] = {
-        guard let url = Bundle.main.url(forResource: "Courses", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let decoded = try? JSONDecoder().decode([Course].self, from: data)
-        else {
-            assertionFailure("Courses.json missing or malformed in the app bundle")
-            return []
-        }
-        return decoded
+struct ClassesReply: Decodable {
+    let today: String
+    let current: [ClassItem]
+    let upcoming: [ClassItem]
+    let past: [ClassItem]
+}
+
+struct ClassSession: Decodable, Hashable, Identifiable {
+    let key: String
+    let day: Int
+    let part: String
+    let date: String
+    let label: String
+    let present: Bool?
+
+    var id: String { key }
+}
+
+struct AttendanceState: Decodable, Hashable {
+    let open: Bool
+    let currentSession: String
+    let currentSessionLabel: String
+    let markedPresent: Bool
+    let sessionsPresent: Int
+    let sessionsTotal: Int
+}
+
+struct Material: Decodable, Hashable, Identifiable {
+    let key: String?
+    let title: String
+    let url: String
+
+    var id: String { (key ?? "") + url }
+}
+
+struct SurveyState: Decodable, Hashable {
+    let available: Bool
+    let submitted: Bool
+    let externalUrl: String
+    let message: String
+}
+
+struct ClassDetail: Decodable, Hashable {
+    let runId: Int
+    let classId: String
+    let sku: String
+    let title: String
+    let startDate: String
+    let endDate: String
+    let startTime: String
+    let endTime: String
+    let mode: String
+    let venue: String
+    let room: String
+    let virtualLink: String
+    let trainer: String
+    let bucket: String
+    let imageUrl: String?
+    let sessions: [ClassSession]
+    let attendance: AttendanceState
+    let materials: [Material]
+    let documents: [Material]
+    let survey: SurveyState
+    let certificate: CertificateInfo?
+    let certificateRule: String?
+}
+
+struct ClassDetailReply: Decodable {
+    let `class`: ClassDetail
+}
+
+// MARK: Trainer
+
+struct TrainerSession: Decodable, Hashable, Identifiable {
+    let key: String
+    let day: Int?
+    let part: String?
+    let date: String?
+    let label: String
+
+    var id: String { key }
+}
+
+struct RosterEntry: Decodable, Hashable, Identifiable {
+    let name: String
+    let email: String
+    let phone: String?
+    let walkin: Bool?
+    let present: [String]?
+
+    var id: String { email }
+}
+
+/// One class the signed-in trainer teaches, from `/mobileapi/trainer/class`.
+struct TrainerClassDetail: Decodable, Hashable {
+    let runId: Int
+    let classId: String
+    let sku: String
+    let title: String
+    let startDate: String
+    let endDate: String
+    let startTime: String
+    let endTime: String
+    let mode: String
+    let venue: String
+    let room: String
+    let virtualLink: String
+    let trainer: String
+    let bucket: String
+    let imageUrl: String?
+    let sessions: [TrainerSession]
+    let currentSession: String?
+    let currentSessionLabel: String?
+    let attendanceOpen: Bool?
+    let checkinUrl: String?
+    let roster: [RosterEntry]
+    let materials: [Material]
+    let documents: [Material]?
+    let surveyResponses: Int?
+}
+
+struct TrainerClassReply: Decodable {
+    let `class`: TrainerClassDetail
+}
+
+// MARK: Survey
+
+struct SurveyField: Decodable, Hashable, Identifiable {
+    let id: String
+    let label: String
+    let type: String
+    let required: Bool
+    let readonly: Bool
+    let options: [String]
+    let value: String
+}
+
+struct SurveySection: Decodable, Hashable, Identifiable {
+    let id: String
+    let title: String
+    let fields: [SurveyField]
+}
+
+struct Survey: Decodable, Hashable {
+    let title: String
+    let state: SurveyState
+    let sections: [SurveySection]
+}
+
+struct SurveyReply: Decodable {
+    let survey: Survey
+}
+
+// MARK: Certificates & billing
+
+struct CertificatesReply: Decodable {
+    let certificates: [CertificateInfo]
+}
+
+struct OrderLine: Decodable, Hashable {
+    let title: String
+    let sku: String
+    let qty: Double
+    let amount: Double
+    let classDate: String
+    let classTime: String
+}
+
+struct Order: Decodable, Hashable, Identifiable {
+    let orderNo: String
+    let date: String
+    let status: String
+    let statusLabel: String
+    let total: Double
+    let paid: Double
+    let refunded: Double
+    let currency: String
+    let paymentMethod: String
+    let invoices: [String]
+    let items: [OrderLine]
+
+    var id: String { orderNo }
+}
+
+struct BillingReply: Decodable {
+    let orders: [Order]
+}
+
+// MARK: Formatting
+
+enum Fmt {
+    private static let ymd: DateFormatter = {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f
     }()
 
-    /// Best catalog available at startup: the cached feed if it is newer than the
-    /// bundled snapshot, otherwise the bundled one.
-    static var courses: [Course] {
-        CatalogCache.load() ?? bundledCourses
+    static func date(_ ymd: String) -> Date? { Self.ymd.date(from: ymd) }
+    static func ymd(_ date: Date) -> String { Self.ymd.string(from: date) }
+
+    /// "Tue 4 Nov 2026"
+    static func longDate(_ ymd: String) -> String {
+        guard let d = date(ymd) else { return "Date to be confirmed" }
+        return d.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).year())
     }
 
-    /// Category names in catalog order, each with its SF Symbol.
-    static func categories(for courses: [Course]) -> [(name: String, icon: String)] {
-        var seen = Set<String>()
-        return courses.compactMap { course in
-            guard !seen.contains(course.category) else { return nil }
-            seen.insert(course.category)
-            return (course.category, course.iconName)
-        }
-    }
-}
-
-/// On-device cache of the published catalog feed.
-enum CatalogCache {
-    private static var fileURL: URL? {
-        try? FileManager.default
-            .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            .appendingPathComponent("courses-feed.json")
+    /// "4 Nov" / "4 – 6 Nov 2026"
+    static func range(_ start: String, _ end: String) -> String {
+        guard let s = date(start) else { return "Date to be confirmed" }
+        guard let e = date(end), end != start else { return longDate(start) }
+        return s.formatted(.dateTime.day().month(.abbreviated)) + " – " + e.formatted(.dateTime.day().month(.abbreviated).year())
     }
 
-    static func load() -> [Course]? {
-        guard let fileURL,
-              let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([Course].self, from: data),
-              !decoded.isEmpty
-        else { return nil }
-        return decoded
+    /// "09:30" → "9:30 am"
+    static func time(_ hm: String) -> String {
+        let parts = hm.split(separator: ":").compactMap { Int($0) }
+        guard parts.count == 2 else { return hm }
+        let h12 = parts[0] % 12 == 0 ? 12 : parts[0] % 12
+        return String(format: "%d:%02d %@", h12, parts[1], parts[0] < 12 ? "am" : "pm")
     }
 
-    static func save(_ data: Data) {
-        guard let fileURL else { return }
-        try? data.write(to: fileURL, options: .atomic)
-    }
-}
-
-extension Course {
-    var searchIndex: String {
-        ([courseCode, title, category, duration, delivery, fundingTier.rawValue, summary] + outcomes).joined(separator: " ")
+    static func times(_ start: String, _ end: String) -> String {
+        if start.isEmpty { return "" }
+        return end.isEmpty ? time(start) : "\(time(start)) – \(time(end))"
     }
 
-    var isWSQCourse: Bool {
-        courseCode.uppercased().hasPrefix("TGS")
-    }
-}
-
-@MainActor
-final class CourseCatalogStore: ObservableObject {
-    /// Newest catalog available: cached feed if present, else the bundled snapshot.
-    @Published private(set) var courses = CourseData.courses
-
-    /// Category sections for the catalog currently being shown.
-    var categories: [(name: String, icon: String)] { CourseData.categories(for: courses) }
-
-    /// Published catalog feed, refreshed weekly by the sync-catalog GitHub Action.
-    private static let feedURL = URL(string: "https://alfredang.github.io/tertiarycoursesapp/courses.json")!
-
-    /// Pull the latest catalog. Any failure silently keeps the current list —
-    /// the catalog must never go empty or block the UI.
-    func refresh() async {
-        var request = URLRequest(url: Self.feedURL)
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        request.timeoutInterval = 15
-
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode,
-              let decoded = try? JSONDecoder().decode([Course].self, from: data),
-              !decoded.isEmpty
-        else { return }
-
-        CatalogCache.save(data)
-        courses = decoded
+    static func money(_ amount: Double, _ code: String) -> String {
+        amount.formatted(.currency(code: code.isEmpty ? Site.currency : code).precision(.fractionLength(amount.rounded() == amount ? 0 : 2)))
     }
 }

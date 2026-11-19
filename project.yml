@@ -6,21 +6,23 @@ options:
 settings:
   base:
     DEVELOPMENT_TEAM: GU9WTSTX9M
-    MARKETING_VERSION: "1.2"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "1.4"
+    CURRENT_PROJECT_VERSION: "5"
     SWIFT_VERSION: "5.0"
 targets:
   TertiaryCourses:
     type: application
     platform: iOS
     sources:
-      - TertiaryCoursesApp
-      - path: TertiaryCoursesApp/Courses.json
+      - path: TertiaryCoursesApp
+        excludes:
+          - Catalog.json
+      - path: TertiaryCoursesApp/Catalog.json
         buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tertiaryinfotech.tertiarycoursesapp
-        PRODUCT_NAME: Tertiary Courses SG
+        PRODUCT_NAME: TC LMS SG
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
@@ -31,13 +33,11 @@ targets:
     info:
       path: TertiaryCoursesApp/Info.plist
       properties:
-        CFBundleDisplayName: Tertiary Courses
+        CFBundleDisplayName: TC LMS SG
+        CFBundleIconName: AppIcon
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
-        TERTIARY_COURSES_API_KEY: ""
-        TERTIARY_COURSES_API_BASE_URL: https://lms-tms.tertiaryinfotech.com
-        TERTIARY_COURSES_LIST_RUNS_PATH: /api/external/list-course-runs
-        TERTIARY_COURSES_GET_RUN_PATH: /api/external/get-course-run
+        NSCalendarsWriteOnlyAccessUsageDescription: Adds your class days to your calendar when you tap "Add My Classes to Calendar".

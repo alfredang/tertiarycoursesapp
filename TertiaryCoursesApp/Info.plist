@@ -5,9 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Tertiary Courses</string>
+	<string>TC LMS SG</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -24,14 +26,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>TERTIARY_COURSES_API_BASE_URL</key>
-	<string>https://lms-tms.tertiaryinfotech.com</string>
-	<key>TERTIARY_COURSES_API_KEY</key>
-	<string></string>
-	<key>TERTIARY_COURSES_GET_RUN_PATH</key>
-	<string>/api/external/get-course-run</string>
-	<key>TERTIARY_COURSES_LIST_RUNS_PATH</key>
-	<string>/api/external/list-course-runs</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Adds your class days to your calendar when you tap "Add My Classes to Calendar".</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 </dict>
