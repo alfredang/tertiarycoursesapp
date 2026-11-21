@@ -16,6 +16,7 @@ phone version of the LMS on www.tertiarycourses.com.sg.
   hour before class (no push service; scheduled on the device from the class list).
 - **Class materials** — slides, learner guide, lesson plan, labs and certificates open in an in-app viewer.
 - **In-house feedback survey** — the site's own course survey, once per class.
+- **Quizzes** — lesson quizzes the trainer sets for a class: answer, submit, see the score; the site scores and records each attempt.
 - **Calendar** — class days by month; add them to the iPhone calendar.
 - **Certificates** and **Billing** — certificate PDFs; registrations and payment status.
 - **Profile** — edit name and phone; Light / Dark / System appearance saved to the account.

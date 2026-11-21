@@ -268,6 +268,8 @@ struct ClassDetailView: View {
     @State private var checkingIn = false
     @State private var notice: String?
     @State private var doc: DocLink?
+    @State private var quiz: QuizSummary?
+    @State private var openedQuiz = false
     @State private var showSurvey = ProcessInfo.processInfo.environment["OPEN_SURVEY"] == "1" && Self.debugBuild
     private static var debugBuild: Bool {
         #if DEBUG
@@ -284,6 +286,7 @@ struct ClassDetailView: View {
                     overview(d)
                     attendanceCard(d)
                     materialsCard(d)
+                    quizCard(d)
                     surveyCard(d)
                     certificateCard(d)
                     sessionsCard(d)
@@ -308,6 +311,9 @@ struct ClassDetailView: View {
         .sheet(isPresented: $showSurvey, onDismiss: { Task { await load() } }) {
             SurveyView(runId: runId)
         }
+        .sheet(item: $quiz, onDismiss: { Task { await load() } }) { q in
+            QuizView(runId: runId, summary: q)
+        }
         .documentViewer($doc)
     }
 
@@ -320,6 +326,11 @@ struct ClassDetailView: View {
             if ProcessInfo.processInfo.environment["OPEN_DOC"] == "1", doc == nil,
                let m = detail?.materials.first, let url = URL(string: m.url) {
                 doc = DocLink(title: m.title, url: url)
+            }
+            // Screenshot automation: OPEN_QUIZ=1 opens the first quiz.
+            if ProcessInfo.processInfo.environment["OPEN_QUIZ"] == "1", quiz == nil, !openedQuiz {
+                openedQuiz = true
+                quiz = detail?.quizzes?.first
             }
             #endif
         } catch {
@@ -420,6 +431,57 @@ struct ClassDetailView: View {
                 }
             }
         }
+    }
+
+    /// Quizzes the course developer added to the Lesson; hidden when the course has none.
+    @ViewBuilder
+    private func quizCard(_ d: ClassDetail) -> some View {
+        let quizzes = d.quizzes ?? []
+        if !quizzes.isEmpty {
+            InfoCard {
+                VStack(alignment: .leading, spacing: 0) {
+                    SectionLabel("Quizzes")
+                        .padding(.bottom, 6)
+                    ForEach(quizzes) { q in
+                        Button {
+                            quiz = q
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: q.previous == nil ? "checklist" : "checkmark.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(q.previous == nil ? Theme.brand : Theme.success)
+                                    .frame(width: 28)
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(q.title)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                        .multilineTextAlignment(.leading)
+                                    Text(quizSubtitle(q))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 8)
+                                Text(q.previous == nil ? "Start" : "Retake")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Theme.brand)
+                            }
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("quiz-\(q.quizId)")
+                        if q != quizzes.last { Divider() }
+                    }
+                }
+            }
+        }
+    }
+
+    private func quizSubtitle(_ q: QuizSummary) -> String {
+        let count = "\(q.questions) question\(q.questions == 1 ? "" : "s")"
+        guard let p = q.previous else { return count }
+        return "\(count) · your score \(p.score) / \(p.total)"
     }
 
     private func surveyCard(_ d: ClassDetail) -> some View {
@@ -646,6 +708,151 @@ struct SurveyView: View {
         defer { submitting = false }
         do {
             done = try await store.submitSurvey(runId: runId, answers: answers)
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+}
+
+// MARK: - Quiz
+
+/// A lesson quiz: pick one option per question, submit, see the score. The site
+/// scores the answers and records the attempt against the learner and the class.
+struct QuizView: View {
+    let runId: Int
+    let summary: QuizSummary
+
+    @EnvironmentObject private var store: LearnerStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var quiz: Quiz?
+    @State private var answers: [String: Int] = [:]
+    @State private var result: QuizResult?
+    @State private var error: String?
+    @State private var submitting = false
+
+    private var unanswered: Int {
+        guard let quiz else { return 0 }
+        return quiz.questions.filter { answers[$0.id] == nil }.count
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                if let quiz {
+                    if let result {
+                        Section {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Your score").font(.subheadline).foregroundStyle(.secondary)
+                                Text("\(result.score) / \(result.total)").font(.largeTitle.bold())
+                                Text("Your score has been recorded.").font(.footnote).foregroundStyle(.secondary)
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityIdentifier("quizScore")
+                        }
+                    }
+                    ForEach(Array(quiz.questions.enumerated()), id: \.element.id) { index, q in
+                        Section {
+                            ForEach(Array(q.options.enumerated()), id: \.offset) { optionIndex, option in
+                                optionRow(q, optionIndex, option)
+                            }
+                        } header: {
+                            Text("\(index + 1). \(q.question)")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .textCase(nil)
+                        }
+                    }
+                    if let error {
+                        Section { Text(error).foregroundStyle(.red).font(.footnote) }
+                    }
+                    if result != nil {
+                        Section {
+                            Button("Take the Quiz Again") {
+                                answers = [:]
+                                result = nil
+                            }
+                        }
+                    } else if unanswered > 0 {
+                        Section {
+                            Text("Answer every question to submit (\(unanswered) left).")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } else if let error {
+                    Section { ErrorCard(message: error) { Task { await load() } } }
+                } else {
+                    ProgressView()
+                }
+            }
+            .navigationTitle(quiz?.title ?? summary.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(result == nil ? "Cancel" : "Done") { dismiss() }
+                }
+                if result == nil {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(submitting ? "Submitting…" : "Submit") { Task { await submit() } }
+                            .disabled(quiz == nil || unanswered > 0 || submitting)
+                            .accessibilityIdentifier("submitQuiz")
+                    }
+                }
+            }
+            .task { await load() }
+        }
+        .tint(Theme.accent)
+    }
+
+    @ViewBuilder
+    private func optionRow(_ q: QuizQuestion, _ index: Int, _ option: String) -> some View {
+        let chosen = answers[q.id] == index
+        let marked = result?.breakdown.first { $0.id == q.id }
+        let isCorrect = marked?.correctIndex == index
+        let isWrongPick = marked != nil && chosen && !isCorrect
+        Button {
+            answers[q.id] = index
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: marked == nil
+                      ? (chosen ? "largecircle.fill.circle" : "circle")
+                      : (isCorrect ? "checkmark.circle.fill" : (isWrongPick ? "xmark.circle.fill" : "circle")))
+                    .foregroundStyle(marked == nil
+                                     ? (chosen ? Theme.brand : Color.secondary)
+                                     : (isCorrect ? Theme.success : (isWrongPick ? Color.red : Color.secondary)))
+                    .accessibilityHidden(true)
+                Text(option)
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(result != nil)
+        .accessibilityLabel(option)
+        .accessibilityValue(marked == nil
+                            ? (chosen ? "Selected" : "")
+                            : (isCorrect ? "Correct answer" : (isWrongPick ? "Your answer, incorrect" : "")))
+        .accessibilityAddTraits(chosen ? .isSelected : [])
+    }
+
+    private func load() async {
+        do {
+            quiz = try await store.quiz(runId: runId, quizId: summary.quizId)
+            error = nil
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    private func submit() async {
+        guard let quiz else { return }
+        submitting = true
+        defer { submitting = false }
+        do {
+            result = try await store.submitQuiz(runId: runId, quizId: quiz.quizId, answers: answers)
+            error = nil
         } catch {
             self.error = error.localizedDescription
         }

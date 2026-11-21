@@ -214,6 +214,8 @@ struct ClassDetail: Decodable, Hashable {
     let survey: SurveyState
     let certificate: CertificateInfo?
     let certificateRule: String?
+    /// Lesson quizzes of the class's course (absent on a site that predates them).
+    let quizzes: [QuizSummary]?
 }
 
 struct ClassDetailReply: Decodable {
@@ -300,6 +302,54 @@ struct Survey: Decodable, Hashable {
 
 struct SurveyReply: Decodable {
     let survey: Survey
+}
+
+// MARK: Lesson quizzes
+
+struct QuizScore: Decodable, Hashable {
+    let score: Int
+    let total: Int
+}
+
+/// A quiz listed on the class page, with the learner's latest score.
+struct QuizSummary: Decodable, Hashable, Identifiable {
+    let quizId: Int
+    let title: String
+    let questions: Int
+    let previous: QuizScore?
+
+    var id: Int { quizId }
+}
+
+struct QuizQuestion: Decodable, Hashable, Identifiable {
+    let id: String
+    let question: String
+    let options: [String]
+}
+
+/// The questions of one quiz. The correct answers stay on the server until it is submitted.
+struct Quiz: Decodable, Hashable {
+    let quizId: Int
+    let title: String
+    let questions: [QuizQuestion]
+}
+
+struct QuizReply: Decodable {
+    let quiz: Quiz
+    let previous: QuizScore?
+}
+
+struct QuizAnswerResult: Decodable, Hashable {
+    let id: String
+    let correct: Bool
+    let correctIndex: Int
+    let selectedIndex: Int?
+}
+
+struct QuizResult: Decodable, Hashable {
+    let score: Int
+    let total: Int
+    let breakdown: [QuizAnswerResult]
 }
 
 // MARK: Certificates & billing

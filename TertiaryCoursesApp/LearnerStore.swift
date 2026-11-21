@@ -212,6 +212,16 @@ final class LearnerStore: ObservableObject {
         return reply.message ?? "Thank you for your feedback!"
     }
 
+    func quiz(runId: Int, quizId: Int) async throws -> Quiz {
+        let reply: QuizReply = try await API.shared.get("learner/quiz", query: ["run_id": String(runId), "quiz_id": String(quizId)])
+        return reply.quiz
+    }
+
+    /// `answers` maps a question id to the chosen option index. The site scores and records the attempt.
+    func submitQuiz(runId: Int, quizId: Int, answers: [String: Int]) async throws -> QuizResult {
+        try await API.shared.post("learner/quiz", body: ["run_id": runId, "quiz_id": quizId, "answers": answers])
+    }
+
     /// Learner and trainer classes of one bucket, soonest first (most recent first for past).
     func items(in bucket: String) -> [ClassItem] {
         func pick(_ r: ClassesReply?) -> [ClassItem] {

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5] — 2026-11-21 · build 6
+
+Quizzes come to TC LMS SG.
+
+- Quizzes: when your trainer sets a quiz for a class, take it on the class page. Pick an answer for each question, submit, and see your score with the correct answers marked.
+- Your latest score shows beside each quiz, and you can retake a quiz.
+
 ## [1.4] — 2026-11-19 · build 5
 
 TC LMS SG now serves trainers as well as learners.
