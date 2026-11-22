@@ -3,8 +3,8 @@ import AuthenticationServices
 import CryptoKit
 
 /// Sign in with an emailed one-time code (the default) or the website password.
-/// Layout follows the TIA house sign-in: app mark, name, one card. Admin sign-in
-/// with Google is a quiet link at the foot of the page.
+/// Layout follows the TIA house sign-in: academy logo and name, the app name, one card.
+/// A quiet "Admin sign-in" link in the footer opens the admin page (Continue with Google).
 struct SignInView: View {
     @EnvironmentObject private var store: LearnerStore
 
@@ -20,6 +20,8 @@ struct SignInView: View {
     @State private var error: String?
     @State private var info: String?
     @State private var google = GoogleAdminSignIn()
+    @State private var showAdmin = false
+    @State private var adminError: String?
     @FocusState private var focus: Field?
 
     private enum Field { case email, password, code }
@@ -33,24 +35,9 @@ struct SignInView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 22) {
-                    // App mark and name
-                    VStack(spacing: 10) {
-                        VStack(spacing: -4) {
-                            Text("TC").font(.system(size: 34, weight: .heavy))
-                            Text(Site.code).font(.system(size: 17, weight: .bold))
-                        }
-                        .foregroundStyle(.white)
-                        .frame(width: 92, height: 92)
-                        .background(
-                            LinearGradient(colors: [Theme.brandTop, Theme.accentDark], startPoint: .top, endPoint: .bottom),
-                            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        )
-                        .shadow(color: Theme.brandTop.opacity(0.25), radius: 12, y: 6)
-                        .accessibilityHidden(true)
-                        Text(Site.appName).font(.system(size: 30, weight: .heavy))
-                        Text(Site.siteName).font(.subheadline).foregroundStyle(.secondary)
-                    }
-                    .padding(.top, 12)
+                    // Academy logo, name, then this app's name
+                    AcademyBrandHeader(appName: Site.appName)
+                        .padding(.top, 12)
 
                     // The sign-in card
                     VStack(alignment: .leading, spacing: 16) {
@@ -177,12 +164,15 @@ struct SignInView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
-                        // Deliberately quiet: staff know it is here.
-                        Button("Admin sign-in") { Task { await signInAsAdmin() } }
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .disabled(busy)
-                            .accessibilityIdentifier("adminSignIn")
+                        // Deliberately quiet: staff know it is here. Opens the admin page.
+                        Button("Admin sign-in") {
+                            error = nil
+                            showAdmin = true
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .disabled(busy)
+                        .accessibilityIdentifier("adminSignIn")
                     }
                     .padding(.horizontal, 8)
                 }
@@ -193,6 +183,11 @@ struct SignInView: View {
             )
             .scrollDismissesKeyboard(.interactively)
             .toolbar(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showAdmin) {
+                AdminSignInPage(appName: Site.appName, busy: busy, error: adminError) {
+                    Task { await signInAsAdmin() }
+                }
+            }
         }
     }
 
@@ -222,16 +217,16 @@ struct SignInView: View {
     /// Admin sign-in: Google in the system sign-in sheet, for the allowed admin account only.
     private func signInAsAdmin() async {
         busy = true
-        error = nil
-        info = nil
+        adminError = nil
         defer { busy = false }
         do {
             let result = try await google.start()
             try await store.signInWithGoogle(code: result.code, verifier: result.verifier)
+            showAdmin = false
         } catch GoogleAdminSignIn.Failure.cancelled {
-            // Closed the sheet: nothing to report.
+            // Closed the Google sheet: nothing to report.
         } catch {
-            self.error = error.localizedDescription
+            adminError = error.localizedDescription
         }
     }
 

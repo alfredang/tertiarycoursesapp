@@ -27,6 +27,9 @@ for f in "$dest"/TertiaryCoursesApp/*.swift; do
     name=$(basename "$f")
     [ "$name" = "Site.swift" ] || [ -f "$src/TertiaryCoursesApp/$name" ] || rm -v "$f"
 done
+# The academy logo on the sign-in screen is the same in every app.
+rm -rf "$dest/TertiaryCoursesApp/Assets.xcassets/AcademyLogo.imageset"
+cp -R "$src/TertiaryCoursesApp/Assets.xcassets/AcademyLogo.imageset" "$dest/TertiaryCoursesApp/Assets.xcassets/"
 mkdir -p "$dest/scripts"
 cp "$src/scripts/make_icon.swift" "$src/scripts/snapshot_catalog.sh" "$src/scripts/check_nonwsq.sh" "$dest/scripts/"
 echo "synced shared source into $dest"

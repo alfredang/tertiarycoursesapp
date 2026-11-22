@@ -5,7 +5,7 @@ import Foundation
 /// (see scripts/sync_variant.sh). Each app talks only to its own site's LMS.
 enum Site {
     static let code = "SG"
-    static let appName = "TC LMS SG"
+    static let appName = "TIA LMS SG"
     static let countryName = "Singapore"
     static let siteName = "Tertiary Courses Singapore"
     static let baseURL = URL(string: "https://www.tertiarycourses.com.sg")!
