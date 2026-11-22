@@ -274,6 +274,9 @@ struct TrainerClassDetail: Decodable, Hashable {
     let materials: [Material]
     let documents: [Material]?
     let surveyResponses: Int?
+    /// Links the trainer shows the class; TRAQOM is set only for SSG-funded classes in Singapore.
+    let feedbackUrl: String?
+    let traqomUrl: String?
 }
 
 struct TrainerClassReply: Decodable {

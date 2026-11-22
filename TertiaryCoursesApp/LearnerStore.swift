@@ -35,7 +35,9 @@ final class LearnerStore: ObservableObject {
         guard let l = learner else { return [] }
         var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
         if l.email.lowercased() == "angch@tertiaryinfotech.com" {
-            roles += ["admin", "marketing", "developer", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
+            // The franchise control centre belongs to the Singapore site only.
+            roles += ["admin", "marketing", "developer", "franchise_admin"]
+                .filter { (l.roles ?? []).contains($0) && ($0 != "franchise_admin" || Site.code == "SG") }
         }
         return roles
     }

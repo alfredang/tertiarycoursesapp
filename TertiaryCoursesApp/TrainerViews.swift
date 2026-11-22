@@ -20,6 +20,7 @@ struct TrainerClassView: View {
     @State private var saving = false
     @State private var notice: String?
     @State private var showQR = false
+    @State private var surveyQR: SurveyLink?
     @State private var doc: DocLink?
 
     var body: some View {
@@ -48,6 +49,10 @@ struct TrainerClassView: View {
             if let d = detail, let link = d.checkinUrl, !link.isEmpty {
                 CheckInQRView(link: link, title: d.title, sessionLabel: d.currentSessionLabel ?? "")
             }
+        }
+        .sheet(item: $surveyQR) { s in
+            CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: "",
+                          heading: s.title, hint: s.hint, shareLabel: "Share Link")
         }
         .alert("Attendance", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
             Button("OK", role: .cancel) {}
@@ -258,6 +263,26 @@ struct TrainerClassView: View {
                       systemImage: "star.bubble.fill")
                     .font(.subheadline)
                     .foregroundStyle(n == 0 ? Color.secondary : Color.primary)
+                if let url = d.feedbackUrl, !url.isEmpty {
+                    Button {
+                        surveyQR = SurveyLink(title: "Course Survey", url: url,
+                                              hint: "Learners scan this to give their course feedback.")
+                    } label: {
+                        Label("Show Course Survey QR", systemImage: "qrcode").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("showSurveyQR")
+                }
+                if let url = d.traqomUrl, !url.isEmpty {
+                    Button {
+                        surveyQR = SurveyLink(title: "TRAQOM Survey", url: url,
+                                              hint: "Every learner must complete the SSG TRAQOM survey before the class ends.")
+                    } label: {
+                        Label("Show TRAQOM Survey QR", systemImage: "qrcode").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("showTraqomQR")
+                }
                 Text("Learners give feedback in this app from the first day of class.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -279,6 +304,14 @@ struct TrainerClassView: View {
             notice = error.localizedDescription
         }
     }
+}
+
+/// A survey the trainer shows the class as a QR code.
+struct SurveyLink: Identifiable {
+    let title: String
+    let url: String
+    let hint: String
+    var id: String { url }
 }
 
 /// One material or document row; opens in the in-app viewer.
@@ -320,6 +353,9 @@ struct CheckInQRView: View {
     let link: String
     let title: String
     let sessionLabel: String
+    var heading = "Check-in QR"
+    var hint = "Learners scan this with their phone camera to check in to this session."
+    var shareLabel = "Share Check-in Link"
 
     @Environment(\.dismiss) private var dismiss
 
@@ -343,15 +379,15 @@ struct CheckInQRView: View {
                         // A QR code must stay dark-on-white to scan, in either theme.
                         .background(Color.white, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .frame(maxWidth: 320)
-                        .accessibilityLabel("Check-in QR code")
+                        .accessibilityLabel("\(heading) code")
                 }
-                Text("Learners scan this with their phone camera to check in to this session.")
+                Text(hint)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 if let url = URL(string: link) {
                     ShareLink(item: url) {
-                        Label("Share Check-in Link", systemImage: "square.and.arrow.up")
+                        Label(shareLabel, systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
                 }
@@ -360,7 +396,7 @@ struct CheckInQRView: View {
             .padding(24)
             .frame(maxWidth: .infinity)
             .background(Theme.page)
-            .navigationTitle("Check-in QR")
+            .navigationTitle(heading)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
