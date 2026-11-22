@@ -433,3 +433,61 @@ enum Fmt {
         amount.formatted(.currency(code: code.isEmpty ? Site.currency : code).precision(.fractionLength(amount.rounded() == amount ? 0 : 2)))
     }
 }
+
+
+// MARK: - Trainer payout and training hours
+
+struct Payout: Decodable, Hashable, Identifiable {
+    let id: String
+    let title: String
+    let courseCode: String
+    let learners: Int?
+    let amount: Double
+    let paymentDate: String
+    let startDate: String
+    let endDate: String
+}
+
+struct PayoutsReply: Decodable {
+    /// False when this site has no payout records to show (or they cannot be reached).
+    let available: Bool
+    let payouts: [Payout]
+    let total: Double
+    let currency: String
+}
+
+struct HoursMonth: Decodable, Hashable, Identifiable {
+    let month: String   // "2026-11"
+    let hours: Double
+    var id: String { month }
+}
+
+struct HoursClass: Decodable, Hashable, Identifiable {
+    let runId: Int
+    let title: String
+    let sku: String
+    let startDate: String
+    let endDate: String
+    let days: Int
+    let hours: Double
+    var id: Int { runId }
+}
+
+struct TrainingHoursReply: Decodable {
+    let totalHours: Double
+    let months: [HoursMonth]
+    let classes: [HoursClass]
+}
+
+extension Fmt {
+    /// "2026-11" → "November 2026"
+    static func month(_ ym: String) -> String {
+        guard let d = date(ym + "-01") else { return ym }
+        return d.formatted(.dateTime.month(.wide).year())
+    }
+
+    /// 16.0 → "16 h", 7.5 → "7.5 h"
+    static func hours(_ h: Double) -> String {
+        (h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h)) + " h"
+    }
+}

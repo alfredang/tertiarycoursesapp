@@ -223,6 +223,11 @@ final class LearnerStore: ObservableObject {
         }
     }
 
+    // MARK: Trainer payout and training hours
+
+    func loadPayouts() async throws -> PayoutsReply { try await API.shared.get("trainer/payouts") }
+    func loadTrainingHours() async throws -> TrainingHoursReply { try await API.shared.get("trainer/hours") }
+
     // MARK: Trainer certifications
 
     private struct CertsReply: Decodable { let certifications: [CertItem] }

@@ -618,3 +618,194 @@ struct PlaygroundSheet: ViewModifier {
         #endif
     }
 }
+
+
+// MARK: - Payout (trainer tab)
+
+struct PayoutView: View {
+    @EnvironmentObject private var store: LearnerStore
+    @State private var reply: PayoutsReply?
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    if let reply {
+                        if !reply.available {
+                            ContentUnavailableView {
+                                Label("Payouts not available", systemImage: "banknote")
+                            } description: {
+                                Text("Your payout history cannot be shown here right now. Please try again later.")
+                            }
+                            .padding(.top, 40)
+                        } else if reply.payouts.isEmpty {
+                            ContentUnavailableView {
+                                Label("No payouts yet", systemImage: "banknote")
+                            } description: {
+                                Text("Payouts for the classes you teach appear here once they are paid.")
+                            }
+                            .padding(.top, 40)
+                        } else {
+                            SummaryCard(title: "Total paid", value: Fmt.money(reply.total, reply.currency),
+                                        caption: "\(reply.payouts.count) payout\(reply.payouts.count == 1 ? "" : "s")")
+                            ForEach(reply.payouts) { PayoutCard(payout: $0, currency: reply.currency) }
+                        }
+                    } else if let error {
+                        ErrorCard(message: error) { Task { await load() } }
+                    } else {
+                        ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
+                    }
+                }
+                .padding(20)
+            }
+            .background(Theme.page)
+            .refreshable { await load() }
+            .task { if reply == nil { await load() } }
+            .navigationTitle("Payout")
+            .navigationBarTitleDisplayMode(.inline)
+            .brandToolbar()
+        }
+    }
+
+    private func load() async {
+        do { reply = try await store.loadPayouts(); error = nil } catch { self.error = error.localizedDescription }
+    }
+}
+
+struct SummaryCard: View {
+    let title: String
+    let value: String
+    let caption: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.subheadline).foregroundStyle(.white.opacity(0.85))
+            Text(value).font(.system(size: 32, weight: .bold)).foregroundStyle(.white)
+            Text(caption).font(.footnote).foregroundStyle(.white.opacity(0.85))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(18)
+        .background(Theme.brand, in: RoundedRectangle(cornerRadius: 16))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct PayoutCard: View {
+    let payout: Payout
+    let currency: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                Text(payout.title.isEmpty ? "Class" : payout.title)
+                    .font(.headline)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 12)
+                Text(Fmt.money(payout.amount, currency))
+                    .font(.headline)
+                    .foregroundStyle(Theme.success)
+            }
+            Group {
+                if !payout.startDate.isEmpty {
+                    LabeledContent("Class", value: Fmt.range(payout.startDate, payout.endDate))
+                }
+                if !payout.paymentDate.isEmpty {
+                    LabeledContent("Paid", value: Fmt.longDate(payout.paymentDate))
+                }
+                if let n = payout.learners, n > 0 {
+                    LabeledContent("Learners", value: String(n))
+                }
+                if !payout.courseCode.isEmpty {
+                    LabeledContent("Course", value: payout.courseCode)
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
+    }
+}
+
+// MARK: - Training hours (trainer tab)
+
+struct TrainingHoursView: View {
+    @EnvironmentObject private var store: LearnerStore
+    @State private var reply: TrainingHoursReply?
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    if let reply {
+                        if reply.classes.isEmpty {
+                            ContentUnavailableView {
+                                Label("No training hours yet", systemImage: "clock")
+                            } description: {
+                                Text("Hours for the classes you teach appear here after each class day.")
+                            }
+                            .padding(.top, 40)
+                        } else {
+                            SummaryCard(title: "Total training hours", value: Fmt.hours(reply.totalHours),
+                                        caption: "\(reply.classes.count) class\(reply.classes.count == 1 ? "" : "es") in the last 3 years")
+                            Text("By month").font(.headline).padding(.top, 4)
+                            VStack(spacing: 0) {
+                                ForEach(reply.months) { m in
+                                    HStack {
+                                        Text(Fmt.month(m.month))
+                                        Spacer()
+                                        Text(Fmt.hours(m.hours)).fontWeight(.semibold)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    if m.id != reply.months.last?.id { Divider().padding(.leading, 16) }
+                                }
+                            }
+                            .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
+                            Text("By class").font(.headline).padding(.top, 4)
+                            ForEach(reply.classes) { c in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(alignment: .top) {
+                                        Text(c.title).font(.headline).fixedSize(horizontal: false, vertical: true)
+                                        Spacer(minLength: 12)
+                                        Text(Fmt.hours(c.hours)).font(.headline).foregroundStyle(Theme.accent)
+                                    }
+                                    Text("\(Fmt.range(c.startDate, c.endDate)) · \(c.days) day\(c.days == 1 ? "" : "s")")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(16)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
+                                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
+                            }
+                            Text("Each class day counts its class time, less a one-hour lunch on days longer than five hours.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if let error {
+                        ErrorCard(message: error) { Task { await load() } }
+                    } else {
+                        ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
+                    }
+                }
+                .padding(20)
+            }
+            .background(Theme.page)
+            .refreshable { await load() }
+            .task { if reply == nil { await load() } }
+            .navigationTitle("Training Hours")
+            .navigationBarTitleDisplayMode(.inline)
+            .brandToolbar()
+        }
+    }
+
+    private func load() async {
+        do { reply = try await store.loadTrainingHours(); error = nil } catch { self.error = error.localizedDescription }
+    }
+}

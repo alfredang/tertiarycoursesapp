@@ -174,6 +174,7 @@ struct GuestTabs: View {
 }
 
 struct LearnerTabs: View {
+    @EnvironmentObject private var store: LearnerStore
     @State private var selection = startTab
 
     var body: some View {
@@ -184,12 +185,23 @@ struct LearnerTabs: View {
             CalendarView()
                 .tabItem { Label("Calendar", systemImage: "calendar") }
                 .tag(1)
-            CertificatesView()
-                .tabItem { Label("Certificates", systemImage: "rosette") }
-                .tag(2)
-            BillingView()
-                .tabItem { Label("Billing", systemImage: "creditcard.fill") }
-                .tag(3)
+            // A trainer sees what they are paid and the hours they have taught;
+            // a learner sees certificates and billing.
+            if store.isTrainer {
+                PayoutView()
+                    .tabItem { Label("Payout", systemImage: "banknote.fill") }
+                    .tag(2)
+                TrainingHoursView()
+                    .tabItem { Label("Hours", systemImage: "clock.fill") }
+                    .tag(3)
+            } else {
+                CertificatesView()
+                    .tabItem { Label("Certificates", systemImage: "rosette") }
+                    .tag(2)
+                BillingView()
+                    .tabItem { Label("Billing", systemImage: "creditcard.fill") }
+                    .tag(3)
+            }
             AccountView()
                 .tabItem { Label("Account", systemImage: "person.crop.circle.fill") }
                 .tag(4)
