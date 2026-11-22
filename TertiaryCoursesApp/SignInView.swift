@@ -184,8 +184,8 @@ struct SignInView: View {
             .scrollDismissesKeyboard(.interactively)
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showAdmin) {
-                AdminSignInPage(appName: Site.appName, busy: busy, error: adminError) {
-                    Task { await signInAsAdmin() }
+                AdminSignInPage(appName: Site.appName, busy: busy, error: adminError) { remember in
+                    Task { await signInAsAdmin(remember: remember) }
                 }
             }
         }
@@ -215,13 +215,14 @@ struct SignInView: View {
     }
 
     /// Admin sign-in: Google in the system sign-in sheet, for the allowed admin account only.
-    private func signInAsAdmin() async {
+    private func signInAsAdmin(remember: Bool) async {
         busy = true
         adminError = nil
         defer { busy = false }
         do {
-            let result = try await google.start()
+            let result = try await google.start(ephemeral: !remember)
             try await store.signInWithGoogle(code: result.code, verifier: result.verifier)
+            AdminRemember.signedIn(email: store.learner?.email ?? "")
             showAdmin = false
         } catch GoogleAdminSignIn.Failure.cancelled {
             // Closed the Google sheet: nothing to report.
@@ -298,7 +299,8 @@ final class GoogleAdminSignIn: NSObject, ASWebAuthenticationPresentationContextP
 
     private var session: ASWebAuthenticationSession?
 
-    func start() async throws -> (code: String, verifier: String) {
+    /// `ephemeral`: do not keep the Google sign-in in the browser (Remember me off).
+    func start(ephemeral: Bool = false) async throws -> (code: String, verifier: String) {
         var bytes = [UInt8](repeating: 0, count: 32)
         _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         let verifier = bytes.map { String(format: "%02x", $0) }.joined()
@@ -314,6 +316,7 @@ final class GoogleAdminSignIn: NSObject, ASWebAuthenticationPresentationContextP
                 else { continuation.resume(throwing: Failure.message("Google sign-in could not start. Please try again.")) }
             }
             s.presentationContextProvider = self
+            s.prefersEphemeralWebBrowserSession = ephemeral
             session = s
             if !s.start() { continuation.resume(throwing: Failure.message("Google sign-in could not start. Please try again.")) }
         }
