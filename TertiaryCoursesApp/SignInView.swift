@@ -1,23 +1,25 @@
 import SwiftUI
+import AuthenticationServices
+import CryptoKit
 
-/// Sign in with an emailed one-time code, or with the website password.
+/// Sign in with an emailed one-time code (the default) or the website password.
+/// Layout follows the TIA house sign-in: app mark, name, one card. Admin sign-in
+/// with Google is a quiet link at the foot of the page.
 struct SignInView: View {
     @EnvironmentObject private var store: LearnerStore
 
-    private enum Method: String, CaseIterable, Identifiable {
-        case code = "Email Code"
-        case password = "Password"
-        var id: String { rawValue }
-    }
+    private enum Method { case code, password }
 
     @State private var method: Method = .code
-    @State private var email = ""
+    @State private var email = UserDefaults.standard.string(forKey: "rememberedEmail") ?? ""
+    @State private var remember = UserDefaults.standard.object(forKey: "rememberEmail") as? Bool ?? true
     @State private var password = ""
     @State private var code = ""
     @State private var codeSent = false
     @State private var busy = false
     @State private var error: String?
     @State private var info: String?
+    @State private var google = GoogleAdminSignIn()
     @FocusState private var focus: Field?
 
     private enum Field { case email, password, code }
@@ -30,157 +32,206 @@ struct SignInView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Learner and trainer sign in")
-                            .font(.title2.bold())
-                        Text("Use the email you registered with on \(Site.websiteLabel) to see your classes, materials, attendance, certificates and billing.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Sign in as").font(.subheadline.weight(.semibold))
-                        Picker("Sign in as", selection: $store.loginRole) {
-                            Text("Learner").tag("learner")
-                            Text("Trainer").tag("trainer")
+                VStack(spacing: 22) {
+                    // App mark and name
+                    VStack(spacing: 10) {
+                        VStack(spacing: -4) {
+                            Text("TC").font(.system(size: 34, weight: .heavy))
+                            Text(Site.code).font(.system(size: 17, weight: .bold))
                         }
-                        .pickerStyle(.segmented)
-                        .accessibilityIdentifier("loginRole")
-                        Text(store.loginRole == "trainer"
-                             ? "See the classes you teach, attendance, payout and training hours."
-                             : "See the courses you are taking. Trainers attending a course sign in as a learner.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                        .foregroundStyle(.white)
+                        .frame(width: 92, height: 92)
+                        .background(
+                            LinearGradient(colors: [Theme.brandTop, Theme.accentDark], startPoint: .top, endPoint: .bottom),
+                            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        )
+                        .shadow(color: Theme.brandTop.opacity(0.25), radius: 12, y: 6)
+                        .accessibilityHidden(true)
+                        Text(Site.appName).font(.system(size: 30, weight: .heavy))
+                        Text(Site.siteName).font(.subheadline).foregroundStyle(.secondary)
                     }
+                    .padding(.top, 12)
 
-                    Picker("Sign-in method", selection: $method) {
-                        ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: method) { _, _ in
-                        error = nil
-                        info = nil
-                    }
-
-                    InfoCard {
-                        VStack(alignment: .leading, spacing: 14) {
-                            field("Email") {
-                                TextField("you@example.com", text: $email)
-                                    .textContentType(.emailAddress)
-                                    .keyboardType(.emailAddress)
-                                    .textInputAutocapitalization(.never)
-                                    .autocorrectionDisabled()
-                                    .focused($focus, equals: .email)
-                                    .submitLabel(method == .password ? .next : .send)
-                                    .onSubmit {
-                                        if method == .password { focus = .password } else { Task { await sendCode() } }
-                                    }
-                                    .onChange(of: email) { _, _ in codeSent = false }
-                                    .accessibilityIdentifier("email")
-                            }
-
-                            if method == .password {
-                                field("Password") {
-                                    SecureField("Your website password", text: $password)
-                                        .textContentType(.password)
-                                        .focused($focus, equals: .password)
-                                        .submitLabel(.go)
-                                        .onSubmit { Task { await signInWithPassword() } }
-                                        .accessibilityIdentifier("password")
-                                }
-                                Button {
-                                    Task { await signInWithPassword() }
-                                } label: {
-                                    busyLabel("Sign In")
-                                }
-                                .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                                .controlSize(.large)
-                                .disabled(busy || !emailValid || password.isEmpty)
-                                .accessibilityIdentifier("signIn")
-
-                                Link("Forgot your password?", destination: Site.baseURL.appendingPathComponent("customer/account/forgotpassword/"))
-                                    .font(.footnote)
-                            } else if codeSent {
-                                field("6-digit code") {
-                                    TextField("123456", text: $code)
-                                        .textContentType(.oneTimeCode)
-                                        .keyboardType(.numberPad)
-                                        .focused($focus, equals: .code)
-                                        .onChange(of: code) { _, new in
-                                            code = String(new.filter(\.isNumber).prefix(6))
-                                        }
-                                }
-                                Button {
-                                    Task { await verify() }
-                                } label: {
-                                    busyLabel("Verify & Sign In")
-                                }
-                                .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                                .controlSize(.large)
-                                .disabled(busy || code.count != 6)
-
-                                Button("Send a new code") { Task { await sendCode() } }
-                                    .font(.footnote)
-                                    .disabled(busy)
-                            } else {
-                                Button {
-                                    Task { await sendCode() }
-                                } label: {
-                                    busyLabel("Email Me a Code")
-                                }
-                                .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                                .controlSize(.large)
-                                .disabled(busy || !emailValid)
-                            }
+                    // The sign-in card
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Sign in").font(.title2.bold())
+                            Text(codeSent && method == .code
+                                 ? "Enter the 6-digit code we emailed you."
+                                 : "Enter the email you registered with to continue.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
-                    }
 
-                    if let info {
-                        Label(info, systemImage: "envelope.badge")
-                            .font(.footnote)
-                            .foregroundStyle(Theme.accent)
-                    }
-                    if let error {
-                        Label(error, systemImage: "exclamationmark.triangle.fill")
-                            .font(.footnote)
-                            .foregroundStyle(.red)
-                    }
-
-                    InfoCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("New to \(Site.siteName)?", systemImage: "sparkles")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Theme.accent)
-                            Text("Learners: your account is created when you register for a course on \(Site.websiteLabel). Trainers: use your \(Site.websiteLabel) trainer login.")
+                        VStack(alignment: .leading, spacing: 6) {
+                            Picker("Sign in as", selection: $store.loginRole) {
+                                Text("Learner").tag("learner")
+                                Text("Trainer").tag("trainer")
+                            }
+                            .pickerStyle(.segmented)
+                            .accessibilityIdentifier("loginRole")
+                            Text(store.loginRole == "trainer"
+                                 ? "See the classes you teach, attendance, payout and training hours."
+                                 : "See the courses you are taking. Trainers attending a course sign in as a learner.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
+
+                        inputRow(icon: "envelope.fill") {
+                            TextField("Email", text: $email)
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .focused($focus, equals: .email)
+                                .submitLabel(method == .password ? .next : .continue)
+                                .onSubmit {
+                                    if method == .password { focus = .password } else { Task { await sendCode() } }
+                                }
+                                .onChange(of: email) { _, _ in codeSent = false }
+                                .accessibilityIdentifier("email")
+                        }
+
+                        if method == .password {
+                            inputRow(icon: "lock.fill") {
+                                SecureField("Website password", text: $password)
+                                    .textContentType(.password)
+                                    .focused($focus, equals: .password)
+                                    .submitLabel(.go)
+                                    .onSubmit { Task { await signInWithPassword() } }
+                                    .accessibilityIdentifier("password")
+                            }
+                        } else if codeSent {
+                            inputRow(icon: "number") {
+                                TextField("6-digit code", text: $code)
+                                    .textContentType(.oneTimeCode)
+                                    .keyboardType(.numberPad)
+                                    .focused($focus, equals: .code)
+                                    .onChange(of: code) { _, new in
+                                        code = String(new.filter(\.isNumber).prefix(6))
+                                    }
+                                    .accessibilityIdentifier("code")
+                            }
+                        }
+
+                        Toggle(isOn: $remember) {
+                            Text("Remember my email").font(.subheadline)
+                        }
+                        .tint(Theme.brand)
+                        .onChange(of: remember) { _, on in
+                            UserDefaults.standard.set(on, forKey: "rememberEmail")
+                            if !on { UserDefaults.standard.removeObject(forKey: "rememberedEmail") }
+                        }
+
+                        Button {
+                            Task {
+                                switch method {
+                                case .password: await signInWithPassword()
+                                case .code: if codeSent { await verify() } else { await sendCode() }
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                if busy { ProgressView().tint(.white) } else { Image(systemName: "arrow.right") }
+                                Text(method == .password ? "Sign In" : (codeSent ? "Verify & Sign In" : "Continue"))
+                            }
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 15)
+                            .foregroundStyle(.white)
+                            .background(Theme.brand.opacity(primaryDisabled ? 0.45 : 1), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(primaryDisabled)
+                        .accessibilityIdentifier(method == .password ? "signIn" : "continue")
+
+                        if let info {
+                            Label(info, systemImage: "envelope.badge").font(.footnote).foregroundStyle(Theme.accent)
+                        }
+                        if let error {
+                            Label(error, systemImage: "exclamationmark.triangle.fill").font(.footnote).foregroundStyle(.red)
+                        }
+
+                        HStack {
+                            if method == .code, codeSent {
+                                Button("Send a new code") { Task { await sendCode() } }.disabled(busy)
+                            } else if method == .password {
+                                Link("Forgot your password?", destination: Site.baseURL.appendingPathComponent("customer/account/forgotpassword/"))
+                            }
+                            Spacer()
+                            Button(method == .code ? "Use password instead" : "Use email code instead") {
+                                method = method == .code ? .password : .code
+                                error = nil
+                                info = nil
+                            }
+                            .accessibilityIdentifier("switchMethod")
+                        }
+                        .font(.footnote.weight(.medium))
                     }
+                    .padding(20)
+                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.cardBorder))
+
+                    VStack(spacing: 10) {
+                        Text("Learners: your account is created when you register for a course on \(Site.websiteLabel).")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                        // Deliberately quiet: staff know it is here.
+                        Button("Admin sign-in") { Task { await signInAsAdmin() } }
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .disabled(busy)
+                            .accessibilityIdentifier("adminSignIn")
+                    }
+                    .padding(.horizontal, 8)
                 }
                 .padding(20)
             }
-            .background(Theme.page)
+            .background(
+                LinearGradient(colors: [Theme.page, Theme.accentSoft], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+            )
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Sign In")
-            .navigationBarTitleDisplayMode(.inline)
-            .brandToolbar()
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
-    @ViewBuilder
-    private func field<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+    private var primaryDisabled: Bool {
+        if busy || !emailValid { return true }
+        switch method {
+        case .password: return password.isEmpty
+        case .code: return codeSent && code.count != 6
+        }
+    }
+
+    private func inputRow<Content: View>(icon: String, @ViewBuilder content: () -> Content) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).foregroundStyle(.secondary).frame(width: 22)
             content()
-                .padding(12)
-                .background(Theme.page, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .background(Theme.page, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+    }
+
+    private func rememberEmail() {
+        if remember { UserDefaults.standard.set(email.trimmingCharacters(in: .whitespaces), forKey: "rememberedEmail") }
+    }
+
+    /// Admin sign-in: Google in the system sign-in sheet, for the allowed admin account only.
+    private func signInAsAdmin() async {
+        busy = true
+        error = nil
+        info = nil
+        defer { busy = false }
+        do {
+            let result = try await google.start()
+            try await store.signInWithGoogle(code: result.code, verifier: result.verifier)
+        } catch GoogleAdminSignIn.Failure.cancelled {
+            // Closed the sheet: nothing to report.
+        } catch {
+            self.error = error.localizedDescription
         }
     }
 
@@ -199,6 +250,7 @@ struct SignInView: View {
         defer { busy = false }
         do {
             info = try await store.sendCode(email: email)
+            rememberEmail()
             codeSent = true
             code = ""
             focus = .code
@@ -225,8 +277,61 @@ struct SignInView: View {
         defer { busy = false }
         do {
             try await store.signIn(email: email, password: password)
+            rememberEmail()
         } catch {
             self.error = error.localizedDescription
         }
+    }
+}
+
+
+/// Admin sign-in with Google, through the website's own Google sign-in. The app
+/// sends the hash of a random verifier; the site answers at this app's URL scheme
+/// with a single-use code, which only this verifier can exchange for a session.
+@MainActor
+final class GoogleAdminSignIn: NSObject, ASWebAuthenticationPresentationContextProviding {
+    enum Failure: LocalizedError {
+        case cancelled
+        case message(String)
+        var errorDescription: String? {
+            switch self {
+            case .cancelled: "Sign-in was cancelled."
+            case .message(let m): m
+            }
+        }
+    }
+
+    private var session: ASWebAuthenticationSession?
+
+    func start() async throws -> (code: String, verifier: String) {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        let verifier = bytes.map { String(format: "%02x", $0) }.joined()
+        let challenge = SHA256.hash(data: Data(verifier.utf8)).map { String(format: "%02x", $0) }.joined()
+        var components = URLComponents(url: Site.baseURL.appendingPathComponent("mobileapi/auth/googlestart"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "challenge", value: challenge)]
+        let scheme = "tclms" + Site.code.lowercased()
+
+        let callback: URL = try await withCheckedThrowingContinuation { continuation in
+            let s = ASWebAuthenticationSession(url: components.url!, callbackURLScheme: scheme) { url, error in
+                if let url { continuation.resume(returning: url) }
+                else if (error as? ASWebAuthenticationSessionError)?.code == .canceledLogin { continuation.resume(throwing: Failure.cancelled) }
+                else { continuation.resume(throwing: Failure.message("Google sign-in could not start. Please try again.")) }
+            }
+            s.presentationContextProvider = self
+            session = s
+            if !s.start() { continuation.resume(throwing: Failure.message("Google sign-in could not start. Please try again.")) }
+        }
+        session = nil
+        let items = URLComponents(url: callback, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        if let message = items.first(where: { $0.name == "error" })?.value { throw Failure.message(message) }
+        guard let code = items.first(where: { $0.name == "code" })?.value, !code.isEmpty else {
+            throw Failure.message("Google sign-in did not complete. Please try again.")
+        }
+        return (code, verifier)
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first ?? ASPresentationAnchor()
     }
 }

@@ -133,6 +133,16 @@ final class LearnerStore: ObservableObject {
         try finishSignIn(reply)
     }
 
+    /// Admin sign-in: swaps the single-use code from Google sign-in for a session.
+    /// The owner account then opens on its Admin view where that is available.
+    func signInWithGoogle(code: String, verifier: String) async throws {
+        let reply: AuthReply = try await API.shared.post("auth/googleexchange", body: [
+            "code": code, "verifier": verifier, "platform": "ios", "app_version": appVersion,
+        ])
+        try finishSignIn(reply)
+        if availableRoles.contains("admin") { await setViewRole("admin") }
+    }
+
     private func finishSignIn(_ reply: AuthReply) throws {
         try Keychain.save(reply.token)
         // Record the role picked on the sign-in screen (the default, Learner, included).
