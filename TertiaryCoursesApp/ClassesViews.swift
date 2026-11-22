@@ -23,10 +23,7 @@ struct ClassesView: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    if let name = store.learner?.firstName, !name.isEmpty {
-                        Text("Hi \(name) 👋")
-                            .font(.title2.bold())
-                    }
+                    if store.staffRole == nil { HomeHeader() }
                     Picker("Classes", selection: $bucket) {
                         ForEach(Bucket.allCases) { b in
                             Text("\(b.rawValue) (\(items(b).count))").tag(b)
@@ -877,6 +874,62 @@ struct StarRating: View {
                 .accessibilityLabel("\(i) star\(i == 1 ? "" : "s"), \(labels[i])")
             }
             Text(labels[value]).font(.caption).foregroundStyle(.secondary).padding(.leading, 4)
+        }
+    }
+}
+
+
+/// Top of the home tab: a welcome, a link to the profile, and (for the owner
+/// account only) the role switcher.
+struct HomeHeader: View {
+    @EnvironmentObject private var store: LearnerStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                AvatarView(image: store.avatar, name: store.learner?.fullName ?? "", size: 48)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Welcome").font(.subheadline).foregroundStyle(.secondary)
+                    Text(store.learner?.firstName.isEmpty == false ? store.learner!.firstName : "back")
+                        .font(.title2.bold())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                Spacer(minLength: 8)
+                Button { store.tab = LearnerStore.accountTab } label: {
+                    Label("My Profile", systemImage: "person.crop.circle")
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Theme.accentSoft, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.accent)
+                .accessibilityIdentifier("myProfileLink")
+            }
+            if store.canSwitchRole {
+                Menu {
+                    Picker("View as", selection: Binding(
+                        get: { store.activeRole },
+                        set: { role in Task { await store.setViewRole(role) } }
+                    )) {
+                        ForEach(store.availableRoles, id: \.self) { Text(LearnerStore.roleName($0)).tag($0) }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.left.arrow.right")
+                        Text("Viewing as \(LearnerStore.roleName(store.activeRole))")
+                        Spacer()
+                        Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold))
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Theme.brand, in: RoundedRectangle(cornerRadius: 12))
+                }
+                .accessibilityIdentifier("viewAsPicker")
+            }
         }
     }
 }

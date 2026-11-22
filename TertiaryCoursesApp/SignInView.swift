@@ -39,6 +39,21 @@ struct SignInView: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Sign in as").font(.subheadline.weight(.semibold))
+                        Picker("Sign in as", selection: $store.loginRole) {
+                            Text("Learner").tag("learner")
+                            Text("Trainer").tag("trainer")
+                        }
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("loginRole")
+                        Text(store.loginRole == "trainer"
+                             ? "See the classes you teach, attendance, payout and training hours."
+                             : "See the courses you are taking. Trainers attending a course sign in as a learner.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Picker("Sign-in method", selection: $method) {
                         ForEach(Method.allCases) { Text($0.rawValue).tag($0) }
                     }

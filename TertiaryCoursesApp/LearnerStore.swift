@@ -30,19 +30,36 @@ final class LearnerStore: ObservableObject {
     }
 
     @Published private(set) var viewRole = UserDefaults.standard.string(forKey: "viewRole") ?? ""
+    /// The role picked on the sign-in screen: "learner" (default) or "trainer".
+    /// A trainer who is taking courses signs in as a learner to see them.
+    @Published var loginRole = UserDefaults.standard.string(forKey: "loginRole") ?? "learner" {
+        didSet { UserDefaults.standard.set(loginRole, forKey: "loginRole") }
+    }
+    /// The selected bottom tab (the home header's My Profile link jumps to Account).
+    /// Shown once after sign-in when the chosen role is not available.
+    @Published var roleNotice: String?
+    @Published var tab = ProcessInfo.processInfo.environment["START_TAB"].flatMap(Int.init) ?? 0
+    static let accountTab = 4
+    static let dashboardTab = 5
+
+    private var isOwner: Bool { learner?.email.lowercased() == "angch@tertiaryinfotech.com" }
 
     var availableRoles: [String] {
         guard let l = learner else { return [] }
+        // Everyone else has exactly one role per sign-in: the one chosen on the
+        // sign-in screen, or Learner when the account does not teach.
+        guard isOwner else { return [loginRole == "trainer" && l.isTrainer ? "trainer" : "learner"] }
         var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
-        if l.email.lowercased() == "angch@tertiaryinfotech.com" {
-            // The franchise control centre belongs to the Singapore site only.
-            roles += ["admin", "marketing", "developer", "franchise_admin"]
-                .filter { (l.roles ?? []).contains($0) && ($0 != "franchise_admin" || Site.code == "SG") }
-        }
+        // The franchise control centre belongs to the Singapore site only.
+        roles += ["admin", "marketing", "developer", "franchise_admin"]
+            .filter { (l.roles ?? []).contains($0) && ($0 != "franchise_admin" || Site.code == "SG") }
         return roles
     }
     var canSwitchRole: Bool { availableRoles.count > 1 }
-    var activeRole: String { availableRoles.contains(viewRole) ? viewRole : (availableRoles.first ?? "learner") }
+    var activeRole: String {
+        if availableRoles.contains(viewRole) { return viewRole }
+        return availableRoles.contains(loginRole) ? loginRole : (availableRoles.first ?? "learner")
+    }
     var isTrainer: Bool { activeRole == "trainer" }
     /// The staff role being viewed, or nil in the trainer and learner views.
     var staffRole: String? { Self.staffRoleNames[activeRole] != nil ? activeRole : nil }
@@ -50,6 +67,7 @@ final class LearnerStore: ObservableObject {
     func setViewRole(_ role: String) async {
         viewRole = role
         UserDefaults.standard.set(role, forKey: "viewRole")
+        tab = staffRole != nil ? Self.dashboardTab : 0
         await refreshClasses()
     }
     private var lastClassRefresh: Date?
@@ -117,7 +135,14 @@ final class LearnerStore: ObservableObject {
 
     private func finishSignIn(_ reply: AuthReply) throws {
         try Keychain.save(reply.token)
+        // Record the role picked on the sign-in screen (the default, Learner, included).
+        UserDefaults.standard.set(loginRole, forKey: "loginRole")
+        viewRole = ""
+        UserDefaults.standard.removeObject(forKey: "viewRole")
         setLearner(reply.learner)
+        if loginRole == "trainer", !reply.learner.isTrainer {
+            roleNotice = "This account does not teach any classes, so you are signed in as a learner."
+        }
         Task { await refreshAll() }
     }
 
@@ -144,6 +169,8 @@ final class LearnerStore: ObservableObject {
         avatarLoadedVersion = nil
         viewRole = ""
         UserDefaults.standard.removeObject(forKey: "viewRole")
+        tab = 0
+        loginRole = "learner"
         Reminders.cancelAll()
         certificates = nil
         orders = nil
@@ -184,6 +211,10 @@ final class LearnerStore: ObservableObject {
     // MARK: Profile
 
     private func setLearner(_ value: Learner) {
+        // Signed in before the sign-in screen asked for a role: keep trainers in the trainer view.
+        if UserDefaults.standard.object(forKey: "loginRole") == nil {
+            loginRole = value.isTrainer ? "trainer" : "learner"
+        }
         learner = value
         // An older site sends no theme; keep the choice made on this device.
         if value.theme != nil { Appearance.apply(value.themeChoice) }

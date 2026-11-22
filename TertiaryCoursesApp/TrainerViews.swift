@@ -519,29 +519,7 @@ struct ProfileSections: View {
                     Text(store.learner?.fullName.isEmpty == false ? store.learner!.fullName : "My account")
                         .font(.title2.weight(.bold))
                         .multilineTextAlignment(.center)
-                    if store.canSwitchRole {
-                        Menu {
-                            Picker("View as", selection: Binding(
-                                get: { store.activeRole },
-                                set: { role in Task { await store.setViewRole(role) } }
-                            )) {
-                                ForEach(store.availableRoles, id: \.self) { Text(LearnerStore.roleName($0)).tag($0) }
-                            }
-                        } label: {
-                            HStack(spacing: 5) {
-                                Text("Viewing as \(LearnerStore.roleName(store.activeRole))")
-                                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.bold))
-                            }
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 7)
-                            .background(Theme.brand, in: Capsule())
-                        }
-                        .accessibilityIdentifier("viewAsPicker")
-                    } else {
-                        StatusChip(text: LearnerStore.roleName(store.activeRole), color: Theme.accent)
-                    }
+                    StatusChip(text: LearnerStore.roleName(store.activeRole), color: Theme.accent)
                     if !badges.isEmpty {
                         FlowLayout(spacing: 6) {
                             ForEach(badges, id: \.self) { badge in
@@ -1050,6 +1028,7 @@ struct StaffDashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    HomeHeader()
                     if let data {
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                             ForEach(data.cards) { StaffCardView(card: $0) }

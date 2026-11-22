@@ -175,10 +175,9 @@ struct GuestTabs: View {
 
 struct LearnerTabs: View {
     @EnvironmentObject private var store: LearnerStore
-    @State private var selection = startTab
 
     var body: some View {
-        TabView(selection: $selection) {
+        TabView(selection: $store.tab) {
             if let role = store.staffRole {
                 StaffDashboardView(role: role)
                     .tabItem { Label("Dashboard", systemImage: "square.grid.2x2.fill") }
@@ -213,5 +212,10 @@ struct LearnerTabs: View {
                 .tabItem { Label("Account", systemImage: "person.crop.circle.fill") }
                 .tag(4)
         }
+        // A staff view opens on its dashboard.
+        .onAppear { if store.staffRole != nil, store.tab == 0 { store.tab = LearnerStore.dashboardTab } }
+        .alert("Signed in", isPresented: Binding(get: { store.roleNotice != nil }, set: { if !$0 { store.roleNotice = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: { Text(store.roleNotice ?? "") }
     }
 }
