@@ -394,6 +394,7 @@ struct ProfileSections: View {
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var phone = ""
+    @State private var linkedin = ""
     @State private var theme: ThemeChoice = Appearance.cached
     @State private var loaded = false
     @State private var saving = false
@@ -420,6 +421,28 @@ struct ProfileSections: View {
     private static var supportsPlayground: Bool { false }
     #endif
 
+    @State private var showPhotoPicker = false
+
+    /// Trainer on the website, whatever view is showing.
+    private var isRealTrainer: Bool { store.learner?.isTrainer ?? false }
+    private var isStaffOrTrainer: Bool { isRealTrainer || store.availableRoles.contains { LearnerStore.staffRoleNames[$0] != nil } }
+
+    /// Short codes of the trainer qualifications on the certifications list.
+    private var badges: [String] {
+        TrainerBadge.all.filter { b in certs.contains { b.matches($0.name) } }.map(\.code)
+    }
+
+    private static func digits(_ phone: String, plus: Bool = false) -> String {
+        let d = phone.filter(\.isNumber)
+        return (plus && phone.trimmingCharacters(in: .whitespaces).hasPrefix("+") ? "+" : "") + d
+    }
+
+    /// wa.me needs the country code: a bare 8-digit Singapore number gets 65.
+    private static func whatsApp(_ phone: String) -> String {
+        let d = digits(phone)
+        return (d.count == 8 && Site.code == "SG") ? "65" + d : d
+    }
+
     private func upload(_ image: UIImage) {
         avatarBusy = true
         Task {
@@ -430,41 +453,89 @@ struct ProfileSections: View {
 
     var body: some View {
         Group {
+            // Who you are: picture, name, roles, trainer badges and contact details.
             Section {
-                VStack(spacing: 12) {
-                    ZStack {
-                        AvatarView(image: store.avatar, name: store.learner?.fullName ?? "", size: 110)
-                        if avatarBusy { ProgressView().padding(30).background(.ultraThinMaterial, in: Circle()) }
-                    }
-                    HStack(spacing: 10) {
-                        PhotosPicker(selection: $photoItem, matching: .images) {
-                            Label("Choose Photo", systemImage: "photo")
-                        }
-                        .accessibilityIdentifier("choosePhoto")
-                        if playgroundAvailable {
-                            Button { showPlayground = true } label: {
-                                Label("Create with AI", systemImage: "apple.intelligence")
+                VStack(spacing: 10) {
+                    ZStack(alignment: .bottomTrailing) {
+                        AvatarView(image: store.avatar, name: store.learner?.fullName ?? "", size: 104)
+                            .overlay { if avatarBusy { ProgressView().padding(30).background(.ultraThinMaterial, in: Circle()) } }
+                        Menu {
+                            Button { showPhotoPicker = true } label: { Label("Choose Photo", systemImage: "photo") }
+                            if playgroundAvailable {
+                                Button { showPlayground = true } label: { Label("Create with Apple Intelligence", systemImage: "apple.intelligence") }
                             }
-                            .accessibilityIdentifier("createAvatarAI")
+                            if store.avatar != nil {
+                                Button(role: .destructive) { Task { try? await store.removeAvatar() } } label: {
+                                    Label("Remove Picture", systemImage: "trash")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "camera.fill")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Theme.brand, in: Circle())
+                                .overlay(Circle().stroke(Theme.card, lineWidth: 2))
                         }
+                        .accessibilityLabel("Change picture")
+                        .accessibilityIdentifier("changePicture")
                     }
-                    .buttonStyle(.bordered)
-                    .font(.subheadline)
-                    if store.avatar != nil {
-                        Button("Remove Picture", role: .destructive) {
-                            Task { try? await store.removeAvatar() }
+                    Text(store.learner?.fullName.isEmpty == false ? store.learner!.fullName : "My account")
+                        .font(.title2.weight(.bold))
+                        .multilineTextAlignment(.center)
+                    if store.canSwitchRole {
+                        Menu {
+                            Picker("View as", selection: Binding(
+                                get: { store.activeRole },
+                                set: { role in Task { await store.setViewRole(role) } }
+                            )) {
+                                ForEach(store.availableRoles, id: \.self) { Text(LearnerStore.roleName($0)).tag($0) }
+                            }
+                        } label: {
+                            HStack(spacing: 5) {
+                                Text("Viewing as \(LearnerStore.roleName(store.activeRole))")
+                                Image(systemName: "chevron.up.chevron.down").font(.caption2.weight(.bold))
+                            }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(Theme.brand, in: Capsule())
                         }
-                        .font(.subheadline)
+                        .accessibilityIdentifier("viewAsPicker")
+                    } else {
+                        StatusChip(text: LearnerStore.roleName(store.activeRole), color: Theme.accent)
+                    }
+                    if !badges.isEmpty {
+                        FlowLayout(spacing: 6) {
+                            ForEach(badges, id: \.self) { badge in
+                                Label(badge, systemImage: "checkmark.seal.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 5)
+                                    .foregroundStyle(Theme.success)
+                                    .background(Theme.success.opacity(0.12), in: Capsule())
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Qualifications: " + badges.joined(separator: ", "))
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-            } header: {
-                Text("Picture")
-            } footer: {
-                Text(playgroundAvailable
-                     ? "Use one of your photos, or create a picture with Apple Intelligence."
-                     : "Use one of your photos.")
+                .padding(.vertical, 8)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+            Section("Contact") {
+                ContactRow(icon: "envelope.fill", title: "Email", value: store.learner?.email ?? "",
+                           url: URL(string: "mailto:" + (store.learner?.email ?? "")))
+                if let p = store.learner?.phone, !p.isEmpty {
+                    ContactRow(icon: "phone.fill", title: "Phone", value: p, url: URL(string: "tel:" + Self.digits(p, plus: true)))
+                    ContactRow(icon: "message.fill", title: "WhatsApp", value: p, url: URL(string: "https://wa.me/" + Self.whatsApp(p)))
+                }
+                if let link = store.learner?.linkedinUrl, !link.isEmpty, let url = URL(string: link) {
+                    ContactRow(icon: "link", title: "LinkedIn", value: link.replacingOccurrences(of: "https://", with: ""), url: url)
+                }
             }
             Section("Name") {
                 TextField("First name", text: $firstName)
@@ -476,12 +547,20 @@ struct ProfileSections: View {
                 TextField("Phone", text: $phone)
                     .textContentType(.telephoneNumber)
                     .keyboardType(.phonePad)
+                if isStaffOrTrainer {
+                    TextField("LinkedIn profile link", text: $linkedin)
+                        .textContentType(.URL)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .accessibilityIdentifier("linkedinField")
+                }
             } header: {
-                Text("Contact")
+                Text("Edit contact")
             } footer: {
-                Text("Your sign-in email is \(store.learner?.email ?? ""). Contact us to change it.")
+                Text("Your phone number is also used for WhatsApp. Your sign-in email is \(store.learner?.email ?? ""); contact us to change it.")
             }
-            if store.isTrainer {
+            if isRealTrainer {
                 Section {
                     ForEach($certs) { $c in
                         VStack(alignment: .leading, spacing: 6) {
@@ -502,10 +581,30 @@ struct ProfileSections: View {
                         Label("Add Certification", systemImage: "plus.circle.fill")
                     }
                     .accessibilityIdentifier("addCertification")
+                    // One-tap trainer qualifications that are not on the list yet.
+                    let missing = TrainerBadge.all.filter { b in !badges.contains(b.code) }
+                    if !missing.isEmpty {
+                        FlowLayout(spacing: 8) {
+                            ForEach(missing, id: \.code) { b in
+                                Button {
+                                    certs.append(CertDraft(name: b.name, issuer: b.issuer))
+                                } label: {
+                                    Label(b.code, systemImage: "plus")
+                                        .font(.caption.weight(.semibold))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Theme.accentSoft, in: Capsule())
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(Theme.accent)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
                 } header: {
                     Text("Certifications")
                 } footer: {
-                    Text("Shown on your trainer profile. Saved with Save Changes and shared with the web app.")
+                    Text("Trainer qualifications such as ACLP and DDDLP show as badges under your name. Saved with Save Changes and shared with the web app.")
                 }
             }
             Section {
@@ -534,6 +633,7 @@ struct ProfileSections: View {
                 .accessibilityIdentifier("saveProfile")
             }
         }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $photoItem, matching: .images)
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             Task {
@@ -555,10 +655,11 @@ struct ProfileSections: View {
             firstName = l.firstName
             lastName = l.lastName
             phone = l.phone ?? ""
+            linkedin = l.linkedinUrl ?? ""
             theme = l.theme == nil ? Appearance.cached : l.themeChoice
         }
-        .task(id: store.isTrainer) {
-            guard store.isTrainer, !certsLoaded else { return }
+        .task(id: isRealTrainer) {
+            guard isRealTrainer, !certsLoaded else { return }
             if let list = try? await store.loadCertifications() {
                 certsLoaded = true
                 certs = list
@@ -581,9 +682,10 @@ struct ProfileSections: View {
                 firstName: firstName.trimmingCharacters(in: .whitespaces),
                 lastName: lastName.trimmingCharacters(in: .whitespaces),
                 phone: phone.trimmingCharacters(in: .whitespaces),
+                linkedin: isStaffOrTrainer ? linkedin.trimmingCharacters(in: .whitespaces) : nil,
                 theme: theme
             )
-            if store.isTrainer, certsLoaded {
+            if isRealTrainer, certsLoaded {
                 try await store.saveCertifications(certs)
                 notice = "Profile and certifications saved."
             }
@@ -807,5 +909,186 @@ struct TrainingHoursView: View {
 
     private func load() async {
         do { reply = try await store.loadTrainingHours(); error = nil } catch { self.error = error.localizedDescription }
+    }
+}
+
+
+// MARK: - Profile helpers
+
+/// Trainer qualifications shown as badges under the name.
+struct TrainerBadge {
+    let code: String
+    let name: String
+    let issuer: String
+
+    func matches(_ certName: String) -> Bool {
+        let n = certName.lowercased()
+        return n.contains(code.lowercased()) || n.contains(name.lowercased())
+    }
+
+    static let all: [TrainerBadge] = [
+        TrainerBadge(code: "ACLP", name: "WSQ Advanced Certificate in Learning and Performance (ACLP)", issuer: "Institute for Adult Learning"),
+        TrainerBadge(code: "ACTA", name: "WSQ Advanced Certificate in Training and Assessment (ACTA)", issuer: "Institute for Adult Learning"),
+        TrainerBadge(code: "DDDLP", name: "WSQ Diploma in Design and Development of Learning for Performance (DDDLP)", issuer: "Institute for Adult Learning"),
+        TrainerBadge(code: "DACE", name: "WSQ Diploma in Adult and Continuing Education (DACE)", issuer: "Institute for Adult Learning"),
+    ]
+}
+
+/// One contact detail; tapping it calls, emails, opens WhatsApp or the LinkedIn profile.
+struct ContactRow: View {
+    let icon: String
+    let title: String
+    let value: String
+    let url: URL?
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Button { if let url { openURL(url) } } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 30, height: 30)
+                    .background(Theme.accentSoft, in: RoundedRectangle(cornerRadius: 8))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title).font(.caption).foregroundStyle(.secondary)
+                    Text(value).font(.subheadline).foregroundStyle(.primary).lineLimit(1).truncationMode(.middle)
+                }
+                Spacer()
+                Image(systemName: "arrow.up.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
+    }
+}
+
+/// Lays chips out left to right, wrapping to new centred rows.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 6
+
+    private func rows(_ subviews: Subviews, width: CGFloat) -> [[(Int, CGSize)]] {
+        var rows: [[(Int, CGSize)]] = [[]]
+        var x: CGFloat = 0
+        for (i, v) in subviews.enumerated() {
+            let size = v.sizeThatFits(.unspecified)
+            if x + size.width > width, !(rows.last?.isEmpty ?? true) { rows.append([]); x = 0 }
+            rows[rows.count - 1].append((i, size))
+            x += size.width + spacing
+        }
+        return rows
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 320
+        let r = rows(subviews, width: width)
+        let height = r.reduce(0) { $0 + ($1.map { $0.1.height }.max() ?? 0) } + spacing * CGFloat(max(r.count - 1, 0))
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in rows(subviews, width: bounds.width) {
+            let rowWidth = row.reduce(0) { $0 + $1.1.width } + spacing * CGFloat(max(row.count - 1, 0))
+            var x = bounds.minX + (bounds.width - rowWidth) / 2
+            let h = row.map { $0.1.height }.max() ?? 0
+            for (i, size) in row {
+                subviews[i].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            y += h + spacing
+        }
+    }
+}
+
+// MARK: - Staff dashboard (Admin, Marketing, Developer, Franchise Admin)
+
+struct StaffDashboardView: View {
+    let role: String
+    @EnvironmentObject private var store: LearnerStore
+    @State private var data: StaffDashboard?
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if let data {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                            ForEach(data.cards) { StaffCardView(card: $0) }
+                        }
+                        ForEach(data.lists) { list in
+                            Text(list.title).font(.headline).padding(.top, 4)
+                            VStack(spacing: 0) {
+                                ForEach(Array(list.rows.enumerated()), id: \.offset) { i, row in
+                                    HStack(alignment: .top, spacing: 12) {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(row.title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                                            if !row.subtitle.isEmpty {
+                                                Text(row.subtitle).font(.footnote).foregroundStyle(.secondary)
+                                                    .fixedSize(horizontal: false, vertical: true)
+                                            }
+                                        }
+                                        Spacer(minLength: 8)
+                                        if !row.value.isEmpty {
+                                            Text(row.value).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.accent)
+                                                .multilineTextAlignment(.trailing)
+                                        }
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    if i < list.rows.count - 1 { Divider().padding(.leading, 16) }
+                                }
+                            }
+                            .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
+                        }
+                        Text("Updated \(data.updatedAt). Pull down to refresh.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else if let error {
+                        ErrorCard(message: error) { Task { await load() } }
+                    } else {
+                        ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
+                    }
+                }
+                .padding(20)
+            }
+            .background(Theme.page)
+            .refreshable { await load() }
+            .task(id: role) { data = nil; await load() }
+            .navigationTitle(LearnerStore.roleName(role))
+            .navigationBarTitleDisplayMode(.inline)
+            .brandToolbar()
+        }
+    }
+
+    private func load() async {
+        do { data = try await store.loadStaffDashboard(role); error = nil } catch { self.error = error.localizedDescription }
+    }
+}
+
+struct StaffCardView: View {
+    let card: StaffCard
+
+    private var tint: Color { card.tone == "warning" ? Theme.warning : Theme.accent }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: card.icon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(tint)
+                .frame(width: 32, height: 32)
+                .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 9))
+            Text(card.value).font(.system(size: 28, weight: .bold)).foregroundStyle(card.tone == "warning" ? Theme.warning : .primary)
+            Text(card.title).font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
+        .padding(14)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(card.title): \(card.value)")
     }
 }

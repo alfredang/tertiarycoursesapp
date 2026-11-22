@@ -14,6 +14,8 @@ struct Learner: Decodable, Hashable {
     let roles: [String]?
     /// Unix time the profile picture was last set; nil when there is none.
     let avatarVersion: Int?
+    /// Trainers and staff only; empty when not set.
+    let linkedinUrl: String?
 
     var isTrainer: Bool { roles?.contains("trainer") ?? false }
     var themeChoice: ThemeChoice { ThemeChoice(rawValue: theme ?? "") ?? .system }
@@ -490,4 +492,35 @@ extension Fmt {
     static func hours(_ h: Double) -> String {
         (h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h)) + " h"
     }
+}
+
+
+// MARK: - Staff dashboard (cards and lists decided by the server)
+
+struct StaffCard: Decodable, Hashable, Identifiable {
+    let title: String
+    let value: String
+    let icon: String
+    let tone: String
+    var id: String { title }
+}
+
+struct StaffRow: Decodable, Hashable {
+    let title: String
+    let subtitle: String
+    let value: String
+}
+
+struct StaffList: Decodable, Hashable, Identifiable {
+    let title: String
+    let rows: [StaffRow]
+    var id: String { title }
+}
+
+struct StaffDashboard: Decodable {
+    let role: String
+    let title: String
+    let cards: [StaffCard]
+    let lists: [StaffList]
+    let updatedAt: String
 }

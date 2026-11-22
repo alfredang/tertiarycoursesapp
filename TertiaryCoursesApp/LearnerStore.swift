@@ -15,17 +15,39 @@ final class LearnerStore: ObservableObject {
     private var avatarLoadedVersion: Int?
 
     var isSignedIn: Bool { learner != nil }
-    /// A trainer account can look at the app as a learner. Only the account below gets the switcher;
-    /// it changes what this device shows, never what the server allows.
-    @Published private(set) var viewAsLearner = UserDefaults.standard.bool(forKey: "viewAsLearner")
-    var canSwitchRole: Bool {
-        (learner?.isTrainer ?? false) && learner?.email.lowercased() == "angch@tertiaryinfotech.com"
-    }
-    var isTrainer: Bool { (learner?.isTrainer ?? false) && !(canSwitchRole && viewAsLearner) }
+    // MARK: Roles
+    //
+    // The app shows one role at a time. A trainer can look at the app as a learner
+    // (their own classes, certificates and billing). Staff dashboards are offered to
+    // the owner account only, and only for roles the website says it holds. The
+    // choice changes what this device shows, never what the server allows.
 
-    func setViewAsLearner(_ value: Bool) async {
-        viewAsLearner = value
-        UserDefaults.standard.set(value, forKey: "viewAsLearner")
+    static let staffRoleNames: [String: String] = [
+        "admin": "Admin", "marketing": "Marketing", "developer": "Developer", "franchise_admin": "Franchise Admin",
+    ]
+    static func roleName(_ role: String) -> String {
+        staffRoleNames[role] ?? (role == "trainer" ? "Trainer" : "Learner")
+    }
+
+    @Published private(set) var viewRole = UserDefaults.standard.string(forKey: "viewRole") ?? ""
+
+    var availableRoles: [String] {
+        guard let l = learner else { return [] }
+        var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
+        if l.email.lowercased() == "angch@tertiaryinfotech.com" {
+            roles += ["admin", "marketing", "developer", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
+        }
+        return roles
+    }
+    var canSwitchRole: Bool { availableRoles.count > 1 }
+    var activeRole: String { availableRoles.contains(viewRole) ? viewRole : (availableRoles.first ?? "learner") }
+    var isTrainer: Bool { activeRole == "trainer" }
+    /// The staff role being viewed, or nil in the trainer and learner views.
+    var staffRole: String? { Self.staffRoleNames[activeRole] != nil ? activeRole : nil }
+
+    func setViewRole(_ role: String) async {
+        viewRole = role
+        UserDefaults.standard.set(role, forKey: "viewRole")
         await refreshClasses()
     }
     private var lastClassRefresh: Date?
@@ -118,8 +140,8 @@ final class LearnerStore: ObservableObject {
         Appearance.reset()
         avatar = nil
         avatarLoadedVersion = nil
-        viewAsLearner = false
-        UserDefaults.standard.removeObject(forKey: "viewAsLearner")
+        viewRole = ""
+        UserDefaults.standard.removeObject(forKey: "viewRole")
         Reminders.cancelAll()
         certificates = nil
         orders = nil
@@ -209,18 +231,24 @@ final class LearnerStore: ObservableObject {
 
     /// Saves the profile on the site. The appearance is applied at once, and kept
     /// on this device even when the site cannot store it yet.
-    func updateProfile(firstName: String, lastName: String, phone: String, theme: ThemeChoice) async throws -> String {
+    func updateProfile(firstName: String, lastName: String, phone: String, linkedin: String?, theme: ThemeChoice) async throws -> String {
         Appearance.apply(theme)
         do {
-            let reply: ProfileReply = try await API.shared.post("profile", body: [
-                "first_name": firstName, "last_name": lastName, "phone": phone, "theme": theme.rawValue,
-            ])
+            var body: [String: Any] = ["first_name": firstName, "last_name": lastName, "phone": phone, "theme": theme.rawValue]
+            if let linkedin { body["linkedin_url"] = linkedin }
+            let reply: ProfileReply = try await API.shared.post("profile", body: body)
             learner = reply.learner
             if reply.learner.theme != nil { Appearance.apply(reply.learner.themeChoice) }
             return reply.message ?? "Profile updated."
         } catch let error as APIError where error.status == 404 {
             throw APIError(message: "Your appearance is saved on this device. Editing your name and phone will be available shortly.", status: 404)
         }
+    }
+
+    // MARK: Staff dashboard
+
+    func loadStaffDashboard(_ role: String) async throws -> StaffDashboard {
+        try await API.shared.get("staff/dashboard", query: ["role": role])
     }
 
     // MARK: Trainer payout and training hours

@@ -179,6 +179,11 @@ struct LearnerTabs: View {
 
     var body: some View {
         TabView(selection: $selection) {
+            if let role = store.staffRole {
+                StaffDashboardView(role: role)
+                    .tabItem { Label("Dashboard", systemImage: "square.grid.2x2.fill") }
+                    .tag(5)
+            }
             ClassesView()
                 .tabItem { Label("My Classes", systemImage: "graduationcap.fill") }
                 .tag(0)
@@ -187,7 +192,9 @@ struct LearnerTabs: View {
                 .tag(1)
             // A trainer sees what they are paid and the hours they have taught;
             // a learner sees certificates and billing.
-            if store.isTrainer {
+            if store.staffRole != nil {
+                // Staff: Dashboard, My Classes, Calendar, Account.
+            } else if store.isTrainer {
                 PayoutView()
                     .tabItem { Label("Payout", systemImage: "banknote.fill") }
                     .tag(2)

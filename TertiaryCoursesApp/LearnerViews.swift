@@ -355,24 +355,6 @@ struct AccountView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
-                if store.canSwitchRole {
-                    Section {
-                        Picker("View as", selection: Binding(
-                            get: { store.viewAsLearner },
-                            set: { v in Task { await store.setViewAsLearner(v) } }
-                        )) {
-                            Text("Trainer").tag(false)
-                            Text("Learner").tag(true)
-                        }
-                        .pickerStyle(.segmented)
-                        .accessibilityIdentifier("viewAsPicker")
-                    } header: {
-                        Text("View as")
-                    } footer: {
-                        Text("See the app the way your learners do, or as a trainer.")
-                    }
-                }
-
                 ProfileSections()
 
                 Section {
