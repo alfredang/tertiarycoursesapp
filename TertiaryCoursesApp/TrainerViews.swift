@@ -273,16 +273,6 @@ struct TrainerClassView: View {
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("showSurveyQR")
                 }
-                if let url = d.traqomUrl, !url.isEmpty {
-                    Button {
-                        surveyQR = SurveyLink(title: "TRAQOM Survey", url: url,
-                                              hint: "Every learner must complete the SSG TRAQOM survey before the class ends.")
-                    } label: {
-                        Label("Show TRAQOM Survey QR", systemImage: "qrcode").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("showTraqomQR")
-                }
                 Text("Learners give feedback in this app from the first day of class.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

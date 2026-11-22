@@ -42,7 +42,9 @@ final class LearnerStore: ObservableObject {
     static let accountTab = 4
     static let dashboardTab = 5
 
-    private var isOwner: Bool { learner?.email.lowercased() == "angch@tertiaryinfotech.com" }
+    /// The one account that can switch between roles, and only in the Singapore app:
+    /// the MY and GH apps look the same for everyone.
+    private var isOwner: Bool { Site.code == "SG" && learner?.email.lowercased() == "angch@tertiaryinfotech.com" }
 
     var availableRoles: [String] {
         guard let l = learner else { return [] }
@@ -50,9 +52,7 @@ final class LearnerStore: ObservableObject {
         // sign-in screen, or Learner when the account does not teach.
         guard isOwner else { return [loginRole == "trainer" && l.isTrainer ? "trainer" : "learner"] }
         var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
-        // The franchise control centre belongs to the Singapore site only.
-        roles += ["admin", "marketing", "developer", "franchise_admin"]
-            .filter { (l.roles ?? []).contains($0) && ($0 != "franchise_admin" || Site.code == "SG") }
+        roles += ["admin", "marketing", "developer", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
         return roles
     }
     var canSwitchRole: Bool { availableRoles.count > 1 }
