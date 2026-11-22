@@ -38,6 +38,18 @@ final class API {
         try await send(path, method: "POST", query: [:], body: body)
     }
 
+    /// Raw bytes of an authenticated GET (the profile picture).
+    func getData(_ path: String) async throws -> Data {
+        var request = URLRequest(url: Site.baseURL.appendingPathComponent("mobileapi/" + path))
+        request.timeoutInterval = 30
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+        if let token { request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization") }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(status) else { throw APIError(message: "No picture.", status: status) }
+        return data
+    }
+
     private func send<T: Decodable>(_ path: String, method: String, query: [String: String], body: [String: Any]?) async throws -> T {
         var components = URLComponents(url: Site.baseURL.appendingPathComponent("mobileapi/" + path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty {

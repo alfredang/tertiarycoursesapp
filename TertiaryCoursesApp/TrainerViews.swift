@@ -1,5 +1,9 @@
 import CoreImage.CIFilterBuiltins
 import SwiftUI
+import PhotosUI
+#if canImport(ImagePlayground)
+import ImagePlayground
+#endif
 
 /// A class the signed-in trainer teaches: overview, materials and attendance.
 struct TrainerClassView: View {
@@ -375,11 +379,18 @@ struct CheckInQRView: View {
     }
 }
 
-// MARK: - Edit profile
+// MARK: - Profile sections (the top of the Account page)
 
-struct EditProfileView: View {
+/// A trainer's certification as edited in the form.
+struct CertDraft: Identifiable {
+    let id = UUID()
+    var name = ""
+    var issuer = ""
+    var year = ""
+}
+
+struct ProfileSections: View {
     @EnvironmentObject private var store: LearnerStore
-    @Environment(\.dismiss) private var dismiss
     @State private var firstName = ""
     @State private var lastName = ""
     @State private var phone = ""
@@ -388,9 +399,73 @@ struct EditProfileView: View {
     @State private var saving = false
     @State private var message: String?
     @State private var saved = false
+    @State private var photoItem: PhotosPickerItem?
+    @State private var showPlayground = false
+    @State private var avatarBusy = false
+    @State private var avatarError: String?
+    @State private var certs: [CertDraft] = []
+    @State private var certsLoaded = false
+
+    private var playgroundAvailable: Bool {
+        #if canImport(ImagePlayground)
+        if #available(iOS 18.2, *) { return ProfileSections.supportsPlayground }
+        #endif
+        return false
+    }
+
+    #if canImport(ImagePlayground)
+    @available(iOS 18.2, *)
+    private static var supportsPlayground: Bool { ImagePlaygroundViewController.isAvailable }
+    #else
+    private static var supportsPlayground: Bool { false }
+    #endif
+
+    private func upload(_ image: UIImage) {
+        avatarBusy = true
+        Task {
+            do { try await store.setAvatar(image) } catch { avatarError = error.localizedDescription }
+            avatarBusy = false
+        }
+    }
 
     var body: some View {
-        Form {
+        Group {
+            Section {
+                VStack(spacing: 12) {
+                    ZStack {
+                        AvatarView(image: store.avatar, name: store.learner?.fullName ?? "", size: 110)
+                        if avatarBusy { ProgressView().padding(30).background(.ultraThinMaterial, in: Circle()) }
+                    }
+                    HStack(spacing: 10) {
+                        PhotosPicker(selection: $photoItem, matching: .images) {
+                            Label("Choose Photo", systemImage: "photo")
+                        }
+                        .accessibilityIdentifier("choosePhoto")
+                        if playgroundAvailable {
+                            Button { showPlayground = true } label: {
+                                Label("Create with AI", systemImage: "apple.intelligence")
+                            }
+                            .accessibilityIdentifier("createAvatarAI")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .font(.subheadline)
+                    if store.avatar != nil {
+                        Button("Remove Picture", role: .destructive) {
+                            Task { try? await store.removeAvatar() }
+                        }
+                        .font(.subheadline)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+            } header: {
+                Text("Picture")
+            } footer: {
+                Text(playgroundAvailable
+                     ? "Use one of your photos, or create a picture with Apple Intelligence."
+                     : "Use one of your photos.")
+            }
             Section("Name") {
                 TextField("First name", text: $firstName)
                     .textContentType(.givenName)
@@ -405,6 +480,33 @@ struct EditProfileView: View {
                 Text("Contact")
             } footer: {
                 Text("Your sign-in email is \(store.learner?.email ?? ""). Contact us to change it.")
+            }
+            if store.isTrainer {
+                Section {
+                    ForEach($certs) { $c in
+                        VStack(alignment: .leading, spacing: 6) {
+                            TextField("Certification", text: $c.name)
+                            HStack {
+                                TextField("Issuer", text: $c.issuer)
+                                TextField("Year", text: $c.year)
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 64)
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .onDelete { certs.remove(atOffsets: $0) }
+                    Button { certs.append(CertDraft()) } label: {
+                        Label("Add Certification", systemImage: "plus.circle.fill")
+                    }
+                    .accessibilityIdentifier("addCertification")
+                } header: {
+                    Text("Certifications")
+                } footer: {
+                    Text("Shown on your trainer profile. Saved with Save Changes and shared with the web app.")
+                }
             }
             Section {
                 Picker("Appearance", selection: $theme) {
@@ -432,8 +534,21 @@ struct EditProfileView: View {
                 .accessibilityIdentifier("saveProfile")
             }
         }
-        .navigationTitle("Edit Profile")
-        .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: photoItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
+                    upload(image)
+                } else {
+                    avatarError = "That picture could not be opened."
+                }
+                photoItem = nil
+            }
+        }
+        .modifier(PlaygroundSheet(isPresented: $showPlayground, name: store.learner?.firstName ?? "") { upload($0) })
+        .alert("Picture", isPresented: Binding(get: { avatarError != nil }, set: { if !$0 { avatarError = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: { Text(avatarError ?? "") }
         .onAppear {
             guard !loaded, let l = store.learner else { return }
             loaded = true
@@ -442,9 +557,16 @@ struct EditProfileView: View {
             phone = l.phone ?? ""
             theme = l.theme == nil ? Appearance.cached : l.themeChoice
         }
+        .task(id: store.isTrainer) {
+            guard store.isTrainer, !certsLoaded else { return }
+            if let list = try? await store.loadCertifications() {
+                certsLoaded = true
+                certs = list
+            }
+        }
         // Show the chosen appearance straight away; Save stores it on the account.
         .onChange(of: theme) { _, t in Appearance.apply(t) }
-        .alert("Profile", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil; if saved { dismiss() } } })) {
+        .alert("Profile", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(message ?? "")
@@ -455,15 +577,44 @@ struct EditProfileView: View {
         saving = true
         defer { saving = false }
         do {
-            message = try await store.updateProfile(
+            var notice = try await store.updateProfile(
                 firstName: firstName.trimmingCharacters(in: .whitespaces),
                 lastName: lastName.trimmingCharacters(in: .whitespaces),
                 phone: phone.trimmingCharacters(in: .whitespaces),
                 theme: theme
             )
+            if store.isTrainer, certsLoaded {
+                try await store.saveCertifications(certs)
+                notice = "Profile and certifications saved."
+            }
+            message = notice
             saved = true
         } catch {
             message = error.localizedDescription
         }
+    }
+}
+
+
+/// Apple Intelligence picture creation (Image Playground). Does nothing on devices
+/// or iOS versions that do not have it; the button is hidden there.
+struct PlaygroundSheet: ViewModifier {
+    @Binding var isPresented: Bool
+    let name: String
+    let onPicked: (UIImage) -> Void
+
+    func body(content: Content) -> some View {
+        #if canImport(ImagePlayground)
+        if #available(iOS 18.2, *) {
+            content.imagePlaygroundSheet(
+                isPresented: $isPresented,
+                concept: "a friendly profile picture portrait"
+            ) { url in
+                if let data = try? Data(contentsOf: url), let image = UIImage(data: data) { onPicked(image) }
+            }
+        } else { content }
+        #else
+        content
+        #endif
     }
 }

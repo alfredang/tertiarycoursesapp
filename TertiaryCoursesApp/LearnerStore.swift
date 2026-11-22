@@ -11,9 +11,23 @@ final class LearnerStore: ObservableObject {
     @Published var certificates: [CertificateInfo]?
     @Published var orders: [Order]?
     @Published var loadError: String?
+    @Published private(set) var avatar: UIImage?
+    private var avatarLoadedVersion: Int?
 
     var isSignedIn: Bool { learner != nil }
-    var isTrainer: Bool { learner?.isTrainer ?? false }
+    /// A trainer account can look at the app as a learner. Only the account below gets the switcher;
+    /// it changes what this device shows, never what the server allows.
+    @Published private(set) var viewAsLearner = UserDefaults.standard.bool(forKey: "viewAsLearner")
+    var canSwitchRole: Bool {
+        (learner?.isTrainer ?? false) && learner?.email.lowercased() == "angch@tertiaryinfotech.com"
+    }
+    var isTrainer: Bool { (learner?.isTrainer ?? false) && !(canSwitchRole && viewAsLearner) }
+
+    func setViewAsLearner(_ value: Bool) async {
+        viewAsLearner = value
+        UserDefaults.standard.set(value, forKey: "viewAsLearner")
+        await refreshClasses()
+    }
     private var lastClassRefresh: Date?
 
     private var appVersion: String {
@@ -102,6 +116,10 @@ final class LearnerStore: ObservableObject {
         trainerClasses = nil
         lastClassRefresh = nil
         Appearance.reset()
+        avatar = nil
+        avatarLoadedVersion = nil
+        viewAsLearner = false
+        UserDefaults.standard.removeObject(forKey: "viewAsLearner")
         Reminders.cancelAll()
         certificates = nil
         orders = nil
@@ -145,6 +163,48 @@ final class LearnerStore: ObservableObject {
         learner = value
         // An older site sends no theme; keep the choice made on this device.
         if value.theme != nil { Appearance.apply(value.themeChoice) }
+        syncAvatar(value.avatarVersion)
+    }
+
+    // MARK: Profile picture
+
+    /// Downloads the picture when the site has a newer one than this device shows.
+    private func syncAvatar(_ version: Int?) {
+        guard let version else { avatar = nil; avatarLoadedVersion = nil; return }
+        guard version != avatarLoadedVersion else { return }
+        avatarLoadedVersion = version
+        Task {
+            if let data = try? await API.shared.getData("profile/avatar"), let image = UIImage(data: data) {
+                avatar = image
+            }
+        }
+    }
+
+    /// Shrinks the picture to a 512px square JPEG, shows it at once and uploads it.
+    func setAvatar(_ image: UIImage) async throws {
+        let side: CGFloat = 512
+        let crop = min(image.size.width, image.size.height)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let square = UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { _ in
+            let scale = side / crop
+            image.draw(in: CGRect(x: (side - image.size.width * scale) / 2, y: (side - image.size.height * scale) / 2,
+                                  width: image.size.width * scale, height: image.size.height * scale))
+        }
+        guard let jpeg = square.jpegData(compressionQuality: 0.85) else {
+            throw APIError(message: "That picture could not be used.")
+        }
+        let reply: ProfileReply = try await API.shared.post("profile/avatar", body: ["image": jpeg.base64EncodedString()])
+        avatar = square
+        learner = reply.learner
+        avatarLoadedVersion = reply.learner.avatarVersion
+    }
+
+    func removeAvatar() async throws {
+        let reply: ProfileReply = try await API.shared.post("profile/avatar", body: ["remove": 1])
+        avatar = nil
+        learner = reply.learner
+        avatarLoadedVersion = nil
     }
 
     /// Saves the profile on the site. The appearance is applied at once, and kept
@@ -161,6 +221,21 @@ final class LearnerStore: ObservableObject {
         } catch let error as APIError where error.status == 404 {
             throw APIError(message: "Your appearance is saved on this device. Editing your name and phone will be available shortly.", status: 404)
         }
+    }
+
+    // MARK: Trainer certifications
+
+    private struct CertsReply: Decodable { let certifications: [CertItem] }
+    private struct CertItem: Decodable { let name: String; let issuer: String; let year: Int? }
+
+    func loadCertifications() async throws -> [CertDraft] {
+        let reply: CertsReply = try await API.shared.get("trainer/certifications")
+        return reply.certifications.map { CertDraft(name: $0.name, issuer: $0.issuer, year: $0.year.map(String.init) ?? "") }
+    }
+
+    func saveCertifications(_ list: [CertDraft]) async throws {
+        let items: [[String: Any]] = list.map { ["name": $0.name, "issuer": $0.issuer, "year": $0.year] }
+        let _: CertsReply = try await API.shared.post("trainer/certifications", body: ["items": items])
     }
 
     // MARK: Trainer

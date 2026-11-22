@@ -355,25 +355,25 @@ struct AccountView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
-                Section {
-                    NavigationLink(value: "profile") {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Text(store.learner?.fullName.isEmpty == false ? store.learner!.fullName : "My account")
-                                    .font(.headline)
-                                if store.isTrainer { StatusChip(text: "Trainer", color: Theme.accent) }
-                            }
-                            Text(store.learner?.email ?? "")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Text("Edit profile and appearance")
-                                .font(.caption)
-                                .foregroundStyle(Theme.accent)
+                if store.canSwitchRole {
+                    Section {
+                        Picker("View as", selection: Binding(
+                            get: { store.viewAsLearner },
+                            set: { v in Task { await store.setViewAsLearner(v) } }
+                        )) {
+                            Text("Trainer").tag(false)
+                            Text("Learner").tag(true)
                         }
-                        .padding(.vertical, 4)
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("viewAsPicker")
+                    } header: {
+                        Text("View as")
+                    } footer: {
+                        Text("See the app the way your learners do, or as a trainer.")
                     }
-                    .accessibilityIdentifier("editProfile")
                 }
+
+                ProfileSections()
 
                 Section {
                     ReminderSettingsRow()
@@ -423,11 +423,6 @@ struct AccountView: View {
             .navigationTitle("Account")
             .navigationBarTitleDisplayMode(.inline)
             .brandToolbar()
-            .navigationDestination(for: String.self) { _ in EditProfileView() }
-            #if DEBUG
-            // Screenshot automation: OPEN_PROFILE=1 opens Edit Profile.
-            .onAppear { if ProcessInfo.processInfo.environment["OPEN_PROFILE"] == "1", path.isEmpty { path.append("profile") } }
-            #endif
             .confirmationDialog("Sign out of \(Site.appName)?", isPresented: $confirmSignOut, titleVisibility: .visible) {
                 Button("Sign Out", role: .destructive) { Task { await store.signOut() } }
             }
@@ -452,5 +447,34 @@ struct AccountView: View {
         } catch {
             message = error.localizedDescription
         }
+    }
+}
+
+
+/// The profile picture, or the person's initials on the brand colour.
+struct AvatarView: View {
+    let image: UIImage?
+    let name: String
+    var size: CGFloat = 80
+
+    private var initials: String {
+        let parts = name.split(separator: " ").prefix(2).compactMap { $0.first }
+        return parts.isEmpty ? "?" : String(parts).uppercased()
+    }
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                ZStack {
+                    Theme.brand
+                    Text(initials).font(.system(size: size * 0.38, weight: .semibold)).foregroundStyle(.white)
+                }
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
     }
 }

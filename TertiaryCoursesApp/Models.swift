@@ -12,6 +12,8 @@ struct Learner: Decodable, Hashable {
     let phone: String?
     let theme: String?
     let roles: [String]?
+    /// Unix time the profile picture was last set; nil when there is none.
+    let avatarVersion: Int?
 
     var isTrainer: Bool { roles?.contains("trainer") ?? false }
     var themeChoice: ThemeChoice { ThemeChoice(rawValue: theme ?? "") ?? .system }
