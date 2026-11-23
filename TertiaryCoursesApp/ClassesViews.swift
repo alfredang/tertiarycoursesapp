@@ -69,7 +69,7 @@ struct ClassesView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await store.refreshClasses() }
+            .pullToRefresh { await store.refreshClasses() }
             .navigationTitle("My Classes")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, prompt: "Find your course")
@@ -330,7 +330,7 @@ struct ClassDetailView: View {
         .background(Theme.page)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
         .task { await load() }
         .alert("Attendance", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
             Button("OK", role: .cancel) {}
@@ -931,5 +931,14 @@ struct HomeHeader: View {
                 .accessibilityIdentifier("viewAsPicker")
             }
         }
+    }
+}
+
+extension View {
+    /// Pull down to refresh. The refresh runs in its own task: SwiftUI cancels a
+    /// `.refreshable` task when the screen redraws part-way (the learner list arrives
+    /// first), which dropped the trainer list's request and made the pull look dead.
+    func pullToRefresh(_ action: @escaping @MainActor () async -> Void) -> some View {
+        refreshable { await Task { @MainActor in await action() }.value }
     }
 }

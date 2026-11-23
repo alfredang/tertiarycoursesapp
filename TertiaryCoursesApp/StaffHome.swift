@@ -111,7 +111,7 @@ struct AdminHomeView: View {
             }
             .background(Theme.page)
             .scrollDismissesKeyboard(.interactively)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task { if data == nil { await load() } }
             .navigationTitle("Admin")
             .navigationBarTitleDisplayMode(.inline)
@@ -216,7 +216,7 @@ struct DeveloperHomeView: View {
             }
             .background(Theme.page)
             .scrollDismissesKeyboard(.interactively)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task { if data == nil { await load() } }
             .navigationTitle("Developer")
             .navigationBarTitleDisplayMode(.inline)
@@ -512,7 +512,7 @@ struct AdminCalendarView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task(id: month) { await load() }
             .navigationTitle("Academy Calendar")
             .navigationBarTitleDisplayMode(.inline)

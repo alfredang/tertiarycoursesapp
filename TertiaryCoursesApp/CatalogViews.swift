@@ -81,7 +81,7 @@ struct CatalogView: View {
             .padding(20)
         }
         .background(Theme.page)
-        .refreshable { await catalog.refresh() }
+        .pullToRefresh { await catalog.refresh() }
         .navigationTitle("Courses")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search courses")

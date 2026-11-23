@@ -78,7 +78,7 @@ struct CalendarView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await store.refreshClasses() }
+            .pullToRefresh { await store.refreshClasses() }
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: ClassItem.self) { ClassDestination(item: $0) }
@@ -197,7 +197,7 @@ struct CertificatesView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await store.refreshCertificates() }
+            .pullToRefresh { await store.refreshCertificates() }
             .navigationTitle("Certificates")
             .navigationBarTitleDisplayMode(.inline)
             .brandToolbar()
@@ -243,7 +243,7 @@ struct BillingView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await store.refreshBilling() }
+            .pullToRefresh { await store.refreshBilling() }
             .navigationTitle("Billing")
             .navigationBarTitleDisplayMode(.inline)
             .brandToolbar()

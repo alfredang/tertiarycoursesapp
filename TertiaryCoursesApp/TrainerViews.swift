@@ -58,7 +58,7 @@ struct TrainerClassView: View {
         .background(Theme.page)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .refreshable { await load() }
+        .pullToRefresh { await load() }
         .task { await load() }
         .documentViewer($doc)
         .sheet(isPresented: $showQR) {
@@ -783,7 +783,7 @@ struct PayoutView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task { if reply == nil { await load() } }
             .navigationTitle("Payout")
             .navigationBarTitleDisplayMode(.inline)
@@ -920,7 +920,7 @@ struct TrainingHoursView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task { if reply == nil { await load() } }
             .navigationTitle("Training Hours")
             .navigationBarTitleDisplayMode(.inline)
@@ -1078,7 +1078,7 @@ struct StaffDashboardView: View {
                 .padding(20)
             }
             .background(Theme.page)
-            .refreshable { await load() }
+            .pullToRefresh { await load() }
             .task(id: role) { data = nil; await load() }
             .navigationTitle(LearnerStore.roleName(role))
             .navigationBarTitleDisplayMode(.inline)
