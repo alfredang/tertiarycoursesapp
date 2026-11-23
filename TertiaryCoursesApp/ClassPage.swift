@@ -64,8 +64,13 @@ struct LessonTopic: Decodable, Hashable {
 struct PracticeExam: Decodable, Hashable {
     let examCode: String
     let examUrl: String?
+    /// The self-register form (pre-filled for a learner). The apps never show it as a QR code:
+    /// the QR is on the web class page only.
     let selfRegisterUrl: String
     let open: Bool?
+    /// The signed-in person is registered for this class's exam (a trainer is registered
+    /// automatically); nil when the exams site could not be reached.
+    let registered: Bool?
 }
 
 struct FeedbackQuestion: Decodable, Hashable {
@@ -721,6 +726,56 @@ struct SupportView: View {
             message = ""
         } catch {
             problem = error.localizedDescription
+        }
+    }
+}
+
+
+// MARK: - Practice Exam
+
+/// The Practice Exam section of the class page. No QR code in the apps: the learner (or the
+/// trainer, for someone without the app) fills in the self-register form inside the app.
+struct PracticeExamBody: View {
+    let exam: PracticeExam
+    let trainer: Bool
+    let openForm: (URL) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if exam.registered == true {
+                Label(trainer ? "You are registered for the \(exam.examCode) practice exam."
+                              : "You are registered for the \(exam.examCode) practice exam. Sign in with your email to start it.",
+                      systemImage: "checkmark.seal.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.success)
+            } else if trainer {
+                Text("You are registered for the \(exam.examCode) practice exam automatically. Learners register with the self-register form; the QR code for the class to scan is on the web class page.")
+                    .font(.subheadline)
+            } else {
+                Text("Register for the \(exam.examCode) practice exam on Tertiary Exams. We email you the exam link.")
+                    .font(.subheadline)
+            }
+            if exam.open == false && exam.registered != true {
+                Text("Registration opens the day before the class and closes 7 days after it ends.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            if exam.registered != true || trainer, exam.open != false, let url = URL(string: exam.selfRegisterUrl) {
+                Button { openForm(url) } label: {
+                    Label(trainer ? "Open Self-Register Form" : "Register for the Practice Exam",
+                          systemImage: "square.and.pencil")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.accent)
+                .accessibilityIdentifier("practiceExamForm")
+            }
+            if let site = exam.examUrl, !site.isEmpty, let url = URL(string: site.hasSuffix("/login") ? site : site + "/login") {
+                Link(destination: url) {
+                    Label("Open Tertiary Exams", systemImage: "arrow.up.right.square")
+                }
+                .font(.subheadline.weight(.semibold))
+            }
         }
     }
 }

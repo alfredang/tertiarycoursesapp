@@ -282,6 +282,7 @@ struct ClassDetailView: View {
     @State private var checkingIn = false
     @State private var notice: String?
     @State private var doc: DocLink?
+    @State private var examForm: DocLink?
     @State private var quiz: QuizSummary?
     @State private var openedQuiz = false
     @State private var showSurvey = ProcessInfo.processInfo.environment["OPEN_SURVEY"] == "1" && Self.debugBuild
@@ -311,6 +312,11 @@ struct ClassDetailView: View {
                         quiz = QuizSummary(quizId: link.quizId ?? 0, title: link.title,
                                            questions: link.questions ?? 0, previous: link.previous)
                     }
+                    if let pe = d.practiceExam {
+                        FoldSection(title: "Practice Exam", icon: "graduationcap", badge: pe.examCode, open: $open) {
+                            PracticeExamBody(exam: pe, trainer: false) { examForm = DocLink(title: "\(pe.examCode) Practice Exam", url: $0) }
+                        }
+                    }
                     FoldSection(title: "Course Survey", icon: "star.bubble", open: $open) { surveyBody(d) }
                     FoldSection(title: "Certificate", icon: "rosette", open: $open) { certificateBody(d) }
                 } else if let error {
@@ -337,6 +343,8 @@ struct ClassDetailView: View {
         .sheet(item: $quiz, onDismiss: { Task { await load() } }) { q in
             QuizView(runId: runId, summary: q)
         }
+        // The self-register form; reload afterwards so the section shows "You are registered".
+        .sheet(item: $examForm, onDismiss: { Task { await load() } }) { DocumentViewer(doc: $0) }
         .documentViewer($doc)
     }
 

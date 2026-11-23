@@ -223,6 +223,8 @@ struct ClassDetail: Decodable, Hashable {
     // 1.6: the website's class page sections.
     let announcements: [Announcement]?
     let lesson: [LessonTopic]?
+    /// The course's practice exam, opened with the self-register form (absent before 1.6.1).
+    let practiceExam: PracticeExam?
 }
 
 struct ClassDetailReply: Decodable {

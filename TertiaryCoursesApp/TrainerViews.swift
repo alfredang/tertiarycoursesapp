@@ -20,7 +20,6 @@ struct TrainerClassView: View {
     @State private var saving = false
     @State private var notice: String?
     @State private var showQR = false
-    @State private var surveyQR: SurveyLink?
     @State private var doc: DocLink?
 
     /// Sections the trainer has opened; every section starts collapsed, like the website's cards.
@@ -66,10 +65,6 @@ struct TrainerClassView: View {
             if let d = detail, let link = d.checkinUrl, !link.isEmpty {
                 CheckInQRView(link: link, title: d.title, sessionLabel: d.currentSessionLabel ?? "")
             }
-        }
-        .sheet(item: $surveyQR) { s in
-            CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: "",
-                          heading: s.title, hint: s.hint, shareLabel: "Share Link")
         }
         .sheet(item: $quizQR) { s in
             CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: s.title,
@@ -270,29 +265,8 @@ struct TrainerClassView: View {
         }
     }
 
-    @ViewBuilder
     private func practiceExamBody(_ pe: PracticeExam) -> some View {
-        Text("Learners register for the \(pe.examCode) practice exam by scanning the self-register QR code.")
-            .font(.subheadline)
-        if pe.open == false {
-            Text("The self-register link works from the day before the class until 7 days after it ends.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-        }
-        Button {
-            surveyQR = SurveyLink(title: "Practice Exam · \(pe.examCode)", url: pe.selfRegisterUrl,
-                                  hint: "Learners scan this to register for the practice exam.")
-        } label: {
-            Label("Show Self-Register QR", systemImage: "qrcode").frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.bordered)
-        .accessibilityIdentifier("practiceExamQR")
-        if let site = pe.examUrl, let url = URL(string: site), !site.isEmpty {
-            Link(destination: url) {
-                Label("Open Practice Exams site", systemImage: "arrow.up.right.square")
-            }
-            .font(.subheadline.weight(.semibold))
-        }
+        PracticeExamBody(exam: pe, trainer: true) { doc = DocLink(title: "\(pe.examCode) Practice Exam", url: $0) }
     }
 
     @ViewBuilder
@@ -618,22 +592,35 @@ struct ProfileSections: View {
                     // One-tap trainer qualifications that are not on the list yet.
                     let missing = TrainerBadge.all.filter { b in !badges.contains(b.code) }
                     if !missing.isEmpty {
-                        FlowLayout(spacing: 8) {
-                            ForEach(missing, id: \.code) { b in
-                                Button {
-                                    certs.append(CertDraft(name: b.name, issuer: b.issuer))
-                                } label: {
-                                    Label(b.code, systemImage: "plus")
-                                        .font(.caption.weight(.semibold))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                        .background(Theme.accentSoft, in: Capsule())
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Quick add")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(missing, id: \.code) { b in
+                                        Button {
+                                            certs.append(CertDraft(name: b.name, issuer: b.issuer))
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "plus")
+                                                Text(b.code)
+                                            }
+                                            .font(.subheadline.weight(.semibold))
+                                            .lineLimit(1)
+                                            .fixedSize()
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 7)
+                                            .background(Theme.accentSoft, in: Capsule())
+                                        }
+                                        .buttonStyle(.borderless)
+                                        .foregroundStyle(Theme.accent)
+                                        .accessibilityLabel("Add \(b.name)")
+                                    }
                                 }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(Theme.accent)
                             }
                         }
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 4)
                     }
                 } header: {
                     Text("Certifications")

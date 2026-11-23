@@ -4,7 +4,9 @@
 
 The class page, calendar and roles now follow the website and the TIA TMS app.
 
-- Class page in the website's layout: a summary card, then E-Attendance, Announcements, Virtual Class Link, Courseware, Lesson (topics, links, videos and quizzes), Course Survey and Certificate for learners; trainers get Announcements they can post and delete, quiz QR codes in the Lesson, Practice Exam (self-register QR) and the Course Feedback Summary.
+- Class page in the website's layout: a summary card, then E-Attendance, Announcements, Virtual Class Link, Courseware, Lesson (topics, links, videos and quizzes), Course Survey and Certificate for learners; trainers get Announcements they can post and delete, quiz QR codes in the Lesson, Practice Exam and the Course Feedback Summary (also for classes run from the TMS).
+- Practice Exam: learners register on the class page with a form filled in with their name and email; trainers are registered automatically and can open the same form for a learner. The self-register QR code is on the web class page only.
+- Trainer Certifications: the quick-add buttons (ACLP, ACTA, DDDLP, DACE) show their names.
 - Classroom classes show their address (the academy's Woodlands address when the class has no other venue) instead of the word "Classroom".
 - My Classes: "Find your course" search and status chips on every card.
 - Calendar: a month grid with each day's classes, Today, swipe to change month and "Jump to next class".
