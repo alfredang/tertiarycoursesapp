@@ -17,10 +17,11 @@ final class LearnerStore: ObservableObject {
     var isSignedIn: Bool { learner != nil }
     // MARK: Roles
     //
-    // The app shows one role at a time. A trainer can look at the app as a learner
-    // (their own classes, certificates and billing). Staff dashboards are offered to
-    // the owner account only, and only for roles the website says it holds. The
-    // choice changes what this device shows, never what the server allows.
+    // The app shows one role at a time. Every account that holds more than one role
+    // (trainer and learner, plus the staff roles the website gives it: Admin,
+    // Marketing, Developer, Franchise Admin) can switch with "View as", in every
+    // country's app. The choice changes what this device shows, never what the
+    // server allows: each endpoint still checks the role.
 
     static let staffRoleNames: [String: String] = [
         "admin": "Admin", "marketing": "Marketing", "developer": "Developer", "franchise_admin": "Franchise Admin",
@@ -42,15 +43,8 @@ final class LearnerStore: ObservableObject {
     static let accountTab = 4
     static let dashboardTab = 5
 
-    /// The one account that can switch between roles, and only in the Singapore app:
-    /// the MY and GH apps look the same for everyone.
-    private var isOwner: Bool { Site.code == "SG" && learner?.email.lowercased() == "angch@tertiaryinfotech.com" }
-
     var availableRoles: [String] {
         guard let l = learner else { return [] }
-        // Everyone else has exactly one role per sign-in: the one chosen on the
-        // sign-in screen, or Learner when the account does not teach.
-        guard isOwner else { return [loginRole == "trainer" && l.isTrainer ? "trainer" : "learner"] }
         var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
         roles += ["admin", "marketing", "developer", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
         return roles

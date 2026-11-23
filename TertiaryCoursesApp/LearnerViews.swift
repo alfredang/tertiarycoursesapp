@@ -3,74 +3,55 @@ import SwiftUI
 
 // MARK: - Calendar
 
-/// Month view of the learner's class days, with the day's classes below.
+/// Month calendar of the account's classes in the TIA TMS layout: one box per day
+/// listing that day's classes (past ones muted); the selected day's classes below.
 struct CalendarView: View {
     @EnvironmentObject private var store: LearnerStore
-    @State private var month = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
+    @State private var month = MonthGrid.firstOfMonth(Date())
     @State private var selected = Fmt.ymd(Date())
     @State private var notice: String?
 
-    private var cal: Calendar {
-        var c = Calendar(identifier: .gregorian)
-        c.firstWeekday = 2   // Monday
-        return c
-    }
+    private var cal: Calendar { MonthGrid.calendar }
 
-    /// yyyy-MM-dd → classes on that day.
-    private var byDay: [String: [ClassItem]] {
-        var map: [String: [ClassItem]] = [:]
-        for item in store.allClasses {
-            let days = item.classDays.isEmpty ? [item.startDate] : item.classDays
-            for d in days where !d.isEmpty { map[d, default: []].append(item) }
+    private var entries: [CalendarEntry] {
+        store.allClasses.map { item in
+            CalendarEntry(id: item.id, title: item.title,
+                          days: item.classDays.isEmpty ? [item.startDate].filter { !$0.isEmpty } : item.classDays,
+                          past: item.bucket == "past")
         }
-        return map
-    }
-
-    private var gridDays: [Date?] {
-        let range = cal.range(of: .day, in: .month, for: month)!
-        let firstWeekday = cal.component(.weekday, from: month)
-        let lead = (firstWeekday - cal.firstWeekday + 7) % 7
-        return Array(repeating: nil, count: lead) + range.map { cal.date(byAdding: .day, value: $0 - 1, to: month) }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    InfoCard {
-                        VStack(spacing: 12) {
-                            HStack {
-                                Button { shift(-1) } label: { Image(systemName: "chevron.left") }
-                                    .accessibilityLabel("Previous month")
-                                Spacer()
-                                Text(month.formatted(.dateTime.month(.wide).year()))
-                                    .font(.headline)
-                                Spacer()
-                                Button { shift(1) } label: { Image(systemName: "chevron.right") }
-                                    .accessibilityLabel("Next month")
-                            }
-                            let symbols = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 6) {
-                                ForEach(symbols, id: \.self) { s in
-                                    Text(s).font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
-                                }
-                                ForEach(Array(gridDays.enumerated()), id: \.offset) { _, day in
-                                    if let day {
-                                        dayCell(day)
-                                    } else {
-                                        Color.clear.frame(height: 40)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                VStack(alignment: .leading, spacing: 14) {
+                    MonthGrid(month: $month, selected: $selected, entries: entries)
+                    CalendarLegend(count: monthCount(entries, month))
 
-                    SectionLabel(Fmt.longDate(selected))
-                    let items = byDay[selected] ?? []
+                    Text("\(Fmt.longDate(selected)) · \(Site.countryName) time")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 4)
+                    let items = store.allClasses.filter { item in
+                        (item.classDays.isEmpty ? [item.startDate] : item.classDays).contains(selected)
+                    }
                     if items.isEmpty {
-                        Text(store.classes == nil ? "Loading your classes…" : "No class on this day.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        InfoCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(store.classes == nil ? "Loading your classes…" : "No classes on this day").font(.headline)
+                                Text("Pick another day, or swipe the calendar to change month.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                if let next = nextClassDay {
+                                    Button("Jump to next class") {
+                                        selected = next
+                                        if let d = Fmt.date(next) { month = MonthGrid.firstOfMonth(d) }
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
                     ForEach(items) { item in
                         if item.runId > 0 {
@@ -110,32 +91,9 @@ struct CalendarView: View {
         }
     }
 
-    private func dayCell(_ day: Date) -> some View {
-        let key = Fmt.ymd(day)
-        let hasClass = byDay[key] != nil
-        let isSelected = key == selected
-        let isToday = key == Fmt.ymd(Date())
-        return Button {
-            selected = key
-        } label: {
-            VStack(spacing: 3) {
-                Text("\(cal.component(.day, from: day))")
-                    .font(.subheadline.weight(isToday || hasClass ? .bold : .regular))
-                    .foregroundStyle(isSelected ? Color.white : (isToday ? Theme.accent : Color.primary))
-                Circle()
-                    .fill(hasClass ? (isSelected ? Color.white : Theme.accent) : Color.clear)
-                    .frame(width: 5, height: 5)
-            }
-            .frame(maxWidth: .infinity, minHeight: 40)
-            .background(isSelected ? Theme.brand : (hasClass ? Theme.accentSoft : Color.clear),
-                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(day.formatted(date: .complete, time: .omitted) + (hasClass ? ", class day" : ""))
-    }
-
-    private func shift(_ months: Int) {
-        if let m = cal.date(byAdding: .month, value: months, to: month) { month = m }
+    /// The first class day after the selected day, if any.
+    private var nextClassDay: String? {
+        entries.flatMap(\.days).filter { $0 > selected }.min()
     }
 
     /// Writes each upcoming class day into the device calendar (write-only access).
@@ -251,10 +209,19 @@ struct CertificatesView: View {
 // MARK: - Billing
 
 struct BillingView: View {
+    /// True when pushed inside another NavigationStack (Account → Billing).
+    var embedded = false
     @EnvironmentObject private var store: LearnerStore
 
     var body: some View {
-        NavigationStack {
+        if embedded {
+            content
+        } else {
+            NavigationStack { content }
+        }
+    }
+
+    private var content: some View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     if let orders = store.orders {
@@ -280,7 +247,6 @@ struct BillingView: View {
             .navigationTitle("Billing")
             .navigationBarTitleDisplayMode(.inline)
             .brandToolbar()
-        }
     }
 }
 
@@ -361,6 +327,14 @@ struct AccountView: View {
                     ReminderSettingsRow()
                 } footer: {
                     Text("Reminds you 3 days before a class starts, the evening before each class day, and an hour before it begins.")
+                }
+
+                if store.staffRole == nil && !store.isTrainer {
+                    Section("Registrations") {
+                        NavigationLink { BillingView(embedded: true) } label: {
+                            Label("Billing", systemImage: "creditcard.fill")
+                        }
+                    }
                 }
 
                 Section("Explore") {

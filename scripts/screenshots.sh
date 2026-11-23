@@ -32,7 +32,7 @@ shot 05-feedback "$SIGN" SIMCTL_CHILD_OPEN_RUN_ID=900001 SIMCTL_CHILD_OPEN_SURVE
 shot 06-calendar "$SIGN" SIMCTL_CHILD_START_TAB=1
 shot 07-profile "$SIGN" SIMCTL_CHILD_START_TAB=4 SIMCTL_CHILD_OPEN_PROFILE=1
 shot 08-certificates "$SIGN" SIMCTL_CHILD_START_TAB=2
-shot 09-billing "$SIGN" SIMCTL_CHILD_START_TAB=3
+shot 09-support "$SIGN" SIMCTL_CHILD_START_TAB=3
 # Signed out: clear the saved session first.
 xcrun simctl terminate "$U" "$BUNDLE" 2>/dev/null || true
 xcrun simctl keychain "$U" reset

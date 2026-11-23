@@ -23,14 +23,31 @@ struct TrainerClassView: View {
     @State private var surveyQR: SurveyLink?
     @State private var doc: DocLink?
 
+    /// Sections the trainer has opened; every section starts collapsed, like the website's cards.
+    @State private var open: Set<String> = []
+    @State private var announcements: [Announcement] = []
+    @State private var quizQR: SurveyLink?
+
+    // Same sections, names and order as the class page on the website (trainer view).
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
                 if let d = detail {
                     overview(d)
-                    attendanceCard(d)
-                    materialsCard(d)
-                    feedbackCard(d)
+                    FoldSection(title: "E-Attendance", icon: "checklist.checked", open: $open) { attendanceBody(d) }
+                    AnnouncementsSection(runId: runId, items: $announcements, canPost: true, open: $open)
+                    VirtualClassSection(mode: d.mode, link: d.virtualLink, open: $open)
+                    FoldSection(title: "Courseware", icon: "folder", open: $open) { materialsBody(d) }
+                    LessonSection(topics: d.lesson ?? [], trainer: true, title: d.title, open: $open) { link in
+                        if !link.url.isEmpty {
+                            quizQR = SurveyLink(title: link.title, url: link.url,
+                                                hint: "Learners scan this to take the quiz. Their scores are saved to this class.")
+                        }
+                    }
+                    if let pe = d.practiceExam {
+                        FoldSection(title: "Practice Exam", icon: "graduationcap", badge: pe.examCode, open: $open) { practiceExamBody(pe) }
+                    }
+                    FoldSection(title: "Course Feedback Summary", icon: "chart.bar", open: $open) { feedbackBody(d) }
                 } else if let error {
                     ErrorCard(message: error) { Task { await load() } }
                 } else {
@@ -54,6 +71,10 @@ struct TrainerClassView: View {
             CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: "",
                           heading: s.title, hint: s.hint, shareLabel: "Share Link")
         }
+        .sheet(item: $quizQR) { s in
+            CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: s.title,
+                          heading: "Quiz QR", hint: s.hint, shareLabel: "Share Quiz Link")
+        }
         .alert("Attendance", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -64,7 +85,9 @@ struct TrainerClassView: View {
     private func load() async {
         do {
             let d = try await store.trainerClass(runId: runId)
+            if detail == nil, d.bucket == "current" { open.insert("E-Attendance") }
             detail = d
+            announcements = d.announcements ?? []
             error = nil
             if session.isEmpty || !d.sessions.contains(where: { $0.key == session }) {
                 session = (d.currentSession ?? "").isEmpty ? (d.sessions.first?.key ?? "") : (d.currentSession ?? "")
@@ -77,6 +100,9 @@ struct TrainerClassView: View {
                 doc = DocLink(title: m.title, url: url)
             }
             if env["OPEN_QR"] == "1" { showQR = true }
+            if env["OPEN_SECTIONS"] == "1" {
+                open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Practice Exam", "Course Feedback Summary"]
+            }
             #endif
         } catch {
             self.error = error.localizedDescription
@@ -91,26 +117,20 @@ struct TrainerClassView: View {
     private func overview(_ d: TrainerClassDetail) -> some View {
         InfoCard {
             VStack(alignment: .leading, spacing: 10) {
+                Text(d.title).font(.title3.bold())
+                Text([d.sku, d.classId].filter { !$0.isEmpty }.joined(separator: "  ·  "))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
                 HStack(spacing: 6) {
+                    StatusChip(text: d.mode == "Classroom" || d.mode.isEmpty ? "Physical" : d.mode, color: Theme.accent)
                     StatusChip(text: "Teaching", color: Theme.accent)
                     if d.bucket == "current" { StatusChip(text: "In progress", color: Theme.success) }
                 }
-                Text(d.title).font(.title3.bold())
-                Text([d.classId, d.sku].filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.accent)
-                Divider()
                 Label(Fmt.range(d.startDate, d.endDate), systemImage: "calendar")
                 if !d.startTime.isEmpty {
                     Label(Fmt.times(d.startTime, d.endTime), systemImage: "clock")
                 }
-                if !d.mode.isEmpty {
-                    Label(d.mode, systemImage: d.mode == "Live Online" ? "video.fill" : "building.2.fill")
-                }
-                if !d.venue.isEmpty || !d.room.isEmpty {
-                    Label([d.room, d.venue].filter { !$0.isEmpty }.joined(separator: "\n"), systemImage: "mappin.and.ellipse")
-                        .textSelection(.enabled)
-                }
+                if !d.venue.isEmpty { VenueLink(address: d.venue) }
                 Label("\(d.roster.count) learner\(d.roster.count == 1 ? "" : "s")", systemImage: "person.2.fill")
                 if let url = URL(string: d.virtualLink), !d.virtualLink.isEmpty {
                     Button {
@@ -128,12 +148,12 @@ struct TrainerClassView: View {
         }
     }
 
-    private func attendanceCard(_ d: TrainerClassDetail) -> some View {
+    private func attendanceBody(_ d: TrainerClassDetail) -> some View {
         let open = d.attendanceOpen ?? false
-        return InfoCard {
+        return Group {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    SectionLabel("Take attendance")
+                    Text("Take attendance").font(.subheadline.weight(.semibold))
                     Spacer()
                     if !d.roster.isEmpty {
                         Text("\(present.count) of \(d.roster.count) present")
@@ -232,51 +252,61 @@ struct TrainerClassView: View {
         }
     }
 
-    private func materialsCard(_ d: TrainerClassDetail) -> some View {
+    @ViewBuilder
+    private func materialsBody(_ d: TrainerClassDetail) -> some View {
         let all = d.materials + (d.documents ?? [])
-        return InfoCard {
-            VStack(alignment: .leading, spacing: 0) {
-                SectionLabel("Class materials")
-                    .padding(.bottom, 6)
-                if all.isEmpty {
-                    Text("No materials are linked to this course yet.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .padding(.vertical, 6)
-                }
-                ForEach(all) { m in
-                    if let url = URL(string: m.url) {
-                        MaterialRow(material: m) { openDocument(url, title: m.title, in: $doc) }
-                        if m != all.last { Divider() }
-                    }
+        if all.isEmpty {
+            Text("No materials are linked to this course yet.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        VStack(spacing: 0) {
+            ForEach(all) { m in
+                if let url = URL(string: m.url) {
+                    MaterialRow(material: m) { openDocument(url, title: m.title, in: $doc) }
+                    if m != all.last { Divider() }
                 }
             }
         }
     }
 
-    private func feedbackCard(_ d: TrainerClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 8) {
-                SectionLabel("Course feedback")
-                let n = d.surveyResponses ?? 0
-                Label(n == 0 ? "No feedback submitted yet" : "\(n) of \(d.roster.count) learner\(d.roster.count == 1 ? "" : "s") gave feedback",
-                      systemImage: "star.bubble.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(n == 0 ? Color.secondary : Color.primary)
-                if let url = d.feedbackUrl, !url.isEmpty {
-                    Button {
-                        surveyQR = SurveyLink(title: "Course Survey", url: url,
-                                              hint: "Learners scan this to give their course feedback.")
-                    } label: {
-                        Label("Show Course Survey QR", systemImage: "qrcode").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("showSurveyQR")
-                }
-                Text("Learners give feedback in this app from the first day of class.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+    @ViewBuilder
+    private func practiceExamBody(_ pe: PracticeExam) -> some View {
+        Text("Learners register for the \(pe.examCode) practice exam by scanning the self-register QR code.")
+            .font(.subheadline)
+        if pe.open == false {
+            Text("The self-register link works from the day before the class until 7 days after it ends.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        Button {
+            surveyQR = SurveyLink(title: "Practice Exam · \(pe.examCode)", url: pe.selfRegisterUrl,
+                                  hint: "Learners scan this to register for the practice exam.")
+        } label: {
+            Label("Show Self-Register QR", systemImage: "qrcode").frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .accessibilityIdentifier("practiceExamQR")
+        if let site = pe.examUrl, let url = URL(string: site), !site.isEmpty {
+            Link(destination: url) {
+                Label("Open Practice Exams site", systemImage: "arrow.up.right.square")
             }
+            .font(.subheadline.weight(.semibold))
+        }
+    }
+
+    @ViewBuilder
+    private func feedbackBody(_ d: TrainerClassDetail) -> some View {
+        if let summary = d.feedbackSummary, summary.count > 0 {
+            FeedbackSummaryView(summary: summary)
+        } else {
+            let n = d.surveyResponses ?? 0
+            Text(n > 0 ? "\(n) response\(n == 1 ? "" : "s") received." : "No feedback yet for this class.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text("Learners fill in the course survey in this app from the first day of class.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 

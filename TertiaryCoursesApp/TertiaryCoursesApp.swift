@@ -176,37 +176,47 @@ struct GuestTabs: View {
 struct LearnerTabs: View {
     @EnvironmentObject private var store: LearnerStore
 
+    // The tabs follow the role being viewed, as in the TIA TMS app:
+    //   Learner:   My Classes, Calendar, Certificates, Support, Account
+    //   Trainer:   My Classes, Calendar, Payout, Hours, Account
+    //   Admin:     Home, Calendar, Courses, Account
+    //   Developer, Marketing, Franchise Admin: Home, Courses, Account
     var body: some View {
         TabView(selection: $store.tab) {
             if let role = store.staffRole {
-                StaffDashboardView(role: role)
-                    .tabItem { Label("Dashboard", systemImage: "square.grid.2x2.fill") }
-                    .tag(5)
-            }
-            ClassesView()
-                .tabItem { Label("My Classes", systemImage: "graduationcap.fill") }
-                .tag(0)
-            CalendarView()
-                .tabItem { Label("Calendar", systemImage: "calendar") }
-                .tag(1)
-            // A trainer sees what they are paid and the hours they have taught;
-            // a learner sees certificates and billing.
-            if store.staffRole != nil {
-                // Staff: Dashboard, My Classes, Calendar, Account.
-            } else if store.isTrainer {
-                PayoutView()
-                    .tabItem { Label("Payout", systemImage: "banknote.fill") }
+                staffHome(role)
+                    .tabItem { Label("Home", systemImage: "house.fill") }
+                    .tag(LearnerStore.dashboardTab)
+                if role == "admin" {
+                    AdminCalendarView()
+                        .tabItem { Label("Calendar", systemImage: "calendar") }
+                        .tag(1)
+                }
+                CatalogView()
+                    .tabItem { Label("Courses", systemImage: "books.vertical.fill") }
                     .tag(2)
-                TrainingHoursView()
-                    .tabItem { Label("Hours", systemImage: "clock.fill") }
-                    .tag(3)
             } else {
-                CertificatesView()
-                    .tabItem { Label("Certificates", systemImage: "rosette") }
-                    .tag(2)
-                BillingView()
-                    .tabItem { Label("Billing", systemImage: "creditcard.fill") }
-                    .tag(3)
+                ClassesView()
+                    .tabItem { Label("My Classes", systemImage: "graduationcap.fill") }
+                    .tag(0)
+                CalendarView()
+                    .tabItem { Label("Calendar", systemImage: "calendar") }
+                    .tag(1)
+                if store.isTrainer {
+                    PayoutView()
+                        .tabItem { Label("Payout", systemImage: "banknote.fill") }
+                        .tag(2)
+                    TrainingHoursView()
+                        .tabItem { Label("Hours", systemImage: "clock.fill") }
+                        .tag(3)
+                } else {
+                    CertificatesView()
+                        .tabItem { Label("Certificates", systemImage: "rosette") }
+                        .tag(2)
+                    SupportView()
+                        .tabItem { Label("Support", systemImage: "lifepreserver") }
+                        .tag(3)
+                }
             }
             AccountView()
                 .tabItem { Label("Account", systemImage: "person.crop.circle.fill") }
@@ -217,5 +227,13 @@ struct LearnerTabs: View {
         .alert("Signed in", isPresented: Binding(get: { store.roleNotice != nil }, set: { if !$0 { store.roleNotice = nil } })) {
             Button("OK", role: .cancel) {}
         } message: { Text(store.roleNotice ?? "") }
+    }
+
+    @ViewBuilder private func staffHome(_ role: String) -> some View {
+        switch role {
+        case "admin": AdminHomeView()
+        case "developer": DeveloperHomeView()
+        default: StaffDashboardView(role: role)
+        }
     }
 }

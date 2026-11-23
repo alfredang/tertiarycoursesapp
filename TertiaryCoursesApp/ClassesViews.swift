@@ -14,9 +14,16 @@ struct ClassesView: View {
     @State private var bucket: Bucket = .current
     @State private var chosenDefault = false
     @State private var path: [ClassItem] = []
+    @State private var query = ""
 
     private func items(_ b: Bucket) -> [ClassItem] {
-        store.items(in: b.rawValue.lowercased())
+        let all = store.items(in: b.rawValue.lowercased())
+        let q = query.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return all }
+        return all.filter {
+            $0.title.localizedCaseInsensitiveContains(q) || $0.sku.localizedCaseInsensitiveContains(q)
+                || $0.classId.localizedCaseInsensitiveContains(q)
+        }
     }
 
     var body: some View {
@@ -65,6 +72,7 @@ struct ClassesView: View {
             .refreshable { await store.refreshClasses() }
             .navigationTitle("My Classes")
             .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $query, prompt: "Find your course")
             .navigationDestination(for: ClassItem.self) { ClassDestination(item: $0) }
             .brandToolbar()
             .onChange(of: store.classes?.today) { _, _ in pickDefaultBucket() }
@@ -92,7 +100,8 @@ struct ClassesView: View {
     }
 
     private var emptyTitle: String {
-        switch bucket {
+        if !query.isEmpty { return "No courses found" }
+        return switch bucket {
         case .current: "No class today"
         case .upcoming: "No upcoming classes"
         case .past: "No past classes yet"
@@ -100,7 +109,8 @@ struct ClassesView: View {
     }
 
     private var emptyText: String {
-        switch bucket {
+        if !query.isEmpty { return "Try another course title or code." }
+        return switch bucket {
         case .current:
             store.isTrainer
                 ? "Classes running now appear here, with attendance and the class materials."
@@ -139,10 +149,11 @@ struct ClassCard: View {
             HStack(alignment: .top, spacing: 12) {
                 CourseThumb(url: item.image)
                 VStack(alignment: .leading, spacing: 4) {
+                    Text(item.classId.isEmpty ? item.sku : "\(item.sku) · \(item.classId)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Theme.accent)
                     HStack(spacing: 6) {
-                        Text(item.classId.isEmpty ? item.sku : item.classId)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Theme.accent)
+                        if !item.isPendingPayment { StatusChip(text: "Confirmed", color: Theme.success) }
                         if store.isTrainer {
                             StatusChip(text: item.isTeaching ? "Teaching" : "Attending",
                                        color: item.isTeaching ? Theme.accent : .secondary)
@@ -170,8 +181,14 @@ struct ClassCard: View {
                 if !item.startTime.isEmpty {
                     Label(Fmt.times(item.startTime, item.endTime), systemImage: "clock")
                 }
-                if !item.mode.isEmpty {
-                    Label(item.mode, systemImage: item.mode == "Live Online" ? "video.fill" : "building.2.fill")
+                // A classroom class shows where it is held, not the word "Classroom".
+                if item.mode == "Live Online" || item.mode == "Hybrid" {
+                    Label(item.mode, systemImage: "video.fill")
+                }
+                if !item.venue.isEmpty {
+                    Label(item.venue, systemImage: "mappin.and.ellipse")
+                } else if item.mode == "Classroom" {
+                    Label("Physical", systemImage: "building.2.fill")
                 }
                 if item.isTeaching {
                     if let n = item.learnerCount {
@@ -276,17 +293,26 @@ struct ClassDetailView: View {
         #endif
     }
 
+    /// Sections the learner has opened; every section starts collapsed, like the website's cards.
+    @State private var open: Set<String> = []
+    @State private var announcements: [Announcement] = []
+
+    // Same sections, names and order as the class page on the website (learner view).
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 14) {
                 if let d = detail {
                     overview(d)
-                    attendanceCard(d)
-                    materialsCard(d)
-                    quizCard(d)
-                    surveyCard(d)
-                    certificateCard(d)
-                    sessionsCard(d)
+                    FoldSection(title: "E-Attendance", icon: "checklist.checked", open: $open) { attendanceBody(d) }
+                    AnnouncementsSection(runId: runId, items: $announcements, canPost: false, open: $open)
+                    VirtualClassSection(mode: d.mode, link: d.virtualLink, open: $open)
+                    FoldSection(title: "Courseware", icon: "folder", open: $open) { materialsBody(d) }
+                    LessonSection(topics: lessonTopics(d), trainer: false, title: d.title, open: $open) { link in
+                        quiz = QuizSummary(quizId: link.quizId ?? 0, title: link.title,
+                                           questions: link.questions ?? 0, previous: link.previous)
+                    }
+                    FoldSection(title: "Course Survey", icon: "star.bubble", open: $open) { surveyBody(d) }
+                    FoldSection(title: "Certificate", icon: "rosette", open: $open) { certificateBody(d) }
                 } else if let error {
                     ErrorCard(message: error) { Task { await load() } }
                 } else {
@@ -316,7 +342,10 @@ struct ClassDetailView: View {
 
     private func load() async {
         do {
-            detail = try await store.classDetail(runId: runId)
+            let d = try await store.classDetail(runId: runId)
+            if detail == nil, d.bucket == "current" { open.insert("E-Attendance") }
+            detail = d
+            announcements = d.announcements ?? []
             error = nil
             #if DEBUG
             // Screenshot automation: OPEN_DOC=1 opens the first material in the viewer.
@@ -329,31 +358,48 @@ struct ClassDetailView: View {
                 openedQuiz = true
                 quiz = detail?.quizzes?.first
             }
+            // OPEN_SECTIONS=1 opens every section.
+            if ProcessInfo.processInfo.environment["OPEN_SECTIONS"] == "1" {
+                open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Course Survey", "Certificate"]
+            }
             #endif
         } catch {
             self.error = error.localizedDescription
         }
     }
 
+    /// The course Lesson; a site without Lesson data still lists the class quizzes.
+    private func lessonTopics(_ d: ClassDetail) -> [LessonTopic] {
+        if let lesson = d.lesson, !lesson.isEmpty { return lesson }
+        let quizzes = d.quizzes ?? []
+        guard !quizzes.isEmpty else { return [] }
+        return [LessonTopic(title: "Quizzes", subtopics: [LessonSubtopic(title: "", links: quizzes.map {
+            LessonLink(type: "quiz", title: $0.title, url: "", quizId: $0.quizId, questions: $0.questions, previous: $0.previous)
+        })])]
+    }
+
     private func overview(_ d: ClassDetail) -> some View {
         InfoCard {
             VStack(alignment: .leading, spacing: 10) {
                 Text(d.title).font(.title3.bold())
-                Text("\(d.classId) · \(d.sku)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.accent)
-                Divider()
+                Text([d.sku, d.classId].filter { !$0.isEmpty }.joined(separator: "  ·  "))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    StatusChip(text: d.mode == "Classroom" ? "Physical" : d.mode, color: Theme.accent)
+                    if d.bucket == "current" { StatusChip(text: "In progress", color: Theme.success) }
+                }
                 Label(Fmt.range(d.startDate, d.endDate), systemImage: "calendar")
                 if !d.startTime.isEmpty {
                     Label(Fmt.times(d.startTime, d.endTime), systemImage: "clock")
                 }
-                Label(d.mode, systemImage: d.mode == "Live Online" ? "video.fill" : "building.2.fill")
-                if !d.venue.isEmpty || !d.room.isEmpty {
-                    Label([d.room, d.venue].filter { !$0.isEmpty }.joined(separator: "\n"), systemImage: "mappin.and.ellipse")
-                        .textSelection(.enabled)
-                }
+                if !d.venue.isEmpty { VenueLink(address: d.venue) }
                 if !d.trainer.isEmpty {
-                    Label("Trainer: \(d.trainer)", systemImage: "person.fill")
+                    Label {
+                        Text("Trainer: ").foregroundStyle(.secondary) + Text(d.trainer).fontWeight(.semibold)
+                    } icon: {
+                        Image(systemName: "person.fill")
+                    }
                 }
                 if let url = URL(string: d.virtualLink), !d.virtualLink.isEmpty {
                     Button {
@@ -371,172 +417,122 @@ struct ClassDetailView: View {
         }
     }
 
-    private func attendanceCard(_ d: ClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionLabel("Digital attendance")
-                if d.attendance.markedPresent {
-                    Label("You're checked in for \(d.attendance.currentSessionLabel).", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(Theme.success)
-                        .font(.subheadline.weight(.semibold))
-                } else if d.attendance.open {
-                    Text("Check in for \(d.attendance.currentSessionLabel) when you arrive.")
-                        .font(.subheadline)
-                    Button {
-                        Task { await checkIn() }
-                    } label: {
-                        HStack {
-                            if checkingIn { ProgressView().tint(.white) }
-                            Label("Check In Now", systemImage: "hand.raised.fill")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                    .controlSize(.large)
-                    .disabled(checkingIn)
-                    .accessibilityIdentifier("checkIn")
-                } else {
-                    Text(d.bucket == "upcoming" ? "Check-in opens on the first day of class." : "Check-in is closed for this class.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+    @ViewBuilder
+    private func attendanceBody(_ d: ClassDetail) -> some View {
+        if d.attendance.markedPresent {
+            Label("You're checked in for \(d.attendance.currentSessionLabel).", systemImage: "checkmark.circle.fill")
+                .foregroundStyle(Theme.success)
+                .font(.subheadline.weight(.semibold))
+        } else if d.attendance.open {
+            Text("Sign in for \(d.attendance.currentSessionLabel) when you arrive.")
+                .font(.subheadline)
+            Button {
+                Task { await checkIn() }
+            } label: {
+                HStack {
+                    if checkingIn { ProgressView().tint(.white) }
+                    Label("Check In Now", systemImage: "hand.raised.fill")
                 }
-                Text("Attended \(d.attendance.sessionsPresent) of \(d.attendance.sessionsTotal) sessions")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.brand)
+            .controlSize(.large)
+            .disabled(checkingIn)
+            .accessibilityIdentifier("checkIn")
+        } else {
+            Text(d.bucket == "upcoming" ? "Check-in opens on the first day of class." : "Check-in is closed for this class.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        ForEach(d.sessions) { s in
+            HStack {
+                Text(s.label).font(.subheadline)
+                Spacer()
+                switch s.present {
+                case .some(true):
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success)
+                        .accessibilityLabel("Present")
+                case .some(false):
+                    Image(systemName: "xmark.circle").foregroundStyle(.secondary)
+                        .accessibilityLabel("Absent")
+                case .none:
+                    Image(systemName: "circle").foregroundStyle(.tertiary)
+                        .accessibilityLabel("Not recorded")
+                }
+            }
+        }
+        Text("Attended \(d.attendance.sessionsPresent) of \(d.attendance.sessionsTotal) sessions")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
+
+    @ViewBuilder
+    private func materialsBody(_ d: ClassDetail) -> some View {
+        let all = d.materials + d.documents
+        if all.isEmpty {
+            Text("Your trainer will share the materials for this class here.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        VStack(spacing: 0) {
+            ForEach(all) { m in
+                if let url = URL(string: m.url) {
+                    MaterialRow(material: m) { openDocument(url, title: m.title, in: $doc) }
+                    if m != all.last { Divider() }
+                }
             }
         }
     }
 
     @ViewBuilder
-    private func materialsCard(_ d: ClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 0) {
-                SectionLabel("Class materials")
-                    .padding(.bottom, 6)
-                if d.materials.isEmpty && d.documents.isEmpty {
-                    Text("Your trainer will share the materials for this class here.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .padding(.vertical, 6)
-                }
-                ForEach(d.materials + d.documents) { m in
-                    if let url = URL(string: m.url) {
-                        MaterialRow(material: m) { openDocument(url, title: m.title, in: $doc) }
-                        if m != (d.materials + d.documents).last { Divider() }
-                    }
-                }
+    private func surveyBody(_ d: ClassDetail) -> some View {
+        if d.survey.submitted {
+            Label(d.survey.message, systemImage: "checkmark.seal.fill")
+                .foregroundStyle(Theme.success)
+                .font(.subheadline.weight(.semibold))
+        } else if let url = URL(string: d.survey.externalUrl), !d.survey.externalUrl.isEmpty {
+            Button {
+                openURL(url)
+            } label: {
+                Label("Open Course Survey", systemImage: "square.and.pencil").frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.brand)
+        } else if d.survey.available {
+            Text("Tell us how the class went — it takes about a minute.")
+                .font(.subheadline)
+            Button {
+                showSurvey = true
+            } label: {
+                Label("Fill In Course Survey", systemImage: "star.bubble.fill").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.brand)
+            .controlSize(.large)
+            .accessibilityIdentifier("giveFeedback")
+        } else {
+            Text(d.survey.message)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 
-    /// Quizzes the course developer added to the Lesson; hidden when the course has none.
     @ViewBuilder
-    private func quizCard(_ d: ClassDetail) -> some View {
-        let quizzes = d.quizzes ?? []
-        if !quizzes.isEmpty {
-            InfoCard {
-                VStack(alignment: .leading, spacing: 0) {
-                    SectionLabel("Quizzes")
-                        .padding(.bottom, 6)
-                    ForEach(quizzes) { q in
-                        Button {
-                            quiz = q
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: q.previous == nil ? "checklist" : "checkmark.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(q.previous == nil ? Theme.brand : Theme.success)
-                                    .frame(width: 28)
-                                    .accessibilityHidden(true)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(q.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                        .multilineTextAlignment(.leading)
-                                    Text(quizSubtitle(q))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer(minLength: 8)
-                                Text(q.previous == nil ? "Start" : "Retake")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(Theme.brand)
-                            }
-                            .padding(.vertical, 10)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("quiz-\(q.quizId)")
-                        if q != quizzes.last { Divider() }
-                    }
-                }
+    private func certificateBody(_ d: ClassDetail) -> some View {
+        if let cert = d.certificate, let url = URL(string: cert.url) {
+            Label("\(cert.name) · \(cert.certNo)", systemImage: "rosette")
+                .font(.subheadline.weight(.semibold))
+            Button {
+                openDocument(url, title: "Certificate", in: $doc)
+            } label: {
+                Label("View Certificate", systemImage: "doc.richtext").frame(maxWidth: .infinity)
             }
-        }
-    }
-
-    private func quizSubtitle(_ q: QuizSummary) -> String {
-        let count = "\(q.questions) question\(q.questions == 1 ? "" : "s")"
-        guard let p = q.previous else { return count }
-        return "\(count) · your score \(p.score) / \(p.total)"
-    }
-
-    private func surveyCard(_ d: ClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionLabel("Course feedback")
-                if d.survey.submitted {
-                    Label(d.survey.message, systemImage: "checkmark.seal.fill")
-                        .foregroundStyle(Theme.success)
-                        .font(.subheadline.weight(.semibold))
-                } else if let url = URL(string: d.survey.externalUrl), !d.survey.externalUrl.isEmpty {
-                    Button {
-                        openURL(url)
-                    } label: {
-                        Label("Open Feedback Form", systemImage: "square.and.pencil").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                } else if d.survey.available {
-                    Text("Tell us how the class went — it takes about a minute.")
-                        .font(.subheadline)
-                    Button {
-                        showSurvey = true
-                    } label: {
-                        Label("Give Feedback", systemImage: "star.bubble.fill").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                    .controlSize(.large)
-                    .accessibilityIdentifier("giveFeedback")
-                } else {
-                    Text(d.survey.message)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    private func certificateCard(_ d: ClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionLabel("Certificate")
-                if let cert = d.certificate, let url = URL(string: cert.url) {
-                    Label("\(cert.name) · \(cert.certNo)", systemImage: "rosette")
-                        .font(.subheadline.weight(.semibold))
-                    Button {
-                        openDocument(url, title: "Certificate", in: $doc)
-                    } label: {
-                        Label("View Certificate", systemImage: "doc.richtext").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                } else {
-                    Text(certificateHint(d))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            .buttonStyle(.bordered)
+        } else {
+            Text(certificateHint(d))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -545,31 +541,6 @@ struct ClassDetailView: View {
         return d.bucket == "past"
             ? "Your certificate will appear here once it is issued\(rule)."
             : "Your certificate is issued after the class when attendance requirements are met\(rule)."
-    }
-
-    private func sessionsCard(_ d: ClassDetail) -> some View {
-        InfoCard {
-            VStack(alignment: .leading, spacing: 8) {
-                SectionLabel("Sessions")
-                ForEach(d.sessions) { s in
-                    HStack {
-                        Text(s.label).font(.subheadline)
-                        Spacer()
-                        switch s.present {
-                        case .some(true):
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success)
-                                .accessibilityLabel("Present")
-                        case .some(false):
-                            Image(systemName: "xmark.circle").foregroundStyle(.secondary)
-                                .accessibilityLabel("Absent")
-                        case .none:
-                            Image(systemName: "circle").foregroundStyle(.tertiary)
-                                .accessibilityLabel("Not recorded")
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private func checkIn() async {
@@ -880,7 +851,7 @@ struct StarRating: View {
 
 
 /// Top of the home tab, in the TIA house layout: a "Welcome back" card with the
-/// name, the role and a My Profile link, then (for the owner account only) a
+/// name, the role and a My Profile link, then (for an account with more than one role) a
 /// "View as" row to switch role.
 struct HomeHeader: View {
     @EnvironmentObject private var store: LearnerStore

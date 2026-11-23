@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		039143D59733D9F53A21F3EC /* StaffHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389E29060A3BDA2B59E8C8C9 /* StaffHome.swift */; };
 		08147DA1D2C6C745CCC02C8E /* TrainerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF52D5798799A2E77EE173D3 /* TrainerViews.swift */; };
 		1F93E8993DE9413CF3E068EC /* SupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A60B8CE9FC92C5A9928C110 /* SupportViews.swift */; };
 		27FA8E5DEEB0D2212E31A7BD /* CatalogViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */; };
 		2DD7969EE5582B9979711CDE /* LearnerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75E75A43D4B99DE3E1BDA66 /* LearnerViews.swift */; };
 		2DDCBBBF82EACAEEC064179D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F4BA980C833D1E1A903B7B /* Models.swift */; };
+		53C77E55B6778F4AE46EC74F /* ClassPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4F60663827C160E7156C74 /* ClassPage.swift */; };
 		5B82F2708BA35DBFA496C1F0 /* ClassesViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C50E32329A42EE859383F1AD /* ClassesViews.swift */; };
 		62029A10258EBDC23284076C /* Catalog.json in Resources */ = {isa = PBXBuildFile; fileRef = 62D51CF477C4B623705F9198 /* Catalog.json */; };
 		7658C77E095C160FB0C64AA9 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C29217D32574707CBDE93FB /* SignInView.swift */; };
@@ -28,6 +30,7 @@
 /* Begin PBXFileReference section */
 		28F4BA980C833D1E1A903B7B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		2C29217D32574707CBDE93FB /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		389E29060A3BDA2B59E8C8C9 /* StaffHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaffHome.swift; sourceTree = "<group>"; };
 		392F6EDC7DF6073F52091784 /* TertiaryCourses.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TertiaryCourses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		462823A25BA4DB21AA6DE6F4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4AB19810B6A6AB7A5FB3512B /* DocumentViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewer.swift; sourceTree = "<group>"; };
@@ -37,6 +40,7 @@
 		6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogViews.swift; sourceTree = "<group>"; };
 		7CC970078B317811F7577236 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		7EA3D98711FE7D782174B0AF /* BrandHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandHeader.swift; sourceTree = "<group>"; };
+		9D4F60663827C160E7156C74 /* ClassPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassPage.swift; sourceTree = "<group>"; };
 		A5E55802A17D828E1B2B7D81 /* Reminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reminders.swift; sourceTree = "<group>"; };
 		A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TertiaryCoursesApp.swift; sourceTree = "<group>"; };
 		B75E75A43D4B99DE3E1BDA66 /* LearnerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnerViews.swift; sourceTree = "<group>"; };
@@ -56,6 +60,7 @@
 				62D51CF477C4B623705F9198 /* Catalog.json */,
 				6E8BA9CE3E0A5CDE50E67485 /* CatalogViews.swift */,
 				C50E32329A42EE859383F1AD /* ClassesViews.swift */,
+				9D4F60663827C160E7156C74 /* ClassPage.swift */,
 				4AB19810B6A6AB7A5FB3512B /* DocumentViewer.swift */,
 				462823A25BA4DB21AA6DE6F4 /* Info.plist */,
 				DF7027708F6D776513C46AF8 /* LearnerStore.swift */,
@@ -64,6 +69,7 @@
 				A5E55802A17D828E1B2B7D81 /* Reminders.swift */,
 				2C29217D32574707CBDE93FB /* SignInView.swift */,
 				54649FC54C34CAF3A3DF2D10 /* Site.swift */,
+				389E29060A3BDA2B59E8C8C9 /* StaffHome.swift */,
 				5A60B8CE9FC92C5A9928C110 /* SupportViews.swift */,
 				A68D36D06252C0C6543E6C6D /* TertiaryCoursesApp.swift */,
 				EF52D5798799A2E77EE173D3 /* TrainerViews.swift */,
@@ -161,6 +167,7 @@
 				A06EFB8DC96BECEEE4E6A42F /* API.swift in Sources */,
 				B5CB9D8EC4973A3C63DB4E6C /* BrandHeader.swift in Sources */,
 				27FA8E5DEEB0D2212E31A7BD /* CatalogViews.swift in Sources */,
+				53C77E55B6778F4AE46EC74F /* ClassPage.swift in Sources */,
 				5B82F2708BA35DBFA496C1F0 /* ClassesViews.swift in Sources */,
 				CA14A0E537563EC50FF46590 /* DocumentViewer.swift in Sources */,
 				E3BA89BE1E479C735BA64DE6 /* LearnerStore.swift in Sources */,
@@ -169,6 +176,7 @@
 				BC974FA645B5848A520A39DD /* Reminders.swift in Sources */,
 				7658C77E095C160FB0C64AA9 /* SignInView.swift in Sources */,
 				B4ED8CE19635CE11F017CDA5 /* Site.swift in Sources */,
+				039143D59733D9F53A21F3EC /* StaffHome.swift in Sources */,
 				1F93E8993DE9413CF3E068EC /* SupportViews.swift in Sources */,
 				D1F5BF620867124FEA2D6605 /* TertiaryCoursesApp.swift in Sources */,
 				08147DA1D2C6C745CCC02C8E /* TrainerViews.swift in Sources */,

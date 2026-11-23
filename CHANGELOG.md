@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+The class page, calendar and roles now follow the website and the TIA TMS app.
+
+- Class page in the website's layout: a summary card, then E-Attendance, Announcements, Virtual Class Link, Courseware, Lesson (topics, links, videos and quizzes), Course Survey and Certificate for learners; trainers get Announcements they can post and delete, quiz QR codes in the Lesson, Practice Exam (self-register QR) and the Course Feedback Summary.
+- Classroom classes show their address (the academy's Woodlands address when the class has no other venue) instead of the word "Classroom".
+- My Classes: "Find your course" search and status chips on every card.
+- Calendar: a month grid with each day's classes, Today, swipe to change month and "Jump to next class".
+- Support tab replaces Billing for learners: send feedback to the academy by email, or call, WhatsApp or find us. Billing moves into Account.
+- Anyone with more than one role (Learner, Trainer, Admin, Marketing, Developer, Franchise Admin) can switch with "View as".
+- Admin home: classes running today and in the next 30 days with KPI tiles and search; Admin calendar of every class. Developer home: the course list with upcoming classes. Marketing and Franchise Admin keep their dashboards. Staff get a Courses tab.
+
 ## [1.5] — 2026-11-21 · build 6
 
 Quizzes come to TC LMS SG.

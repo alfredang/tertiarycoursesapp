@@ -9,16 +9,21 @@ phone version of the LMS on www.tertiarycourses.com.sg.
 - **Sign in** with an emailed one-time code or the website password (learner or trainer login).
 - **My Classes** — current, upcoming and past classes; venue / online link. A trainer sees the
   classes they teach (WSQ and non-WSQ) beside the classes they attend, tagged Teaching / Attending.
-- **Trainer class view** — take attendance per session, show the check-in QR, trainer and learner
-  materials, feedback response count.
+- **Class page** — the website's sections: E-Attendance, Announcements, Virtual Class Link, Courseware,
+  Lesson (topics, links, videos, quizzes), Course Survey and Certificate; trainers also post announcements,
+  show quiz and Practice Exam QR codes and read the Course Feedback Summary.
+- **Trainer attendance** — take attendance per session and show the check-in QR.
 - **Digital attendance** — learners check in to the current session.
 - **Class reminders** — local notifications 3 days before, the evening before each class day and an
   hour before class (no push service; scheduled on the device from the class list).
 - **Class materials** — slides, learner guide, lesson plan, labs and certificates open in an in-app viewer.
 - **In-house feedback survey** — the site's own course survey, once per class.
 - **Quizzes** — lesson quizzes the trainer sets for a class: answer, submit, see the score; the site scores and records each attempt.
-- **Calendar** — class days by month; add them to the iPhone calendar.
-- **Certificates** and **Billing** — certificate PDFs; registrations and payment status.
+- **Calendar** — a month grid of class days (TIA TMS layout); add them to the iPhone calendar.
+- **Certificates** and **Support** tabs — certificate PDFs; feedback emailed to the academy and contacts.
+  Billing (registrations and payment status) is in Account.
+- **Roles** — anyone with more than one role switches with "View as": Learner, Trainer, Admin (classes and
+  calendar), Developer (course list), Marketing and Franchise Admin (dashboards).
 - **Profile** — edit name and phone; Light / Dark / System appearance saved to the account.
 - **Courses** — the public non-WSQ catalog; **account deletion** in Account.
 

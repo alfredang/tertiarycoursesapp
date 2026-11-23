@@ -220,6 +220,9 @@ struct ClassDetail: Decodable, Hashable {
     let certificateRule: String?
     /// Lesson quizzes of the class's course (absent on a site that predates them).
     let quizzes: [QuizSummary]?
+    // 1.6: the website's class page sections.
+    let announcements: [Announcement]?
+    let lesson: [LessonTopic]?
 }
 
 struct ClassDetailReply: Decodable {
@@ -276,6 +279,11 @@ struct TrainerClassDetail: Decodable, Hashable {
     let surveyResponses: Int?
     /// The course survey link the trainer shows the class.
     let feedbackUrl: String?
+    // 1.6: the website's class page sections.
+    let announcements: [Announcement]?
+    let lesson: [LessonTopic]?
+    let practiceExam: PracticeExam?
+    let feedbackSummary: FeedbackSummary?
 }
 
 struct TrainerClassReply: Decodable {
