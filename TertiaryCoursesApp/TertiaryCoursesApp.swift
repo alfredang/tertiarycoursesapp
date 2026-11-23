@@ -125,6 +125,12 @@ struct RootView: View {
     @EnvironmentObject private var catalog: CatalogStore
     @Environment(\.scenePhase) private var scenePhase
 
+    /// The sign-in pages (Sign In, Admin sign-in) are always light, whatever the device
+    /// setting. Signed in (or restoring a session), the account's saved appearance.
+    private func applyAppearance() {
+        Appearance.apply(store.restoring || store.isSignedIn ? Appearance.cached : .light, remember: false)
+    }
+
     var body: some View {
         Group {
             if store.restoring {
@@ -140,7 +146,9 @@ struct RootView: View {
             }
         }
         .tint(Theme.accent)
-        .onAppear { Appearance.apply(Appearance.cached, remember: false) }
+        .onAppear { applyAppearance() }
+        .onChange(of: store.isSignedIn) { _, _ in applyAppearance() }
+        .onChange(of: store.restoring) { _, _ in applyAppearance() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.refreshIfStale() } }
         }
