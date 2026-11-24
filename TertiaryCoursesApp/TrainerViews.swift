@@ -46,6 +46,7 @@ struct TrainerClassView: View {
                     if let pe = d.practiceExam {
                         FoldSection(title: "Practice Exam", icon: "graduationcap", badge: pe.examCode, open: $open) { practiceExamBody(pe) }
                     }
+                    FoldSection(title: "Course Feedback", icon: "checklist", open: $open) { feedbackLinkBody(d) }
                     FoldSection(title: "Course Feedback Summary", icon: "chart.bar", open: $open) { feedbackBody(d) }
                 } else if let error {
                     ErrorCard(message: error) { Task { await load() } }
@@ -68,7 +69,7 @@ struct TrainerClassView: View {
         }
         .sheet(item: $quizQR) { s in
             CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: s.title,
-                          heading: "Quiz QR", hint: s.hint, shareLabel: "Share Quiz Link")
+                          heading: s.heading, hint: s.hint, shareLabel: s.shareLabel)
         }
         .alert("Attendance", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
             Button("OK", role: .cancel) {}
@@ -96,7 +97,11 @@ struct TrainerClassView: View {
             }
             if env["OPEN_QR"] == "1" { showQR = true }
             if env["OPEN_SECTIONS"] == "1" {
-                open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Practice Exam", "Course Feedback Summary"]
+                open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Practice Exam", "Course Feedback", "Course Feedback Summary"]
+            }
+            if let one = env["OPEN_SECTION"] { open = [one] }
+            if env["OPEN_FEEDBACK_QR"] == "1", let link = d.feedbackUrl, !link.isEmpty {
+                quizQR = feedbackQR(d, link)
             }
             #endif
         } catch {
@@ -269,6 +274,40 @@ struct TrainerClassView: View {
         PracticeExamBody(exam: pe, trainer: true) { doc = DocLink(title: "\(pe.examCode) Practice Exam", url: $0) }
     }
 
+    /// Course Feedback, as on the website's class page: the QR of the class's feedback form
+    /// (the TMS form for a class run from the TMS), its link, and the course code and run id.
+    @ViewBuilder
+    private func feedbackLinkBody(_ d: TrainerClassDetail) -> some View {
+        if let link = d.feedbackUrl, !link.isEmpty {
+            Button {
+                quizQR = feedbackQR(d, link)
+            } label: {
+                SectionTile(icon: "qrcode", title: "Show Course Feedback QR", subtitle: link, trailing: "chevron.right")
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("showFeedbackQR")
+            if let url = URL(string: link) {
+                Button { UIApplication.shared.open(url) } label: {
+                    Label("Open Link", systemImage: "arrow.up.right.square").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+            Text("Course Code: \(d.sku)   ·   Course Run ID: \(d.classId)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+        } else {
+            SectionTile(icon: "qrcode", title: "Not available yet",
+                        subtitle: "The feedback form has not been set up for this class yet.", muted: true)
+        }
+    }
+
+    private func feedbackQR(_ d: TrainerClassDetail, _ link: String) -> SurveyLink {
+        SurveyLink(title: "Course Code: \(d.sku) · Course Run ID: \(d.classId)", url: link,
+                   hint: "Learners scan this to share their feedback on the class.",
+                   heading: "Course Feedback", shareLabel: "Share Feedback Link")
+    }
+
     @ViewBuilder
     private func feedbackBody(_ d: TrainerClassDetail) -> some View {
         if let summary = d.feedbackSummary, summary.count > 0 {
@@ -305,6 +344,8 @@ struct SurveyLink: Identifiable {
     let title: String
     let url: String
     let hint: String
+    var heading = "Quiz QR"
+    var shareLabel = "Share Quiz Link"
     var id: String { url }
 }
 
@@ -421,10 +462,10 @@ struct CertDraft: Identifiable {
 
 struct ProfileSections: View {
     @EnvironmentObject private var store: LearnerStore
-    @State private var firstName = ""
-    @State private var lastName = ""
+    @State private var fullName = ""
     @State private var phone = ""
     @State private var linkedin = ""
+    @State private var employment = ""
     @State private var theme: ThemeChoice = Appearance.cached
     @State private var loaded = false
     @State private var saving = false
@@ -546,10 +587,16 @@ struct ProfileSections: View {
                 }
             }
             Section("Name") {
-                TextField("First name", text: $firstName)
-                    .textContentType(.givenName)
-                TextField("Last name", text: $lastName)
-                    .textContentType(.familyName)
+                TextField("Name", text: $fullName)
+                    .textContentType(.name)
+            }
+            Section("Employment status") {
+                Picker("Employment status", selection: $employment) {
+                    Text("Not set").tag("")
+                    Text("Employed").tag("Employed")
+                    Text("Unemployed").tag("Unemployed")
+                    Text("Looking for Job").tag("Looking for Job")
+                }
             }
             Section {
                 TextField("Phone", text: $phone)
@@ -650,7 +697,7 @@ struct ProfileSections: View {
                         Spacer()
                     }
                 }
-                .disabled(saving || firstName.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(saving || fullName.trimmingCharacters(in: .whitespaces).isEmpty)
                 .accessibilityIdentifier("saveProfile")
             }
         }
@@ -673,10 +720,10 @@ struct ProfileSections: View {
         .onAppear {
             guard !loaded, let l = store.learner else { return }
             loaded = true
-            firstName = l.firstName
-            lastName = l.lastName
+            fullName = [l.firstName, l.lastName].filter { !$0.isEmpty }.joined(separator: " ")
             phone = l.phone ?? ""
             linkedin = l.linkedinUrl ?? ""
+            employment = l.employmentStatus ?? ""
             theme = l.theme == nil ? Appearance.cached : l.themeChoice
         }
         .task(id: isRealTrainer) {
@@ -699,11 +746,16 @@ struct ProfileSections: View {
         saving = true
         defer { saving = false }
         do {
+            // One Name row; the site keeps first and last name apart, so split at the last space.
+            let parts = fullName.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+            let first = parts.count > 1 ? parts.dropLast().joined(separator: " ") : (parts.first ?? "")
+            let last = parts.count > 1 ? (parts.last ?? "") : ""
             var notice = try await store.updateProfile(
-                firstName: firstName.trimmingCharacters(in: .whitespaces),
-                lastName: lastName.trimmingCharacters(in: .whitespaces),
+                firstName: first,
+                lastName: last,
                 phone: phone.trimmingCharacters(in: .whitespaces),
                 linkedin: isStaffOrTrainer ? linkedin.trimmingCharacters(in: .whitespaces) : nil,
+                employment: employment,
                 theme: theme
             )
             if isRealTrainer, certsLoaded {

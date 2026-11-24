@@ -142,6 +142,52 @@ struct DevKpis: Decodable, Hashable {
     let disabled: Int
 }
 
+struct DevTopic: Decodable, Hashable {
+    let title: String
+    let subTopics: [String]
+}
+
+struct DevClass: Decodable, Hashable, Identifiable {
+    let classId: String
+    let startDate: String
+    let endDate: String
+    let startTime: String
+    let endTime: String
+    let vacancy: String
+    let mode: String
+    var id: String { classId }
+}
+
+/// A course as the admin edit page shows it (/mobileapi/staff/course), read only.
+struct DevCourseDetail: Decodable, Hashable {
+    let id: Int
+    let sku: String
+    let title: String
+    let enabled: Bool
+    let price: Double?
+    let currency: String?
+    let durationHours: String?
+    let sessions: String?
+    let level: String?
+    let software: String?
+    let programmingLanguage: String?
+    let shortDescription: String?
+    let topics: [DevTopic]?
+    let prerequisite: String?
+    let additionalNote: String?
+    let trainerProfile: String?
+    let metaTitle: String?
+    let metaDescription: String?
+    let metaKeywords: String?
+    let url: String?
+    let imageUrl: String?
+    let upcomingClasses: [DevClass]?
+}
+
+struct DevCourseReply: Decodable {
+    let course: DevCourseDetail
+}
+
 struct DevCoursesReply: Decodable {
     let kpis: DevKpis
     let courses: [DevCourse]
@@ -177,6 +223,11 @@ extension LearnerStore {
         var q = ["role": activeRole]
         if let from, let to { q["from"] = from; q["to"] = to }
         return try await API.shared.get("staff/classes", query: q)
+    }
+
+    func loadDevCourse(id: Int) async throws -> DevCourseDetail {
+        let reply: DevCourseReply = try await API.shared.get("staff/course", query: ["role": activeRole, "id": String(id)])
+        return reply.course
     }
 
     func loadDevCourses() async throws -> DevCoursesReply {
@@ -646,7 +697,7 @@ struct FeedbackSummaryView: View {
 
 // MARK: - Support tab
 
-/// Support: a feedback form emailed to the academy, then the ways to reach it directly.
+/// Support: the same card layout as Feedback. A message emailed to the academy, then the ways to reach it directly.
 struct SupportView: View {
     @EnvironmentObject private var store: LearnerStore
     @State private var info: SupportInfo?
@@ -655,63 +706,117 @@ struct SupportView: View {
     @State private var sending = false
     @State private var notice: String?
     @State private var problem: String?
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case subject, message }
 
     private static let fallback = SupportInfo(email: Site.email, phone: Site.phone, whatsapp: Site.whatsAppLabel, address: nil)
 
     private static func digits(_ s: String) -> String { s.filter(\.isNumber) }
 
+    private var canSend: Bool {
+        !sending && !subject.trimmingCharacters(in: .whitespaces).isEmpty
+            && !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    TextField("Subject", text: $subject).accessibilityIdentifier("supportSubject")
-                    TextField("How can we help? Tell us what happened.", text: $message, axis: .vertical)
-                        .lineLimit(4...10)
-                        .accessibilityIdentifier("supportMessage")
-                    Button {
-                        Task { await send() }
-                    } label: {
-                        Text(sending ? "Sending…" : "Send feedback")
+            content
+                .navigationTitle("Support")
+                .navigationBarTitleDisplayMode(.inline)
+                .brandToolbar()
+                .task { if info == nil { info = try? await store.loadSupport() } }
+        }
+    }
+
+    private var content: some View {
+        let c = info ?? Self.fallback
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                InfoCard {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("We're here to help", systemImage: "lifepreserver.fill")
                             .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 6)
+                            .foregroundStyle(Theme.accent)
+                        Text("Ask a question or tell us what went wrong. Your message is emailed to the academy with your name and email, so we can reply.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Theme.brand)
-                    .disabled(sending || subject.trimmingCharacters(in: .whitespaces).isEmpty
-                              || message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .accessibilityIdentifier("supportSend")
-                    if let notice {
-                        Label(notice, systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success).font(.subheadline)
-                    }
-                    if let problem { Text(problem).font(.footnote).foregroundStyle(.red) }
-                } header: {
-                    Text("Feedback")
-                } footer: {
-                    Text("Your message is emailed to the academy with your name and email, so we can reply.")
                 }
 
-                let c = info ?? Self.fallback
-                Section("Contact us") {
-                    if let email = c.email, !email.isEmpty {
-                        ContactRow(icon: "envelope.fill", title: "Email", value: email, url: URL(string: "mailto:" + email))
+                SectionLabel("Your message")
+                TextField("Subject", text: $subject)
+                    .textFieldStyle(.roundedBorder)
+                    .focused($focusedField, equals: .subject)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .message }
+                    .accessibilityIdentifier("supportSubject")
+
+                ZStack(alignment: .topLeading) {
+                    if message.isEmpty {
+                        Text("How can we help? Tell us what happened.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 8)
                     }
-                    if let phone = c.phone, !phone.isEmpty {
-                        ContactRow(icon: "phone.fill", title: "Tel", value: phone, url: URL(string: "tel:+" + Self.digits(phone)))
-                    }
-                    if let wa = c.whatsapp, !wa.isEmpty {
-                        ContactRow(icon: "message.fill", title: "WhatsApp", value: wa, url: URL(string: "https://wa.me/" + Self.digits(wa)))
-                    }
+                    TextEditor(text: $message)
+                        .scrollContentBackground(.hidden)
+                        .frame(minHeight: 160)
+                        .focused($focusedField, equals: .message)
+                        .accessibilityIdentifier("supportMessage")
                 }
-                if let address = c.address, !address.isEmpty {
-                    Section("Address") { VenueLink(address: address).font(.subheadline) }
+                .padding(8)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+
+                Button {
+                    Task { await send() }
+                } label: {
+                    Label(sending ? "Sending…" : "Send message", systemImage: "paperplane.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.brand)
+                .controlSize(.large)
+                .disabled(!canSend)
+                .accessibilityIdentifier("supportSend")
+
+                if let notice {
+                    Label(notice, systemImage: "checkmark.circle.fill").foregroundStyle(Theme.success).font(.subheadline)
+                }
+                if let problem { Text(problem).font(.footnote).foregroundStyle(.red) }
+
+                SectionLabel("Contact us")
+                InfoCard {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if let email = c.email, !email.isEmpty {
+                            ContactRow(icon: "envelope.fill", title: "Email", value: email, url: URL(string: "mailto:" + email))
+                        }
+                        if let phone = c.phone, !phone.isEmpty {
+                            Divider()
+                            ContactRow(icon: "phone.fill", title: "Tel", value: phone, url: URL(string: "tel:+" + Self.digits(phone)))
+                        }
+                        if let wa = c.whatsapp, !wa.isEmpty {
+                            Divider()
+                            ContactRow(icon: "message.fill", title: "WhatsApp", value: wa, url: URL(string: "https://wa.me/" + Self.digits(wa)))
+                        }
+                        if let address = c.address, !address.isEmpty {
+                            Divider()
+                            VenueLink(address: address).font(.subheadline).padding(.vertical, 12)
+                        }
+                    }
                 }
             }
-            .navigationTitle("Support")
-            .navigationBarTitleDisplayMode(.inline)
-            .brandToolbar()
-            .scrollDismissesKeyboard(.interactively)
-            .task { if info == nil { info = try? await store.loadSupport() } }
+            .padding(20)
+        }
+        .background(Theme.page)
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { focusedField = nil }
+            }
         }
     }
 

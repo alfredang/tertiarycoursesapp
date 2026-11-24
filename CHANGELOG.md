@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+- Trainers: every class page has the Course Feedback section again, as on the website: show the feedback QR full screen for learners to scan, share or open the link, with the course code and run id.
+- My Classes and Calendar: pull down to refresh now also reloads the classes you teach (the refresh was being cancelled before the teaching list loaded).
+
+## [1.7] — 2026-11-23 · build 8
+
+- Developer: tap a course to see its details, read only, as on the admin course page.
+- Profile: Employment status (Not set, Employed, Unemployed, Looking for Job), saved to your account.
+- Your profile picture now defaults to the photo on file for your account.
+
+## [1.6] — 2026-11-23 · build 7
+
 The class page, calendar and roles now follow the website and the TIA TMS app.
 
 - Class page in the website's layout: a summary card, then E-Attendance, Announcements, Virtual Class Link, Courseware, Lesson (topics, links, videos and quizzes), Course Survey and Certificate for learners; trainers get Announcements they can post and delete, quiz QR codes in the Lesson, Practice Exam and the Course Feedback Summary (also for classes run from the TMS).
@@ -13,6 +24,11 @@ The class page, calendar and roles now follow the website and the TIA TMS app.
 - Support tab replaces Billing for learners: send feedback to the academy by email, or call, WhatsApp or find us. Billing moves into Account.
 - Anyone with more than one role (Learner, Trainer, Admin, Marketing, Developer, Franchise Admin) can switch with "View as".
 - Admin home: classes running today and in the next 30 days with KPI tiles and search; Admin calendar of every class. Developer home: the course list with upcoming classes. Marketing and Franchise Admin keep their dashboards. Staff get a Courses tab.
+- Roles in the "View as" picker now run Learner, Trainer, Developer, Marketing, Admin, Franchise Admin.
+- Support tab redesigned in the Feedback layout, with the contact details in a card.
+- Developer home filters courses by All, Enabled or Disabled.
+- Class reminders follow the TIA TMS app: 3 days before, the evening before each class day, and the morning of each class, for classes you teach and classes you attend.
+- Profile: Name is one row.
 
 ## [1.5] — 2026-11-21 · build 6
 

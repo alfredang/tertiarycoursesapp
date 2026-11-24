@@ -6,7 +6,7 @@ import UserNotifications
 /// or attending:
 ///   • 3 days before the first day, 09:00
 ///   • the evening before each class day, 18:00
-///   • each class day, 1 hour before the start time (08:00 when there is none)
+///   • the morning of each class day, 08:00 (an hour before the start when it is earlier)
 /// The whole schedule is rebuilt each time the classes refresh.
 enum Reminders {
     static let enabledKey = "reminders.enabled"
@@ -117,7 +117,7 @@ enum Reminders {
                 if let eve = cal.date(byAdding: .day, value: -1, to: day) {
                     add(item, kind: "eve", day: eve, hour: 18, minute: 0, lead: "tomorrow")
                 }
-                if hm.count == 2, hm[0] >= 1 {
+                if hm.count == 2, hm[0] >= 1, hm[0] * 60 + hm[1] <= 8 * 60 + 30 {
                     add(item, kind: "day", day: day, hour: hm[0] - 1, minute: hm[1], lead: "in 1 hour")
                 } else {
                     add(item, kind: "day", day: day, hour: 8, minute: 0, lead: "today")

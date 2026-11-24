@@ -45,8 +45,8 @@ final class LearnerStore: ObservableObject {
 
     var availableRoles: [String] {
         guard let l = learner else { return [] }
-        var roles = l.isTrainer ? ["trainer", "learner"] : ["learner"]
-        roles += ["admin", "marketing", "developer", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
+        var roles = l.isTrainer ? ["learner", "trainer"] : ["learner"]
+        roles += ["developer", "marketing", "admin", "franchise_admin"].filter { (l.roles ?? []).contains($0) }
         return roles
     }
     var canSwitchRole: Bool { availableRoles.count > 1 }
@@ -190,7 +190,14 @@ final class LearnerStore: ObservableObject {
         _ = await (c, e, b)
     }
 
+    /// Pull-to-refresh cancels its task when the list redraws mid-refresh, and the learner list
+    /// lands (and redraws) before the teaching list, so the teaching request was cancelled and a
+    /// trainer's Current/Upcoming list never refreshed. An unstructured task cannot be cancelled that way.
     func refreshClasses() async {
+        await Task { await self.loadClasses() }.value
+    }
+
+    private func loadClasses() async {
         let teaches = isTrainer
         async let teaching: ClassesReply? = teaches ? (try? await API.shared.get("trainer/classes")) : nil
         do {
@@ -268,11 +275,12 @@ final class LearnerStore: ObservableObject {
 
     /// Saves the profile on the site. The appearance is applied at once, and kept
     /// on this device even when the site cannot store it yet.
-    func updateProfile(firstName: String, lastName: String, phone: String, linkedin: String?, theme: ThemeChoice) async throws -> String {
+    func updateProfile(firstName: String, lastName: String, phone: String, linkedin: String?, employment: String? = nil, theme: ThemeChoice) async throws -> String {
         Appearance.apply(theme)
         do {
             var body: [String: Any] = ["first_name": firstName, "last_name": lastName, "phone": phone, "theme": theme.rawValue]
             if let linkedin { body["linkedin_url"] = linkedin }
+            if let employment { body["employment_status"] = employment }
             let reply: ProfileReply = try await API.shared.post("profile", body: body)
             learner = reply.learner
             if reply.learner.theme != nil { Appearance.apply(reply.learner.themeChoice) }

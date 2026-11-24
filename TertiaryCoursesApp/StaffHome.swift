@@ -168,7 +168,7 @@ struct DeveloperHomeView: View {
     @State private var query = ""
 
     enum Filter: String, CaseIterable, Identifiable {
-        case all = "All", withClasses = "With classes", disabled = "Disabled"
+        case all = "All", enabled = "Enabled", disabled = "Disabled"
         var id: String { rawValue }
     }
 
@@ -176,7 +176,7 @@ struct DeveloperHomeView: View {
         var all = data?.courses ?? []
         switch filter {
         case .all: break
-        case .withClasses: all = all.filter { $0.upcomingClasses > 0 }
+        case .enabled: all = all.filter { $0.enabled }
         case .disabled: all = all.filter { !$0.enabled }
         }
         let q = query.trimmingCharacters(in: .whitespaces)
@@ -192,7 +192,7 @@ struct DeveloperHomeView: View {
                     if let data {
                         HStack(spacing: 8) {
                             KpiTile(value: data.kpis.courses, label: "Courses")
-                            KpiTile(value: data.kpis.withClasses, label: "With classes")
+                            KpiTile(value: data.kpis.courses - data.kpis.disabled, label: "Enabled")
                             KpiTile(value: data.kpis.disabled, label: "Disabled", highlight: true)
                         }
                         Picker("Filter", selection: $filter) {
@@ -204,7 +204,10 @@ struct DeveloperHomeView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         LazyVStack(spacing: 12) {
-                            ForEach(list) { DevCourseCard(course: $0) }
+                            ForEach(list) { c in
+                                NavigationLink { DevCourseDetailView(course: c) } label: { DevCourseCard(course: c) }
+                                    .buttonStyle(.plain)
+                            }
                         }
                     } else if let error {
                         ErrorCard(message: error) { Task { await load() } }
@@ -245,6 +248,104 @@ struct DevCourseCard: View {
                   systemImage: "calendar")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+    }
+}
+
+// MARK: - Developer course details (read only)
+
+struct DevCourseDetailView: View {
+    @EnvironmentObject private var store: LearnerStore
+    let course: DevCourse
+    @State private var detail: DevCourseDetail?
+    @State private var error: String?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                if let d = detail {
+                    HStack(spacing: 6) {
+                        Text(d.sku).font(.caption.weight(.semibold)).foregroundStyle(Theme.accent)
+                        StatusChip(text: d.enabled ? "Enabled" : "Disabled", color: d.enabled ? Theme.success : .red)
+                    }
+                    Text(d.title).font(.title3.weight(.semibold))
+                    card("Course details") {
+                        row("Price", d.price.map { String(format: "%@ %.2f", d.currency ?? "", $0) })
+                        row("Duration (hours)", d.durationHours)
+                        row("Sessions", d.sessions)
+                        row("Level", d.level)
+                        row("Software", d.software)
+                        row("Programming language", d.programmingLanguage)
+                    }
+                    text("Short description", d.shortDescription)
+                    if let topics = d.topics, !topics.isEmpty {
+                        card("Topics") {
+                            ForEach(Array(topics.enumerated()), id: \.offset) { i, t in
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("\(i + 1). \(t.title)").font(.subheadline.weight(.semibold))
+                                    ForEach(t.subTopics, id: \.self) { Text("• " + $0).font(.footnote).foregroundStyle(.secondary) }
+                                }
+                            }
+                        }
+                    }
+                    text("Prerequisite", d.prerequisite)
+                    text("Additional note", d.additionalNote)
+                    text("Trainer profile", d.trainerProfile)
+                    if let classes = d.upcomingClasses, !classes.isEmpty {
+                        card("Upcoming classes") {
+                            ForEach(classes) { c in
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(c.classId) · \(Fmt.longDate(c.startDate))").font(.subheadline.weight(.semibold))
+                                    Text("\(c.startTime)–\(c.endTime) · \(c.mode) · vacancy \(c.vacancy)").font(.footnote).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    card("Search listing") {
+                        row("Meta title", d.metaTitle)
+                        row("Meta description", d.metaDescription)
+                        row("Meta keywords", d.metaKeywords)
+                        row("Page", d.url)
+                    }
+                } else if let error {
+                    ErrorCard(message: error) { Task { await load() } }
+                } else {
+                    ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
+                }
+            }
+            .padding(20)
+        }
+        .background(Theme.page)
+        .navigationTitle(course.sku)
+        .navigationBarTitleDisplayMode(.inline)
+        .task { if detail == nil { await load() } }
+    }
+
+    private func load() async {
+        do { detail = try await store.loadDevCourse(id: course.id); error = nil } catch { self.error = error.localizedDescription }
+    }
+
+    @ViewBuilder private func row(_ label: String, _ value: String?) -> some View {
+        if let v = value, !v.isEmpty {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label).font(.caption).foregroundStyle(.secondary)
+                Text(v).font(.subheadline)
+            }
+        }
+    }
+
+    @ViewBuilder private func text(_ title: String, _ value: String?) -> some View {
+        if let v = value, !v.isEmpty { card(title) { Text(v).font(.subheadline) } }
+    }
+
+    private func card<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title).font(.headline)
+            content()
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

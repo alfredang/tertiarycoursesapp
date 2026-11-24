@@ -16,6 +16,8 @@ struct Learner: Decodable, Hashable {
     let avatarVersion: Int?
     /// Trainers and staff only; empty when not set.
     let linkedinUrl: String?
+    /// "", Employed, Unemployed or Looking for Job.
+    let employmentStatus: String?
 
     var isTrainer: Bool { roles?.contains("trainer") ?? false }
     var themeChoice: ThemeChoice { ThemeChoice(rawValue: theme ?? "") ?? .system }

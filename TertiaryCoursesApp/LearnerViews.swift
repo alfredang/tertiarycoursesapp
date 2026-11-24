@@ -326,7 +326,7 @@ struct AccountView: View {
                 Section {
                     ReminderSettingsRow()
                 } footer: {
-                    Text("Reminds you 3 days before a class starts, the evening before each class day, and an hour before it begins.")
+                    Text("Reminds you 3 days before a class starts, the evening before each class day, and on the morning of each class.")
                 }
 
                 if store.staffRole == nil && !store.isTrainer {

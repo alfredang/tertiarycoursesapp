@@ -88,6 +88,7 @@ On a **deployment target < iOS 18** use the classic `.tabItem { Label(...) }` AP
 7. **State hoisting**: lift state to make views reusable and previewable.
 8. **`#Preview`**: add previews in light + dark and a large Dynamic Type size.
 9. **Adaptive**: use size classes / `NavigationSplitView` for iPad instead of hardcoding widths.
+10. **Google sign-in shows the account chooser**: open the handoff in a shared `ASWebAuthenticationSession` (`prefersEphemeralWebBrowserSession = false`) and have the server send `prompt=select_account`; an ephemeral session or a missing prompt signs the user straight into the wrong account. Gate: `~/.claude/skills/tia-frontend-design/scripts/check_google_account_chooser.sh <app> <backend>`.
 
 ## Common Issues
 

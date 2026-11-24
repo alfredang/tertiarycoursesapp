@@ -62,7 +62,7 @@ enum Appearance {
     private static let key = "appearance.theme"
 
     static var cached: ThemeChoice {
-        ThemeChoice(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .system
+        ThemeChoice(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .light
     }
 
     static func apply(_ choice: ThemeChoice, remember: Bool = true) {
@@ -81,7 +81,7 @@ enum Appearance {
 
     static func reset() {
         UserDefaults.standard.removeObject(forKey: key)
-        apply(.system, remember: false)
+        apply(.light, remember: false)   // the sign-in page is always light
     }
 }
 
