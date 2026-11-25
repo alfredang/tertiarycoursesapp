@@ -19,7 +19,7 @@ struct TrainerClassView: View {
     @State private var dirty = false
     @State private var saving = false
     @State private var notice: String?
-    @State private var showQR = false
+    @State private var showSign = false
     @State private var doc: DocLink?
 
     /// Sections the trainer has opened; every section starts collapsed, like the website's cards.
@@ -62,10 +62,8 @@ struct TrainerClassView: View {
         .pullToRefresh { await load() }
         .task { await load() }
         .documentViewer($doc)
-        .sheet(isPresented: $showQR) {
-            if let d = detail, let link = d.checkinUrl, !link.isEmpty {
-                CheckInQRView(link: link, title: d.title, sessionLabel: d.currentSessionLabel ?? "")
-            }
+        .sheet(isPresented: $showSign, onDismiss: { Task { await load() } }) {
+            if let d = detail { signSheet(d) }
         }
         .sheet(item: $quizQR) { s in
             CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: s.title,
@@ -90,12 +88,12 @@ struct TrainerClassView: View {
             }
             resetMarks(d)
             #if DEBUG
-            // Screenshot automation: OPEN_DOC=1 opens the first material, OPEN_QR=1 the check-in QR.
+            // Screenshot automation: OPEN_DOC=1 opens the first material, OPEN_SIGN=1 the signature dialog.
             let env = ProcessInfo.processInfo.environment
             if env["OPEN_DOC"] == "1", doc == nil, let m = d.materials.first, let url = URL(string: m.url) {
                 doc = DocLink(title: m.title, url: url)
             }
-            if env["OPEN_QR"] == "1" { showQR = true }
+            if env["OPEN_SIGN"] == "1" { showSign = true }
             if env["OPEN_SECTIONS"] == "1" {
                 open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Practice Exam", "Course Feedback", "Course Feedback Summary"]
             }
@@ -196,8 +194,16 @@ struct TrainerClassView: View {
                                 }
                             )) {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(r.name.isEmpty ? r.email : r.name)
-                                        .font(.subheadline.weight(.medium))
+                                    HStack(spacing: 6) {
+                                        Text(r.name.isEmpty ? r.email : r.name)
+                                            .font(.subheadline.weight(.medium))
+                                        if (r.signed ?? []).contains(session) {
+                                            Image(systemName: "signature")
+                                                .font(.caption.weight(.semibold))
+                                                .foregroundStyle(Theme.success)
+                                                .accessibilityLabel("Signed")
+                                        }
+                                    }
                                     Text(r.email + ((r.walkin ?? false) ? " · walk-in" : ""))
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
@@ -237,18 +243,39 @@ struct TrainerClassView: View {
                         .disabled(saving || !dirty || session.isEmpty)
                         .accessibilityIdentifier("saveAttendance")
                     }
-                    if let link = d.checkinUrl, !link.isEmpty {
+                    if !session.isEmpty {
+                        if (d.trainerSigned ?? []).contains(session) {
+                            Label("You have signed for this session.", systemImage: "signature")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(Theme.success)
+                        }
                         Button {
-                            showQR = true
+                            showSign = true
                         } label: {
-                            Label("Show Check-in QR", systemImage: "qrcode").frame(maxWidth: .infinity)
+                            Label("Sign Attendance", systemImage: "signature").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.large)
-                        .accessibilityIdentifier("showQR")
+                        .accessibilityIdentifier("signAttendance")
+                        Text("You sign for the session, or hand your phone to a learner to sign. A learner who signs is marked present.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
+        }
+    }
+
+    /// The signature dialog for the chosen session: the trainer, then every learner on the roster.
+    private func signSheet(_ d: TrainerClassDetail) -> some View {
+        let key = session
+        let label = d.sessions.first { $0.key == key }?.label ?? ""
+        var signers = [Signer(id: "trainer", name: "You (trainer)", signed: (d.trainerSigned ?? []).contains(key))]
+        signers += d.roster.map { Signer(id: $0.email, name: $0.name.isEmpty ? $0.email : $0.name, signed: ($0.signed ?? []).contains(key)) }
+        return SignatureSheet(title: d.title, sessionLabel: label, signers: signers,
+                              hint: "Choose who is signing, then sign with a finger in the box.",
+                              closeOnSuccess: false) { signer, png in
+            try await store.signAttendance(runId: runId, sessionKey: key, signer: signer.id, signature: png)
         }
     }
 
@@ -1164,5 +1191,210 @@ struct StaffCardView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.cardBorder))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(card.title): \(card.value)")
+    }
+}
+
+// MARK: - Finger signature for e-attendance
+
+/// Someone who can sign in the signature dialog: the trainer ("trainer") or a roster learner (email).
+struct Signer: Identifiable, Hashable {
+    let id: String
+    let name: String
+    var signed = false
+}
+
+/// The dialog that takes a finger signature for attendance (replaces the check-in QR code).
+/// Learner: one signer (themselves); signing checks them in and closes the dialog.
+/// Trainer: picks who signs (themselves or a learner handed the phone); stays open for the next.
+struct SignatureSheet: View {
+    let title: String
+    let sessionLabel: String
+    /// More than one: a "Who is signing?" picker.
+    let signers: [Signer]
+    var hint = "Sign with your finger in the box below."
+    var closeOnSuccess = true
+    /// Sends the signature; answers the message to show.
+    let submit: (_ signer: Signer, _ png: Data) async throws -> String
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var strokes: [[CGPoint]] = []
+    @State private var signerId = ""
+    @State private var done: Set<String> = []
+    @State private var sending = false
+    @State private var message: String?
+    @State private var error: String?
+    @State private var padSize = CGSize(width: 320, height: 200)
+    @State private var drawing = false
+
+    private var signer: Signer? { signers.first { $0.id == signerId } ?? signers.first }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title).font(.headline)
+                        if !sessionLabel.isEmpty {
+                            Text(sessionLabel).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    }
+                    if signers.count > 1 {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Who is signing?").font(.subheadline.weight(.semibold))
+                            Picker("Who is signing?", selection: $signerId) {
+                                ForEach(signers) { s in
+                                    Text(s.name + (isSigned(s) ? "  ✓ signed" : "")).tag(s.id)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .accessibilityIdentifier("signerPicker")
+                        }
+                    } else if let s = signers.first {
+                        Label(s.name, systemImage: "person.fill").font(.subheadline.weight(.semibold))
+                    }
+                    Text(hint).font(.footnote).foregroundStyle(.secondary)
+                    pad
+                    if let message {
+                        Label(message, systemImage: "checkmark.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.success)
+                    }
+                    if let error {
+                        Text(error).font(.footnote).foregroundStyle(.red)
+                    }
+                    HStack(spacing: 12) {
+                        Button {
+                            strokes = []
+                        } label: {
+                            Label("Clear", systemImage: "eraser").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .disabled(strokes.isEmpty || sending)
+                        .accessibilityIdentifier("clearSignature")
+                        Button {
+                            Task { await send() }
+                        } label: {
+                            HStack {
+                                if sending { ProgressView().tint(.white) }
+                                Label("Submit", systemImage: "signature")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Theme.brand)
+                        .controlSize(.large)
+                        .disabled(!hasInk || sending || signer == nil)
+                        .accessibilityIdentifier("submitSignature")
+                    }
+                }
+                .padding(20)
+            }
+            .scrollDisabled(true)
+            .background(Theme.page)
+            .navigationTitle("Sign Attendance")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(closeOnSuccess ? "Cancel" : "Done") { dismiss() }
+                }
+            }
+        }
+        .tint(Theme.accent)
+        // A downward stroke must draw, not pull the dialog away.
+        .interactiveDismissDisabled()
+        .onAppear {
+            if signerId.isEmpty { signerId = signers.first?.id ?? "" }
+        }
+    }
+
+    /// Enough ink to count as a signature, not a stray tap.
+    private var hasInk: Bool { strokes.reduce(0) { $0 + $1.count } >= 8 }
+
+    private func isSigned(_ s: Signer) -> Bool { s.signed || done.contains(s.id) }
+
+    private var pad: some View {
+        ZStack(alignment: .bottomLeading) {
+            // The pad is always white with black ink, in either theme, like paper.
+            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white)
+            Rectangle().fill(Color.black.opacity(0.25)).frame(height: 1)
+                .padding(.horizontal, 24).padding(.bottom, 44)
+            if strokes.isEmpty {
+                Text("Sign here")
+                    .font(.callout)
+                    .foregroundStyle(Color.black.opacity(0.35))
+                    .padding(.leading, 24).padding(.bottom, 52)
+            }
+            SignatureInk(strokes: strokes)
+        }
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.black.opacity(0.15)))
+        .frame(height: 220)
+        .frame(maxWidth: .infinity)
+        .background(GeometryReader { g in
+            Color.clear.onAppear { padSize = g.size }.onChange(of: g.size) { _, new in padSize = new }
+        })
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                .onChanged { v in
+                    let p = CGPoint(x: min(max(v.location.x, 0), padSize.width), y: min(max(v.location.y, 0), padSize.height))
+                    if !drawing || strokes.isEmpty { strokes.append([p]); drawing = true } else { strokes[strokes.count - 1].append(p) }
+                }
+                .onEnded { _ in drawing = false }
+        )
+        .accessibilityElement()
+        .accessibilityLabel("Signature pad")
+        .accessibilityHint("Draw your signature with one finger.")
+        .accessibilityIdentifier("signaturePad")
+    }
+
+    @MainActor
+    private func png() -> Data? {
+        let renderer = ImageRenderer(content: SignatureInk(strokes: strokes).frame(width: padSize.width, height: padSize.height))
+        renderer.scale = 2
+        return renderer.uiImage?.pngData()
+    }
+
+    private func send() async {
+        guard let s = signer, let data = png() else { return }
+        sending = true
+        error = nil
+        message = nil
+        defer { sending = false }
+        do {
+            let text = try await submit(s, data)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            strokes = []
+            done.insert(s.id)
+            if closeOnSuccess {
+                dismiss()
+            } else {
+                message = text
+                // Hand the phone to the next learner who has not signed.
+                if let next = signers.first(where: { $0.id != "trainer" && !isSigned($0) }) { signerId = next.id }
+            }
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+}
+
+/// The ink of a signature: black strokes on a clear background (also what is uploaded).
+struct SignatureInk: View {
+    let strokes: [[CGPoint]]
+
+    var body: some View {
+        Canvas { ctx, _ in
+            for stroke in strokes {
+                var path = Path()
+                if stroke.count == 1, let p = stroke.first {
+                    path.addEllipse(in: CGRect(x: p.x - 1.5, y: p.y - 1.5, width: 3, height: 3))
+                    ctx.fill(path, with: .color(.black))
+                    continue
+                }
+                path.addLines(stroke)
+                ctx.stroke(path, with: .color(.black), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+            }
+        }
     }
 }

@@ -279,7 +279,7 @@ struct ClassDetailView: View {
     @Environment(\.openURL) private var openURL
     @State private var detail: ClassDetail?
     @State private var error: String?
-    @State private var checkingIn = false
+    @State private var signing = false
     @State private var notice: String?
     @State private var doc: DocLink?
     @State private var examForm: DocLink?
@@ -337,6 +337,16 @@ struct ClassDetailView: View {
         } message: {
             Text(notice ?? "")
         }
+        .sheet(isPresented: $signing, onDismiss: { Task { await load() } }) {
+            if let d = detail {
+                SignatureSheet(title: d.title, sessionLabel: d.attendance.currentSessionLabel,
+                               signers: [Signer(id: "me", name: store.learner.map { $0.fullName.isEmpty ? $0.email : $0.fullName } ?? "Your signature")]) { _, png in
+                    let text = try await store.markAttendance(runId: runId, signature: png)
+                    notice = text
+                    return text
+                }
+            }
+        }
         .sheet(isPresented: $showSurvey, onDismiss: { Task { await load() } }) {
             SurveyView(runId: runId)
         }
@@ -365,6 +375,10 @@ struct ClassDetailView: View {
             if ProcessInfo.processInfo.environment["OPEN_QUIZ"] == "1", quiz == nil, !openedQuiz {
                 openedQuiz = true
                 quiz = detail?.quizzes?.first
+            }
+            // OPEN_SIGN=1 opens the check-in signature dialog.
+            if ProcessInfo.processInfo.environment["OPEN_SIGN"] == "1", d.attendance.open, !d.attendance.markedPresent {
+                signing = true
             }
             // OPEN_SECTIONS=1 opens every section.
             if ProcessInfo.processInfo.environment["OPEN_SECTIONS"] == "1" {
@@ -431,22 +445,29 @@ struct ClassDetailView: View {
             Label("You're checked in for \(d.attendance.currentSessionLabel).", systemImage: "checkmark.circle.fill")
                 .foregroundStyle(Theme.success)
                 .font(.subheadline.weight(.semibold))
+            // Marked present by the trainer but not signed yet: the learner can still sign.
+            if d.attendance.open, d.attendance.signed == false {
+                Button {
+                    signing = true
+                } label: {
+                    Label("Add Your Signature", systemImage: "signature").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .accessibilityIdentifier("addSignature")
+            }
         } else if d.attendance.open {
-            Text("Sign in for \(d.attendance.currentSessionLabel) when you arrive.")
+            Text("Sign for \(d.attendance.currentSessionLabel) with your finger when you arrive.")
                 .font(.subheadline)
             Button {
-                Task { await checkIn() }
+                signing = true
             } label: {
-                HStack {
-                    if checkingIn { ProgressView().tint(.white) }
-                    Label("Check In Now", systemImage: "hand.raised.fill")
-                }
-                .frame(maxWidth: .infinity)
+                Label("Check In Now", systemImage: "signature")
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(Theme.brand)
             .controlSize(.large)
-            .disabled(checkingIn)
             .accessibilityIdentifier("checkIn")
         } else {
             Text(d.bucket == "upcoming" ? "Check-in opens on the first day of class." : "Check-in is closed for this class.")
@@ -551,17 +572,6 @@ struct ClassDetailView: View {
             : "Your certificate is issued after the class when attendance requirements are met\(rule)."
     }
 
-    private func checkIn() async {
-        checkingIn = true
-        defer { checkingIn = false }
-        do {
-            notice = try await store.markAttendance(runId: runId)
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-            await load()
-        } catch {
-            notice = error.localizedDescription
-        }
-    }
 }
 
 // MARK: - Survey

@@ -323,6 +323,15 @@ final class LearnerStore: ObservableObject {
         return reply.class
     }
 
+    /// A finger signature on the trainer's phone: signer "trainer" (the trainer) or a roster learner's email.
+    func signAttendance(runId: Int, sessionKey: String, signer: String, signature: Data) async throws -> String {
+        let reply: MessageReply = try await API.shared.post("trainer/sign", body: [
+            "run_id": runId, "session_key": sessionKey, "signer": signer,
+            "signature": signature.base64EncodedString(),
+        ])
+        return reply.message ?? "Signature saved."
+    }
+
     func saveAttendance(runId: Int, sessionKey: String, records: [[String: Any]]) async throws -> String {
         let reply: MessageReply = try await API.shared.post("trainer/attendance", body: [
             "run_id": runId, "session_key": sessionKey, "records": records,
@@ -349,8 +358,11 @@ final class LearnerStore: ObservableObject {
         return reply.class
     }
 
-    func markAttendance(runId: Int) async throws -> String {
-        let reply: MessageReply = try await API.shared.post("learner/attendance", body: ["run_id": runId])
+    /// Check in to the current session with the learner's finger signature (PNG).
+    func markAttendance(runId: Int, signature: Data) async throws -> String {
+        let reply: MessageReply = try await API.shared.post("learner/attendance", body: [
+            "run_id": runId, "signature": signature.base64EncodedString(),
+        ])
         return reply.message ?? "You have been marked present."
     }
 

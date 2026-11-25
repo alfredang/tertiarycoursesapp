@@ -178,6 +178,8 @@ struct AttendanceState: Decodable, Hashable {
     let currentSession: String
     let currentSessionLabel: String
     let markedPresent: Bool
+    /// The learner has signed (finger signature) for the current session; nil before app 1.5's API.
+    let signed: Bool?
     let sessionsPresent: Int
     let sessionsTotal: Int
 }
@@ -251,6 +253,8 @@ struct RosterEntry: Decodable, Hashable, Identifiable {
     let phone: String?
     let walkin: Bool?
     let present: [String]?
+    /// Session keys this learner has signed with a finger.
+    let signed: [String]?
 
     var id: String { email }
 }
@@ -278,6 +282,8 @@ struct TrainerClassDetail: Decodable, Hashable {
     let attendanceOpen: Bool?
     let checkinUrl: String?
     let roster: [RosterEntry]
+    /// Session keys the trainer has signed for.
+    let trainerSigned: [String]?
     let materials: [Material]
     let documents: [Material]?
     let surveyResponses: Int?
