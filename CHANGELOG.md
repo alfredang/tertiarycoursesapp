@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.8] — 2026-11-25 · build 9
+
+- Developer: the course page shows only what developers work with: course title and code, funding validity, course type, duration, training and assessment hours, every courseware link (tap to open, hold to copy), and a Practice Exam switch that links the course to an exam on Tertiary Exams.
+- Developer: course cards show the course type and hours instead of class information.
 - Trainers: every class page has the Course Feedback section again, as on the website: show the feedback QR full screen for learners to scan, share or open the link, with the course code and run id.
 - My Classes and Calendar: pull down to refresh now also reloads the classes you teach (the refresh was being cancelled before the teaching list loaded).
 

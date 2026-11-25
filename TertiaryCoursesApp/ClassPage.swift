@@ -134,6 +134,10 @@ struct DevCourse: Decodable, Hashable, Identifiable {
     let enabled: Bool
     let upcomingClasses: Int
     let nextClass: String
+    // 1.8 (absent from older sites)
+    var courseType: String? = nil
+    var trainingHours: Double? = nil
+    var assessmentHours: Double? = nil
 }
 
 struct DevKpis: Decodable, Hashable {
@@ -182,6 +186,44 @@ struct DevCourseDetail: Decodable, Hashable {
     let url: String?
     let imageUrl: String?
     let upcomingClasses: [DevClass]?
+    // 1.8: the Developer page shows only these (absent from older sites).
+    var courseType: String? = nil
+    var fundingValidityStart: String? = nil
+    var fundingValidityEnd: String? = nil
+    var trainingHours: Double? = nil
+    var assessmentHours: Double? = nil
+    var durationDays: Int? = nil
+    var courseware: [DevCoursewareLink]? = nil
+    var practiceExamSetting: PracticeExamSetting? = nil
+}
+
+/// One saved courseware link of a course (Trainer Slides, Learner Guide, the Drive folder, …).
+struct DevCoursewareLink: Decodable, Hashable, Identifiable {
+    let key: String
+    let label: String
+    let url: String
+    var id: String { key }
+}
+
+/// A course's Practice Exam switch, as the web Edit Course -> Course Settings holds it.
+struct PracticeExamSetting: Decodable, Hashable {
+    struct Exam: Decodable, Hashable, Identifiable {
+        let slug: String
+        let code: String
+        let title: String
+        let vendor: String?
+        var id: String { slug }
+    }
+    let configured: Bool
+    let enabled: Bool
+    let examSlug: String
+    let examCode: String
+    let exams: [Exam]
+    let warning: String?
+}
+
+struct PracticeExamSettingReply: Decodable {
+    let setting: PracticeExamSetting
 }
 
 struct DevCourseReply: Decodable {
@@ -228,6 +270,13 @@ extension LearnerStore {
     func loadDevCourse(id: Int) async throws -> DevCourseDetail {
         let reply: DevCourseReply = try await API.shared.get("staff/course", query: ["role": activeRole, "id": String(id)])
         return reply.course
+    }
+
+    /// Turns a course's practice exam on (linked to `examSlug`) or off (""). The server checks the role.
+    func setPracticeExam(courseId: Int, examSlug: String) async throws -> PracticeExamSetting {
+        let reply: PracticeExamSettingReply = try await API.shared.post(
+            "staff/practiceexam", body: ["role": activeRole, "id": courseId, "exam_slug": examSlug])
+        return reply.setting
     }
 
     func loadDevCourses() async throws -> DevCoursesReply {

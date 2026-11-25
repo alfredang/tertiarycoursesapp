@@ -23,7 +23,8 @@ phone version of the LMS on www.tertiarycourses.com.sg.
 - **Certificates** and **Support** tabs — certificate PDFs; feedback emailed to the academy and contacts.
   Billing (registrations and payment status) is in Account.
 - **Roles** — anyone with more than one role switches with "View as": Learner, Trainer, Admin (classes and
-  calendar), Developer (course list), Marketing and Franchise Admin (dashboards).
+  calendar), Developer (course list and a course page with funding validity, course type,
+  training and assessment hours, every courseware link and the Practice Exam switch), Marketing and Franchise Admin (dashboards).
 - **Profile** — edit name and phone; Light / Dark / System appearance saved to the account.
 - **Courses** — the public non-WSQ catalog; **account deletion** in Account.
 

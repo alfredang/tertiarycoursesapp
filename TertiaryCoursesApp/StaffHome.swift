@@ -240,14 +240,17 @@ struct DevCourseCard: View {
             HStack(spacing: 6) {
                 Text(course.sku).font(.caption.weight(.semibold)).foregroundStyle(Theme.accent)
                 StatusChip(text: course.enabled ? "Enabled" : "Disabled", color: course.enabled ? Theme.success : .red)
+                if let type = course.courseType, !type.isEmpty {
+                    StatusChip(text: type, color: Theme.accent)
+                }
             }
             Text(course.title).font(.headline).multilineTextAlignment(.leading)
-            Label(course.upcomingClasses == 0
-                  ? "No upcoming classes"
-                  : "\(course.upcomingClasses) upcoming · next \(Fmt.longDate(course.nextClass))",
-                  systemImage: "calendar")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            if course.trainingHours != nil || course.assessmentHours != nil {
+                Label("\(DevHours.text(course.trainingHours)) training · \(DevHours.text(course.assessmentHours)) assessment",
+                      systemImage: "clock")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -256,13 +259,24 @@ struct DevCourseCard: View {
     }
 }
 
-// MARK: - Developer course details (read only)
+/// "7.5 h", "16 h", "0 h".
+enum DevHours {
+    static func text(_ hours: Double?) -> String {
+        let h = hours ?? 0
+        return (h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h)) + " h"
+    }
+}
 
+// MARK: - Developer course page
+
+/// A course for the Developer role: its identity, funding validity, type and hours, every
+/// courseware link, and the Practice Exam switch. No description or class information.
 struct DevCourseDetailView: View {
     @EnvironmentObject private var store: LearnerStore
     let course: DevCourse
     @State private var detail: DevCourseDetail?
     @State private var error: String?
+    @State private var doc: DocLink?
 
     var body: some View {
         ScrollView {
@@ -274,42 +288,27 @@ struct DevCourseDetailView: View {
                     }
                     Text(d.title).font(.title3.weight(.semibold))
                     card("Course details") {
-                        row("Price", d.price.map { String(format: "%@ %.2f", d.currency ?? "", $0) })
-                        row("Duration (hours)", d.durationHours)
-                        row("Sessions", d.sessions)
-                        row("Level", d.level)
-                        row("Software", d.software)
-                        row("Programming language", d.programmingLanguage)
+                        row("Course Title", d.title)
+                        row("Course Code", d.sku)
+                        row("Funding Validity", fundingValidity(d))
+                        row("Course Type", d.courseType ?? (d.sku.uppercased().hasPrefix("TGS-") ? "WSQ" : "Non-WSQ"))
+                        row("Duration", d.durationDays.map { $0 > 0 ? "\($0) day\($0 == 1 ? "" : "s")" : "Not set" } ?? d.durationHours.map { "\($0) hours" })
+                        row("Training Hours", DevHours.text(d.trainingHours ?? Double(d.durationHours ?? "")))
+                        row("Assessment Hours", DevHours.text(d.assessmentHours))
                     }
-                    text("Short description", d.shortDescription)
-                    if let topics = d.topics, !topics.isEmpty {
-                        card("Topics") {
-                            ForEach(Array(topics.enumerated()), id: \.offset) { i, t in
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("\(i + 1). \(t.title)").font(.subheadline.weight(.semibold))
-                                    ForEach(t.subTopics, id: \.self) { Text("• " + $0).font(.footnote).foregroundStyle(.secondary) }
-                                }
+                    card("Courseware") {
+                        let links = d.courseware ?? []
+                        if links.isEmpty {
+                            Text("No courseware links saved yet.").font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        ForEach(links) { link in
+                            CoursewareLinkRow(link: link) {
+                                if let url = URL(string: link.url) { openDocument(url, title: link.label, in: $doc) }
                             }
                         }
                     }
-                    text("Prerequisite", d.prerequisite)
-                    text("Additional note", d.additionalNote)
-                    text("Trainer profile", d.trainerProfile)
-                    if let classes = d.upcomingClasses, !classes.isEmpty {
-                        card("Upcoming classes") {
-                            ForEach(classes) { c in
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("\(c.classId) · \(Fmt.longDate(c.startDate))").font(.subheadline.weight(.semibold))
-                                    Text("\(c.startTime)–\(c.endTime) · \(c.mode) · vacancy \(c.vacancy)").font(.footnote).foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    card("Search listing") {
-                        row("Meta title", d.metaTitle)
-                        row("Meta description", d.metaDescription)
-                        row("Meta keywords", d.metaKeywords)
-                        row("Page", d.url)
+                    if let setting = d.practiceExamSetting {
+                        PracticeExamSwitch(courseId: d.id, setting: setting).id(setting)
                     }
                 } else if let error {
                     ErrorCard(message: error) { Task { await load() } }
@@ -320,8 +319,10 @@ struct DevCourseDetailView: View {
             .padding(20)
         }
         .background(Theme.page)
+        .pullToRefresh { await load() }
         .navigationTitle(course.sku)
         .navigationBarTitleDisplayMode(.inline)
+        .documentViewer($doc)
         .task { if detail == nil { await load() } }
     }
 
@@ -329,17 +330,22 @@ struct DevCourseDetailView: View {
         do { detail = try await store.loadDevCourse(id: course.id); error = nil } catch { self.error = error.localizedDescription }
     }
 
-    @ViewBuilder private func row(_ label: String, _ value: String?) -> some View {
-        if let v = value, !v.isEmpty {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(label).font(.caption).foregroundStyle(.secondary)
-                Text(v).font(.subheadline)
-            }
-        }
+    /// The SSG funding window of a WSQ course; non-WSQ courses have none (the web shows NA).
+    private func fundingValidity(_ d: DevCourseDetail) -> String {
+        guard let end = d.fundingValidityEnd, !end.isEmpty else { return "Not applicable (non-funded course)" }
+        let start = d.fundingValidityStart.map(Fmt.longDate) ?? "N/A"
+        return "\(start) – \(Fmt.longDate(end))"
     }
 
-    @ViewBuilder private func text(_ title: String, _ value: String?) -> some View {
-        if let v = value, !v.isEmpty { card(title) { Text(v).font(.subheadline) } }
+    @ViewBuilder private func row(_ label: String, _ value: String?) -> some View {
+        if let v = value, !v.isEmpty {
+            HStack(alignment: .firstTextBaseline) {
+                Text(label).font(.subheadline).foregroundStyle(.secondary)
+                Spacer(minLength: 12)
+                Text(v).font(.subheadline.weight(.medium)).multilineTextAlignment(.trailing)
+            }
+            .accessibilityElement(children: .combine)
+        }
     }
 
     private func card<C: View>(_ title: String, @ViewBuilder _ content: () -> C) -> some View {
@@ -351,6 +357,139 @@ struct DevCourseDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+    }
+}
+
+/// One courseware link: its name and the link itself. Tap to open; hold to copy or share.
+struct CoursewareLinkRow: View {
+    let link: DevCoursewareLink
+    let open: () -> Void
+
+    private var icon: String {
+        if link.key == "courseware_link" || link.key == "lab_url" { return "folder.fill" }
+        if link.key.contains("slides") { return "play.rectangle.fill" }
+        if link.key == "practice_exam_url" { return "checkmark.seal.fill" }
+        return "doc.text.fill"
+    }
+
+    var body: some View {
+        Button(action: open) {
+            HStack(spacing: 12) {
+                Image(systemName: icon).foregroundStyle(Theme.accent).frame(width: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(link.label).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                    Text(link.url).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "arrow.up.right.square").foregroundStyle(.tertiary)
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button { UIPasteboard.general.string = link.url } label: { Label("Copy Link", systemImage: "doc.on.doc") }
+            if let url = URL(string: link.url) {
+                ShareLink(item: url) { Label("Share", systemImage: "square.and.arrow.up") }
+                Link(destination: url) { Label("Open in Safari", systemImage: "safari") }
+            }
+        }
+        .accessibilityHint("Opens the link. Touch and hold to copy it.")
+    }
+}
+
+/// The course's Practice Exam switch: on links the course to one exam on Tertiary Exams,
+/// off removes it. Saved on the website straight away.
+struct PracticeExamSwitch: View {
+    @EnvironmentObject private var store: LearnerStore
+    let courseId: Int
+    @State var setting: PracticeExamSetting
+    @State private var on: Bool
+    @State private var slug: String
+    @State private var saving = false
+    @State private var problem: String?
+
+    init(courseId: Int, setting: PracticeExamSetting) {
+        self.courseId = courseId
+        _setting = State(initialValue: setting)
+        _on = State(initialValue: setting.enabled)
+        _slug = State(initialValue: setting.examSlug)
+    }
+
+    private var currentTitle: String {
+        setting.exams.first { $0.slug == setting.examSlug }?.title ?? setting.examCode
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: Binding(get: { on }, set: { switched($0) })) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Practice Exam").font(.headline)
+                    Text(setting.enabled ? "On · \(currentTitle)" : "Off")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .tint(Theme.accent)
+            .disabled(!setting.configured || saving)
+            .accessibilityIdentifier("practice-exam-toggle")
+
+            if !setting.configured {
+                Text("Practice exams are not set up on this site.").font(.footnote).foregroundStyle(.secondary)
+            } else if on {
+                if setting.exams.isEmpty {
+                    Text(setting.warning ?? "No practice exams are available.").font(.footnote).foregroundStyle(Theme.warning)
+                } else {
+                    Picker("Exam", selection: Binding(get: { slug }, set: { picked($0) })) {
+                        if slug.isEmpty { Text("Choose an exam").tag("") }
+                        ForEach(setting.exams) { Text("\($0.code) · \($0.title)").tag($0.slug) }
+                    }
+                    .pickerStyle(.menu)
+                    .disabled(saving)
+                }
+            }
+            if saving { ProgressView().frame(maxWidth: .infinity) }
+            if let problem { Text(problem).font(.footnote).foregroundStyle(.red) }
+            Text("Learners and trainers of this course's classes get a Practice Exam section on the class page.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
+    }
+
+    /// Off saves at once; on waits for an exam to be chosen (or saves the only one there is).
+    private func switched(_ value: Bool) {
+        problem = nil
+        on = value
+        if !value {
+            slug = ""
+            if setting.enabled { save("") }
+        } else if setting.exams.count == 1 {
+            picked(setting.exams[0].slug)
+        }
+    }
+
+    private func picked(_ value: String) {
+        slug = value
+        guard !value.isEmpty, value != setting.examSlug else { return }
+        save(value)
+    }
+
+    private func save(_ value: String) {
+        saving = true
+        Task {
+            defer { saving = false }
+            do {
+                setting = try await store.setPracticeExam(courseId: courseId, examSlug: value)
+                on = setting.enabled
+                slug = setting.examSlug
+            } catch {
+                problem = error.localizedDescription
+                on = setting.enabled
+                slug = setting.examSlug
+            }
+        }
     }
 }
 
