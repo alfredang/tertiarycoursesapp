@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.9] — 2026-11-26 · build 10
+
+**What's New (user-facing):**
+> Sign your attendance with your finger. Learners tap Check In Now and sign to check in. Trainers tap Sign Attendance to sign for the session, or hand the phone to a learner to sign, which marks them present.
+
+- E-Attendance: Check In Now opens a signature box. Sign with your finger to check in to the session. If your trainer marked you present first, you can still add your signature.
+- Trainers: Sign Attendance replaces the check-in QR code. Sign for the session yourself, or hand your phone to a learner to sign; a learner who signs is marked present. The roster shows who has signed.
+- The signatures appear on the website's E-Attendance page and in its signed attendance sheet (PDF).
+
 ## [1.8] — 2026-11-25 · build 9
 
 - Developer: the course page shows only what developers work with: course title and code, funding validity, course type, duration, training and assessment hours, every courseware link (tap to open, hold to copy), and a Practice Exam switch that links the course to an exam on Tertiary Exams.
