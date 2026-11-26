@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.10] — 2026-11-27 · build 11
+
+**What's New (user-facing):**
+> E-Attendance now shows the check-in form right on the class page: your name and email are filled in, sign in the box and tap Check In. Trainers check in the same way, and can download the attendance as an Excel file.
+
+- E-Attendance (learners): the check-in form is on the class page itself. Name, email and session are filled in from your profile; sign with your finger and tap Check In. No QR code in the app (it is on the web portal only).
+- E-Attendance (trainers): the same check-in form for your own attendance, above the learner roster. A learner without a phone can still sign on yours (Let a Learner Sign on This Phone).
+- Trainers: Download attendance for this session or all sessions as an Excel file, to save to Files, email or AirDrop.
+
 ## [1.9] — 2026-11-26 · build 10
 
 **What's New (user-facing):**

@@ -50,6 +50,39 @@ final class API {
         return data
     }
 
+    /// An authenticated GET that answers a file (the attendance workbook), saved to a
+    /// temporary folder under the server's filename so it can be shared or saved to Files.
+    /// Errors come back as the usual JSON envelope.
+    func downloadFile(_ path: String, query: [String: String], fallbackName: String) async throws -> URL {
+        var components = URLComponents(url: Site.baseURL.appendingPathComponent("mobileapi/" + path), resolvingAgainstBaseURL: false)!
+        components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
+        var request = URLRequest(url: components.url!)
+        request.timeoutInterval = 60
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+        if let token { request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization") }
+        let data: Data
+        let response: URLResponse
+        do { (data, response) = try await URLSession.shared.data(for: request) } catch {
+            throw APIError(message: "The download did not finish. Check your connection and try again.")
+        }
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(status) else {
+            let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+            if status == 401, token != nil {
+                await MainActor.run { NotificationCenter.default.post(name: .sessionExpired, object: nil) }
+            }
+            throw APIError(message: json?["error"] as? String ?? "Something went wrong (\(status)). Please try again.", status: status)
+        }
+        var name = (response.suggestedFilename ?? "").replacingOccurrences(of: "/", with: "-")
+        if name.isEmpty || !name.contains(".") { name = fallbackName }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let dest = folder.appendingPathComponent(name)
+        try data.write(to: dest)
+        return dest
+    }
+
     private func send<T: Decodable>(_ path: String, method: String, query: [String: String], body: [String: Any]?) async throws -> T {
         var components = URLComponents(url: Site.baseURL.appendingPathComponent("mobileapi/" + path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty {

@@ -82,7 +82,7 @@ final class LearnerStore: ObservableObject {
     func restore() async {
         defer { restoring = false }
         #if DEBUG
-        // Screenshot automation: UITEST_SIGNIN="email|password" signs in on launch.
+        // Screenshot automation: UITEST_SIGNIN="email|password" signs in on launch; VIEW_AS picks the role view.
         if let creds = ProcessInfo.processInfo.environment["UITEST_SIGNIN"], let bar = creds.firstIndex(of: "|") {
             do {
                 try await signIn(email: String(creds[..<bar]), password: String(creds[creds.index(after: bar)...]))
@@ -90,6 +90,10 @@ final class LearnerStore: ObservableObject {
                 print("UITEST_SIGNIN failed: \(error.localizedDescription)")
             }
             if isSignedIn { await refreshAll() }
+            // VIEW_AS=trainer|developer|… opens that role's view (the sign-in resets it).
+            if isSignedIn, let role = ProcessInfo.processInfo.environment["VIEW_AS"], availableRoles.contains(role) {
+                await setViewRole(role)
+            }
             return
         }
         #endif
@@ -330,6 +334,12 @@ final class LearnerStore: ObservableObject {
             "signature": signature.base64EncodedString(),
         ])
         return reply.message ?? "Signature saved."
+    }
+
+    /// The class's saved attendance as an Excel file: one session key, or "all".
+    func attendanceWorkbook(runId: Int, session: String) async throws -> URL {
+        try await API.shared.downloadFile("trainer/export", query: ["run_id": String(runId), "session": session],
+                                          fallbackName: "Attendance_\(runId)_\(session).xlsx")
     }
 
     func saveAttendance(runId: Int, sessionKey: String, records: [[String: Any]]) async throws -> String {

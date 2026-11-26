@@ -26,6 +26,9 @@ struct TrainerClassView: View {
     @State private var open: Set<String> = []
     @State private var announcements: [Announcement] = []
     @State private var quizQR: SurveyLink?
+    /// "all" or a session key while its Excel file downloads; the file then opens in the share sheet.
+    @State private var exporting: String?
+    @State private var exported: DownloadedFile?
 
     // Same sections, names and order as the class page on the website (trainer view).
     var body: some View {
@@ -65,6 +68,7 @@ struct TrainerClassView: View {
         .sheet(isPresented: $showSign, onDismiss: { Task { await load() } }) {
             if let d = detail { signSheet(d) }
         }
+        .sheet(item: $exported) { FileShareSheet(file: $0.url) }
         .sheet(item: $quizQR) { s in
             CheckInQRView(link: s.url, title: detail?.title ?? "", sessionLabel: s.title,
                           heading: s.heading, hint: s.hint, shareLabel: s.shareLabel)
@@ -88,12 +92,14 @@ struct TrainerClassView: View {
             }
             resetMarks(d)
             #if DEBUG
-            // Screenshot automation: OPEN_DOC=1 opens the first material, OPEN_SIGN=1 the signature dialog.
+            // Screenshot automation: OPEN_DOC=1 opens the first material, OPEN_SIGN=1 the signature dialog,
+            // OPEN_EXPORT=all|<session key> downloads the attendance file.
             let env = ProcessInfo.processInfo.environment
             if env["OPEN_DOC"] == "1", doc == nil, let m = d.materials.first, let url = URL(string: m.url) {
                 doc = DocLink(title: m.title, url: url)
             }
             if env["OPEN_SIGN"] == "1" { showSign = true }
+            if let which = env["OPEN_EXPORT"], exported == nil, exporting == nil { Task { await export(which) } }
             if env["OPEN_SECTIONS"] == "1" {
                 open = ["E-Attendance", "Announcements", "Virtual Class Link", "Courseware", "Lesson", "Practice Exam", "Course Feedback", "Course Feedback Summary"]
             }
@@ -179,6 +185,29 @@ struct TrainerClassView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                // The trainer checks in with the same form as a learner: details from the profile,
+                // a signature box and Check In. No QR code in the apps (it is on the web portal only).
+                if open, !session.isEmpty {
+                    let label = d.sessions.first { $0.key == session }?.label ?? (d.currentSessionLabel ?? "")
+                    if (d.trainerSigned ?? []).contains(session) {
+                        Label("You're checked in for \(label).", systemImage: "checkmark.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.success)
+                            .accessibilityIdentifier("trainerCheckedIn")
+                    } else {
+                        CheckInForm(name: myName, email: store.learner?.email ?? "", phone: store.learner?.phone ?? "",
+                                    sessionLabel: label) { png in
+                            try await store.signAttendance(runId: runId, sessionKey: session, signer: "trainer", signature: png)
+                        } onDone: { text in
+                            notice = text
+                            Task { await load() }
+                        }
+                        .id(session)
+                    }
+                    Divider().padding(.vertical, 2)
+                }
+
+                Text("Learners").font(.subheadline.weight(.semibold))
                 if d.roster.isEmpty {
                     Text("No learners are on this class roster yet.")
                         .font(.subheadline)
@@ -243,37 +272,80 @@ struct TrainerClassView: View {
                         .disabled(saving || !dirty || session.isEmpty)
                         .accessibilityIdentifier("saveAttendance")
                     }
-                    if !session.isEmpty {
-                        if (d.trainerSigned ?? []).contains(session) {
-                            Label("You have signed for this session.", systemImage: "signature")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(Theme.success)
-                        }
+                    if !session.isEmpty, !d.roster.isEmpty {
                         Button {
                             showSign = true
                         } label: {
-                            Label("Sign Attendance", systemImage: "signature").frame(maxWidth: .infinity)
+                            Label("Let a Learner Sign on This Phone", systemImage: "signature").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.large)
                         .accessibilityIdentifier("signAttendance")
-                        Text("You sign for the session, or hand your phone to a learner to sign. A learner who signs is marked present.")
+                        Text("A learner without a phone can check in on yours: they sign, and are marked present.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                if !d.roster.isEmpty, !d.sessions.isEmpty {
+                    Divider().padding(.vertical, 2)
+                    Text("Download attendance").font(.subheadline.weight(.semibold))
+                    HStack(spacing: 10) {
+                        exportButton("This Session", icon: "doc.text", which: session)
+                            .disabled(session.isEmpty)
+                            .accessibilityIdentifier("downloadSession")
+                        exportButton("All Sessions", icon: "square.stack.3d.up", which: "all")
+                            .accessibilityIdentifier("downloadAllSessions")
+                    }
+                    Text(dirty
+                         ? "Save your changes first: the file has the saved attendance."
+                         : "The saved attendance as an Excel file, to save to Files, email or AirDrop.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
     }
 
-    /// The signature dialog for the chosen session: the trainer, then every learner on the roster.
+    private func exportButton(_ title: String, icon: String, which: String) -> some View {
+        Button {
+            Task { await export(which) }
+        } label: {
+            HStack(spacing: 6) {
+                if exporting == which { ProgressView() } else { Image(systemName: icon) }
+                Text(title)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .disabled(exporting != nil)
+    }
+
+    /// Downloads the saved attendance (one session, or "all") as the website's Excel file.
+    private func export(_ which: String) async {
+        exporting = which
+        defer { exporting = nil }
+        do {
+            let file = try await store.attendanceWorkbook(runId: runId, session: which)
+            exported = DownloadedFile(url: file)
+        } catch {
+            notice = error.localizedDescription
+        }
+    }
+
+    private var myName: String {
+        guard let me = store.learner else { return "" }
+        return me.fullName.isEmpty ? me.email : me.fullName
+    }
+
+    /// The signature dialog for the chosen session, for a learner signing on the trainer's phone.
     private func signSheet(_ d: TrainerClassDetail) -> some View {
         let key = session
         let label = d.sessions.first { $0.key == key }?.label ?? ""
-        var signers = [Signer(id: "trainer", name: "You (trainer)", signed: (d.trainerSigned ?? []).contains(key))]
-        signers += d.roster.map { Signer(id: $0.email, name: $0.name.isEmpty ? $0.email : $0.name, signed: ($0.signed ?? []).contains(key)) }
+        let signers = d.roster.map { Signer(id: $0.email, name: $0.name.isEmpty ? $0.email : $0.name, signed: ($0.signed ?? []).contains(key)) }
         return SignatureSheet(title: d.title, sessionLabel: label, signers: signers,
-                              hint: "Choose who is signing, then sign with a finger in the box.",
+                              hint: "Choose the learner, then they sign with a finger in the box.",
                               closeOnSuccess: false) { signer, png in
             try await store.signAttendance(runId: runId, sessionKey: key, signer: signer.id, signature: png)
         }
@@ -1224,7 +1296,6 @@ struct SignatureSheet: View {
     @State private var message: String?
     @State private var error: String?
     @State private var padSize = CGSize(width: 320, height: 200)
-    @State private var drawing = false
 
     private var signer: Signer? { signers.first { $0.id == signerId } ?? signers.first }
 
@@ -1308,55 +1379,16 @@ struct SignatureSheet: View {
         }
     }
 
-    /// Enough ink to count as a signature, not a stray tap.
-    private var hasInk: Bool { strokes.reduce(0) { $0 + $1.count } >= 8 }
+    private var hasInk: Bool { SignaturePad.hasInk(strokes) }
 
     private func isSigned(_ s: Signer) -> Bool { s.signed || done.contains(s.id) }
 
     private var pad: some View {
-        ZStack(alignment: .bottomLeading) {
-            // The pad is always white with black ink, in either theme, like paper.
-            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white)
-            Rectangle().fill(Color.black.opacity(0.25)).frame(height: 1)
-                .padding(.horizontal, 24).padding(.bottom, 44)
-            if strokes.isEmpty {
-                Text("Sign here")
-                    .font(.callout)
-                    .foregroundStyle(Color.black.opacity(0.35))
-                    .padding(.leading, 24).padding(.bottom, 52)
-            }
-            SignatureInk(strokes: strokes)
-        }
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.black.opacity(0.15)))
-        .frame(height: 220)
-        .frame(maxWidth: .infinity)
-        .background(GeometryReader { g in
-            Color.clear.onAppear { padSize = g.size }.onChange(of: g.size) { _, new in padSize = new }
-        })
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                .onChanged { v in
-                    let p = CGPoint(x: min(max(v.location.x, 0), padSize.width), y: min(max(v.location.y, 0), padSize.height))
-                    if !drawing || strokes.isEmpty { strokes.append([p]); drawing = true } else { strokes[strokes.count - 1].append(p) }
-                }
-                .onEnded { _ in drawing = false }
-        )
-        .accessibilityElement()
-        .accessibilityLabel("Signature pad")
-        .accessibilityHint("Draw your signature with one finger.")
-        .accessibilityIdentifier("signaturePad")
-    }
-
-    @MainActor
-    private func png() -> Data? {
-        let renderer = ImageRenderer(content: SignatureInk(strokes: strokes).frame(width: padSize.width, height: padSize.height))
-        renderer.scale = 2
-        return renderer.uiImage?.pngData()
+        SignaturePad(strokes: $strokes, size: $padSize)
     }
 
     private func send() async {
-        guard let s = signer, let data = png() else { return }
+        guard let s = signer, let data = SignaturePad.png(strokes, size: padSize) else { return }
         sending = true
         error = nil
         message = nil
@@ -1373,6 +1405,154 @@ struct SignatureSheet: View {
                 // Hand the phone to the next learner who has not signed.
                 if let next = signers.first(where: { $0.id != "trainer" && !isSigned($0) }) { signerId = next.id }
             }
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+}
+
+/// The box a signature is drawn in with one finger: white like paper in either theme, black ink.
+struct SignaturePad: View {
+    @Binding var strokes: [[CGPoint]]
+    @Binding var size: CGSize
+    @State private var drawing = false
+
+    /// Enough ink to count as a signature, not a stray tap.
+    static func hasInk(_ strokes: [[CGPoint]]) -> Bool { strokes.reduce(0) { $0 + $1.count } >= 8 }
+
+    /// The signature as the PNG the server stores.
+    @MainActor
+    static func png(_ strokes: [[CGPoint]], size: CGSize) -> Data? {
+        let renderer = ImageRenderer(content: SignatureInk(strokes: strokes).frame(width: size.width, height: size.height))
+        renderer.scale = 2
+        return renderer.uiImage?.pngData()
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.white)
+            Rectangle().fill(Color.black.opacity(0.25)).frame(height: 1)
+                .padding(.horizontal, 24).padding(.bottom, 44)
+            if strokes.isEmpty {
+                Text("Sign here")
+                    .font(.callout)
+                    .foregroundStyle(Color.black.opacity(0.35))
+                    .padding(.leading, 24).padding(.bottom, 52)
+            }
+            SignatureInk(strokes: strokes)
+        }
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.black.opacity(0.15)))
+        .frame(height: 200)
+        .frame(maxWidth: .infinity)
+        .background(GeometryReader { g in
+            Color.clear.onAppear { size = g.size }.onChange(of: g.size) { _, new in size = new }
+        })
+        .contentShape(Rectangle())
+        // Starts on touch-down, so a stroke draws instead of scrolling the page or pulling to refresh.
+        .gesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                .onChanged { v in
+                    let p = CGPoint(x: min(max(v.location.x, 0), size.width), y: min(max(v.location.y, 0), size.height))
+                    if !drawing || strokes.isEmpty { strokes.append([p]); drawing = true } else { strokes[strokes.count - 1].append(p) }
+                }
+                .onEnded { _ in drawing = false }
+        )
+        .accessibilityElement()
+        .accessibilityLabel("Signature pad")
+        .accessibilityHint("Draw your signature with one finger.")
+        .accessibilityIdentifier("signaturePad")
+    }
+}
+
+/// The check-in form, shown in E-Attendance for learners and trainers alike: the signed-in
+/// person's details filled in from their profile, the session, a signature box and Check In.
+/// It is the same form the web portal's check-in QR opens; the apps never show that QR.
+struct CheckInForm: View {
+    let name: String
+    let email: String
+    let phone: String
+    let sessionLabel: String
+    var buttonTitle = "Check In"
+    /// Sends the signature; answers the message to show.
+    let submit: (_ png: Data) async throws -> String
+    /// After a successful check-in, with the server's message.
+    var onDone: (String) -> Void = { _ in }
+
+    @State private var strokes: [[CGPoint]] = []
+    @State private var padSize = CGSize(width: 320, height: 200)
+    @State private var sending = false
+    @State private var error: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            field("Name", name)
+            field("Email", email)
+            if !phone.isEmpty { field("Mobile", phone) }
+            field("Session", sessionLabel)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Signature").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                SignaturePad(strokes: $strokes, size: $padSize)
+            }
+            if let error {
+                Text(error).font(.footnote).foregroundStyle(.red)
+            }
+            HStack(spacing: 12) {
+                Button {
+                    strokes = []
+                } label: {
+                    Label("Clear", systemImage: "eraser").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .disabled(strokes.isEmpty || sending)
+                .accessibilityIdentifier("clearSignature")
+                Button {
+                    Task { await send() }
+                } label: {
+                    HStack {
+                        if sending { ProgressView().tint(.white) }
+                        Label(buttonTitle, systemImage: "checkmark.circle.fill")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.brand)
+                .controlSize(.large)
+                .disabled(!SignaturePad.hasInk(strokes) || sending)
+                .accessibilityIdentifier("checkIn")
+            }
+            if !SignaturePad.hasInk(strokes) {
+                Text("Sign with your finger in the box, then tap \(buttonTitle).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityIdentifier("checkInForm")
+    }
+
+    private func field(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            Text(value.isEmpty ? "—" : value)
+                .font(.subheadline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .accessibilityLabel("\(label): \(value)")
+        }
+    }
+
+    private func send() async {
+        guard let data = SignaturePad.png(strokes, size: padSize) else { return }
+        sending = true
+        error = nil
+        defer { sending = false }
+        do {
+            let text = try await submit(data)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            strokes = []
+            onDone(text)
         } catch {
             self.error = error.localizedDescription
         }

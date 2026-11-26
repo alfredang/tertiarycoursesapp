@@ -279,7 +279,6 @@ struct ClassDetailView: View {
     @Environment(\.openURL) private var openURL
     @State private var detail: ClassDetail?
     @State private var error: String?
-    @State private var signing = false
     @State private var notice: String?
     @State private var doc: DocLink?
     @State private var examForm: DocLink?
@@ -337,16 +336,6 @@ struct ClassDetailView: View {
         } message: {
             Text(notice ?? "")
         }
-        .sheet(isPresented: $signing, onDismiss: { Task { await load() } }) {
-            if let d = detail {
-                SignatureSheet(title: d.title, sessionLabel: d.attendance.currentSessionLabel,
-                               signers: [Signer(id: "me", name: store.learner.map { $0.fullName.isEmpty ? $0.email : $0.fullName } ?? "Your signature")]) { _, png in
-                    let text = try await store.markAttendance(runId: runId, signature: png)
-                    notice = text
-                    return text
-                }
-            }
-        }
         .sheet(isPresented: $showSurvey, onDismiss: { Task { await load() } }) {
             SurveyView(runId: runId)
         }
@@ -375,10 +364,6 @@ struct ClassDetailView: View {
             if ProcessInfo.processInfo.environment["OPEN_QUIZ"] == "1", quiz == nil, !openedQuiz {
                 openedQuiz = true
                 quiz = detail?.quizzes?.first
-            }
-            // OPEN_SIGN=1 opens the check-in signature dialog.
-            if ProcessInfo.processInfo.environment["OPEN_SIGN"] == "1", d.attendance.open, !d.attendance.markedPresent {
-                signing = true
             }
             // OPEN_SECTIONS=1 opens every section.
             if ProcessInfo.processInfo.environment["OPEN_SECTIONS"] == "1" {
@@ -439,36 +424,35 @@ struct ClassDetailView: View {
         }
     }
 
+    private var myName: String {
+        guard let me = store.learner else { return "" }
+        return me.fullName.isEmpty ? me.email : me.fullName
+    }
+
     @ViewBuilder
     private func attendanceBody(_ d: ClassDetail) -> some View {
-        if d.attendance.markedPresent {
-            Label("You're checked in for \(d.attendance.currentSessionLabel).", systemImage: "checkmark.circle.fill")
+        let a = d.attendance
+        // Signed already (or an older server that does not report signatures): checked in.
+        if a.markedPresent, a.signed != false {
+            Label("You're checked in for \(a.currentSessionLabel).", systemImage: "checkmark.circle.fill")
                 .foregroundStyle(Theme.success)
                 .font(.subheadline.weight(.semibold))
-            // Marked present by the trainer but not signed yet: the learner can still sign.
-            if d.attendance.open, d.attendance.signed == false {
-                Button {
-                    signing = true
-                } label: {
-                    Label("Add Your Signature", systemImage: "signature").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .accessibilityIdentifier("addSignature")
+                .accessibilityIdentifier("checkedIn")
+        } else if a.open {
+            // The check-in form, filled in from the profile: sign and tap Check In. No QR code.
+            if a.markedPresent {
+                Text("Your trainer marked you present. Add your signature for \(a.currentSessionLabel).")
+                    .font(.subheadline)
             }
-        } else if d.attendance.open {
-            Text("Sign for \(d.attendance.currentSessionLabel) with your finger when you arrive.")
-                .font(.subheadline)
-            Button {
-                signing = true
-            } label: {
-                Label("Check In Now", systemImage: "signature")
-                    .frame(maxWidth: .infinity)
+            CheckInForm(name: myName, email: store.learner?.email ?? "", phone: store.learner?.phone ?? "",
+                        sessionLabel: a.currentSessionLabel,
+                        buttonTitle: a.markedPresent ? "Submit Signature" : "Check In") { png in
+                try await store.markAttendance(runId: runId, signature: png)
+            } onDone: { text in
+                notice = text
+                Task { await load() }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Theme.brand)
-            .controlSize(.large)
-            .accessibilityIdentifier("checkIn")
+            .id(a.currentSession)
         } else {
             Text(d.bucket == "upcoming" ? "Check-in opens on the first day of class." : "Check-in is closed for this class.")
                 .font(.subheadline)
